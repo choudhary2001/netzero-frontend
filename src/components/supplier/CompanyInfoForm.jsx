@@ -10,6 +10,9 @@ const CompanyInfoForm = () => {
         businessType: '',
         registrationCertificate: null,
         rolesDefinedClearly: '',
+        organizationRoles: [
+            { role: '', responsibility: '' }
+        ],
         certificates: [
             { type: '', level: '', validity: '' }
         ]
@@ -68,6 +71,34 @@ const CompanyInfoForm = () => {
         setFormData({
             ...formData,
             certificates
+        });
+    };
+
+    const handleRoleChange = (index, field, value) => {
+        const updatedRoles = [...formData.organizationRoles];
+        updatedRoles[index] = {
+            ...updatedRoles[index],
+            [field]: value
+        };
+        setFormData({
+            ...formData,
+            organizationRoles: updatedRoles
+        });
+    };
+
+    const addRole = () => {
+        setFormData({
+            ...formData,
+            organizationRoles: [...formData.organizationRoles, { role: '', responsibility: '' }]
+        });
+    };
+
+    const removeRole = (index) => {
+        const roles = [...formData.organizationRoles];
+        roles.splice(index, 1);
+        setFormData({
+            ...formData,
+            organizationRoles: roles
         });
     };
 
@@ -216,6 +247,62 @@ const CompanyInfoForm = () => {
                                 <span className="ml-2 text-gray-700">NO</span>
                             </label>
                         </div>
+
+                        {formData.rolesDefinedClearly === 'YES' && (
+                            <div className="mt-4">
+                                <p className="text-gray-600 mb-4 text-sm sm:text-base">
+                                    Please list key roles and responsibilities in your organization:
+                                </p>
+
+                                {formData.organizationRoles.map((roleInfo, index) => (
+                                    <div key={index} className="mb-4 sm:mb-6 p-3 sm:p-4 border border-gray-200 rounded-md">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                                            <div>
+                                                <input
+                                                    type="text"
+                                                    value={roleInfo.role}
+                                                    onChange={(e) => handleRoleChange(index, 'role', e.target.value)}
+                                                    required
+                                                    className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                    placeholder="Role/Position"
+                                                />
+                                            </div>
+                                            <div>
+                                                <input
+                                                    type="text"
+                                                    value={roleInfo.responsibility}
+                                                    onChange={(e) => handleRoleChange(index, 'responsibility', e.target.value)}
+                                                    required
+                                                    className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                    placeholder="Key Responsibilities"
+                                                />
+                                            </div>
+                                            <div className="flex justify-end md:col-span-2">
+                                                {formData.organizationRoles.length > 1 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeRole(index)}
+                                                        className="text-red-500 hover:text-red-700 p-1"
+                                                        aria-label="Remove role"
+                                                    >
+                                                        <FaTrash />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+
+                                <button
+                                    type="button"
+                                    onClick={addRole}
+                                    className="flex items-center text-green-500 border border-green-500 px-3 sm:px-4 py-1.5 sm:py-2 rounded-md hover:bg-green-50 text-sm sm:text-base"
+                                >
+                                    <FaPlus className="mr-2" />
+                                    Add Role
+                                </button>
+                            </div>
+                        )}
                     </div>
                 );
 

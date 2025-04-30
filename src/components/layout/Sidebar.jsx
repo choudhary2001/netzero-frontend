@@ -381,17 +381,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             </div>
 
             {/* Company Footer */}
-            <div className="text-center text-xs text-gray-500 mt-4 border-t pt-4">
-              <p>Made with ❤️ by</p>
-              <a
-                href="https://swastik.ai"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-green-600 hover:text-green-800"
-              >
-                Shwastik Tech Solutions Pvt Ltd
-              </a>
-            </div>
+
           </div>
         </div>
       </div>
