@@ -1,5 +1,6 @@
 import React from 'react';
-import { FaBuilding, FaCheckCircle, FaClock, FaChartLine, FaChartPie, FaUsers } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import { FaBuilding, FaCheckCircle, FaClock, FaChartLine, FaChartPie, FaUsers, FaUserPlus } from 'react-icons/fa';
 import {
     LineChart,
     Line,
@@ -21,6 +22,7 @@ const summaryData = {
     totalCompanies: 58,
     pendingApprovals: 5,
     recentSubmissions: 12,
+    totalUsers: 12,
 };
 
 const submissionsData = [
@@ -42,6 +44,15 @@ const categoryData = [
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
+// Dummy recent activity data
+const recentActivities = [
+    { id: 1, user: 'supplier@example.com', action: 'submitted Environment data.', time: '2 hours ago' },
+    { id: 2, user: 'company.user@netzero.com', action: 'updated Company Info.', time: '5 hours ago' },
+    { id: 3, user: 'admin@gmail.com', action: 'approved Supplier registration.', time: '1 day ago' },
+    { id: 4, user: 'supplier.manager@ecocorp.com', action: 'submitted Social metrics.', time: '2 days ago' },
+    { id: 5, user: 'compliance.officer@green.com', action: 'requested data clarification.', time: '3 days ago' },
+];
+
 const AdminDashboard = () => {
     return (
         <div className='container'>
@@ -49,7 +60,7 @@ const AdminDashboard = () => {
                 <h1 className="text-3xl font-semibold text-gray-800 mb-6">Admin Dashboard</h1>
 
                 {/* Summary Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <DashboardCard
                         icon={<FaBuilding className="text-blue-500" size={24} />}
                         title="Total Companies"
@@ -67,6 +78,12 @@ const AdminDashboard = () => {
                         title="Recent Submissions (Month)"
                         value={summaryData.recentSubmissions}
                         bgColor="bg-green-50"
+                    />
+                    <DashboardCard
+                        icon={<FaUsers className="text-purple-500" size={24} />}
+                        title="Total Users"
+                        value={summaryData.totalUsers}
+                        bgColor="bg-purple-50"
                     />
                 </div>
 
@@ -117,16 +134,31 @@ const AdminDashboard = () => {
                     </div>
                 </div>
 
-                {/* Placeholder for recent activity or user list */}
+                {/* Recent activity section */}
                 <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
-                    <h2 className="text-xl font-semibold text-gray-700 mb-4 flex items-center">
-                        <FaUsers className="mr-2 text-purple-500" /> Recent Activity / Users
-                    </h2>
-                    <p className="text-gray-600">List of recent activities or user overview will go here...</p>
-                    {/* Example item */}
-                    <div className="border-t mt-4 pt-2 text-sm text-gray-500">
-                        <span>User 'supplier@example.com' submitted Environment data.</span>
-                        <span className="float-right">2 hours ago</span>
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl font-semibold text-gray-700 flex items-center">
+                            <FaClock className="mr-2 text-gray-500" /> Recent Activity
+                        </h2>
+                        {/* Link to User Management */}
+                        <Link to="/admin/users" className="text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center">
+                            Manage Users <FaUsers className="ml-1" />
+                        </Link>
+                    </div>
+                    {/* List of Activities */}
+                    <div className="space-y-3">
+                        {recentActivities.map((activity) => (
+                            <div key={activity.id} className="border-t pt-3 text-sm text-gray-600 flex justify-between items-center">
+                                <div>
+                                    <span className="font-medium text-gray-800">{activity.user}</span> {activity.action}
+                                </div>
+                                <span className="text-xs text-gray-400 whitespace-nowrap pl-2">{activity.time}</span>
+                            </div>
+                        ))}
+                        {/* Placeholder if no activities */}
+                        {recentActivities.length === 0 && (
+                            <p className="text-gray-500 text-center py-4">No recent activity to display.</p>
+                        )}
                     </div>
                 </div>
 

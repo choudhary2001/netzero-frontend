@@ -9,11 +9,24 @@ const dummyUsers = [
     { id: 3, email: 'compliance.officer@green.com', role: 'company', joined: '2024-05-01' },
     { id: 4, email: 'admin2@test.com', role: 'admin', joined: '2024-07-15' },
     { id: 5, email: 'supplier.contact@sustainable.org', role: 'supplier', joined: '2024-06-30' },
+    { id: 6, email: 'facility.manager@carbonzero.net', role: 'company', joined: '2024-02-15' },
+    { id: 7, email: 'lead.admin@corp.net', role: 'admin', joined: '2023-12-01' },
+    { id: 8, email: 'vendor.support@supplychain.io', role: 'supplier', joined: '2024-04-10' },
+    { id: 9, email: 'regional.head@greenworld.com', role: 'company', joined: '2024-01-25' },
+    { id: 10, email: 'operations@ecologistics.co', role: 'supplier', joined: '2024-07-05' },
+    { id: 11, email: 'data.analyst@metrics.com', role: 'company', joined: '2024-05-20' },
+    { id: 12, email: 'sysadmin@internal.net', role: 'admin', joined: '2024-06-11' },
 ];
 
 const UserManagement = () => {
+    // Calculate user counts by role
+    const totalUsers = dummyUsers.length;
+    const adminCount = dummyUsers.filter(user => user.role === 'admin').length;
+    const supplierCount = dummyUsers.filter(user => user.role === 'supplier').length;
+    const companyCount = dummyUsers.filter(user => user.role === 'company').length;
+
     return (
-        <div className='container'>
+        <div className='container mx-auto p-4'>
             <h1 className="text-3xl font-semibold text-gray-800 mb-6">User Management</h1>
             <div className="bg-white p-6 rounded-lg shadow-md">
                 <div className="flex justify-between items-center mb-6">
@@ -21,6 +34,26 @@ const UserManagement = () => {
                     <button className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center">
                         <FaPlus className="mr-2" /> Add New User
                     </button>
+                </div>
+
+                {/* Summary Statistics */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div className="bg-gray-100 p-4 rounded-lg shadow">
+                        <h3 className="text-sm font-medium text-gray-500">Total Users</h3>
+                        <p className="mt-1 text-2xl font-semibold text-gray-900">{totalUsers}</p>
+                    </div>
+                    <div className="bg-purple-50 p-4 rounded-lg shadow">
+                        <h3 className="text-sm font-medium text-purple-600">Admin Users</h3>
+                        <p className="mt-1 text-2xl font-semibold text-purple-800">{adminCount}</p>
+                    </div>
+                    <div className="bg-blue-50 p-4 rounded-lg shadow">
+                        <h3 className="text-sm font-medium text-blue-600">Supplier Users</h3>
+                        <p className="mt-1 text-2xl font-semibold text-blue-800">{supplierCount}</p>
+                    </div>
+                    <div className="bg-orange-50 p-4 rounded-lg shadow">
+                        <h3 className="text-sm font-medium text-orange-600">Company Users</h3>
+                        <p className="mt-1 text-2xl font-semibold text-orange-800">{companyCount}</p>
+                    </div>
                 </div>
 
                 {/* Users Table */}
