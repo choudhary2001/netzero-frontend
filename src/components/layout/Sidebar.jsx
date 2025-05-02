@@ -75,123 +75,32 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             icon: <FiHome className="h-5 w-5" />
           },
           {
-            name: 'Departments',
-            path: '/admin/departments',
+            name: 'User Management',
+            path: '/admin/user-management',
             icon: <FiGrid className="h-5 w-5" />
           },
-          // {
-          //   name: 'Users',
-          //   path: '/admin/users',
-          //   icon: <FiUsers className="h-5 w-5" />
-          // },
+
           {
-            name: 'Teachers',
-            path: '/admin/teachers',
+            name: 'Company Info',
+            path: '/admin/company-info',
             icon: <FiUser className="h-5 w-5" />
           },
           {
-            name: 'Batches',
-            path: '/admin/batches',
+            name: 'Environment',
+            path: '/admin/environment',
             icon: <FiUsers className="h-5 w-5" />
           },
           {
-            name: 'Semesters',
-            path: '/admin/semesters',
+            name: 'Governance',
+            path: '/admin/governance',
             icon: <FiCalendar className="h-5 w-5" />
           },
           {
-            name: 'Subjects',
-            path: '/admin/subjects',
+            name: 'Social',
+            path: '/admin/social',
             icon: <FiBook className="h-5 w-5" />
           },
 
-          {
-            name: 'Students',
-            path: '/admin/students',
-            icon: <FiUser className="h-5 w-5" />
-          },
-
-          {
-            name: 'Timetable Settings',
-            path: '/admin/timetable-settings',
-            icon: <FiSettings className="h-5 w-5" />
-          },
-          {
-            name: 'Manage Weekdays',
-            path: '/admin/weekdays',
-            icon: <FiCalendar className="h-5 w-5" />
-          },
-          {
-            name: 'Manage Time Slots',
-            path: '/admin/timeslots',
-            icon: <FiClock className="h-5 w-5" />
-          },
-          {
-            name: 'Holiday Management',
-            path: '/admin/holidays',
-            icon: <FiSun className="h-5 w-5" />
-          },
-          {
-            name: 'Timetables',
-            path: '/admin/timetables',
-            icon: <FiClock className="h-5 w-5" />
-          },
-          {
-            name: 'Timetables With Holidays',
-            path: '/admin/timetable-with-holidays',
-            icon: <FiClock className="h-5 w-5" />
-          },
-          {
-            name: 'Attendance Settings',
-            path: '/admin/attendance-settings',
-            icon: <FiSettings className="h-5 w-5" />
-          },
-          {
-            name: 'Attendance Management',
-            path: '/admin/attendance-management',
-            icon: <FiClipboard className="h-5 w-5" />
-          },
-          { // Add new link
-            name: 'Attendance Report',
-            path: '/admin/attendance-report',
-            icon: <FiBarChart2 className="h-5 w-5" />
-          },
-          {
-            name: 'Teacher Attendance Management',
-            path: '/admin/teacher-attendance-management',
-            icon: <FiClipboard className="h-5 w-5" />
-          },
-          {
-            name: 'Teacher Attendance Report',
-            path: '/admin/teacher-attendance-report',
-            icon: <FiBarChart2 className="h-5 w-5" />
-          },
-
-          {
-            name: 'Exams',
-            path: '/admin/exams',
-            icon: <FiBook className="h-5 w-5" />
-          },
-          {
-            name: 'Student Promotion',
-            path: '/admin/student-promotion',
-            icon: <FiUsers className="h-5 w-5" />
-          },
-          {
-            name: 'Bulk Notifications',
-            path: '/admin/bulk-emails',
-            icon: <FiBell className="h-5 w-5" />
-          },
-          // {
-          //   name: 'Exam Results',
-          //   path: '/admin/exam-results',
-          //   icon: <FiGift className="h-5 w-5" />
-          // },
-          // {
-          //   name: 'Settings',
-          //   path: '/admin/settings',
-          //   icon: <FiSettings className="h-5 w-5" />
-          // }
         ];
       case 'teacher':
         return [

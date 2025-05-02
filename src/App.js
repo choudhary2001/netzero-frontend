@@ -19,6 +19,14 @@ import Environment from './components/supplier/EnvironmentForm';
 import Social from './components/supplier/SocialForm';
 import Governance from './components/supplier/Governance';
 
+import AdminDashboard from './components/admin/AdminDashboard';
+import CompanyInfoManagement from './components/admin/CompanyInfoManagement';
+import EnvironmentManagement from './components/admin/EnvironmentManagement';
+import GovernanceManagement from './components/admin/GovernanceManagement';
+import SocialManagement from './components/admin/SocialManagement';
+import UserManagement from './components/admin/UserManagement';
+
+
 const App = () => {
   const { token, user } = useSelector((state) => state.auth);
 
@@ -49,11 +57,49 @@ const App = () => {
             </RoleBasedRoute>
           } />
 
-
-
-
-
-
+          {/* Admin Routes */}
+          <Route path="/admin/dashboard" element={
+            <RoleBasedRoute allowedRoles={['admin']}>
+              <Layout>
+                <AdminDashboard />
+              </Layout>
+            </RoleBasedRoute>
+          } />
+          <Route path="/admin/user-management" element={
+            <RoleBasedRoute allowedRoles={['admin']}>
+              <Layout>
+                <UserManagement />
+              </Layout>
+            </RoleBasedRoute>
+          } />
+          <Route path="/admin/company-info" element={
+            <RoleBasedRoute allowedRoles={['admin']}>
+              <Layout>
+                <CompanyInfoManagement />
+              </Layout>
+            </RoleBasedRoute>
+          } />
+          <Route path="/admin/environment" element={
+            <RoleBasedRoute allowedRoles={['admin']}>
+              <Layout>
+                <EnvironmentManagement />
+              </Layout>
+            </RoleBasedRoute>
+          } />
+          <Route path="/admin/governance" element={
+            <RoleBasedRoute allowedRoles={['admin']}>
+              <Layout>
+                <GovernanceManagement />
+              </Layout>
+            </RoleBasedRoute>
+          } />
+          <Route path="/admin/social" element={
+            <RoleBasedRoute allowedRoles={['admin']}>
+              <Layout>
+                <SocialManagement />
+              </Layout>
+            </RoleBasedRoute>
+          } />
 
           {/* supplier Routes */}
           <Route path="/supplier" element={
