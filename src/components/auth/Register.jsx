@@ -1,39 +1,48 @@
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { login } from '../../store/authSlice';
-import authService from '../../services/authService';
+import { FaBuilding, FaTruck, FaGoogle } from 'react-icons/fa';
 import { FiUser, FiLock, FiAlertCircle } from 'react-icons/fi';
-
-const Login = () => {
-    const [credentials, setCredentials] = useState({ username: '', password: '' });
+import authService from '../../services/authService';
+const Register = () => {
+    const [formData, setFormData] = useState({
+        email: '',
+        password: '',
+        confirmPassword: '',
+        role: 'company'
+    });
     const [errors, setErrors] = useState({});
     const [showPassword, setShowPassword] = useState(false);
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-    // const { loading, error } = useSelector((state) => state.auth);
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setCredentials({ ...credentials, [name]: value });
-        // Clear error when user types
-        if (errors[name]) {
-            setErrors({ ...errors, [name]: '' });
+        const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+        setFormData({
+            ...formData,
+            [e.target.name]: value
+        });
+        if (errors[e.target.name]) {
+            setErrors({ ...errors, [e.target.name]: '' });
         }
     };
 
     const validateForm = () => {
         const newErrors = {};
-        if (!credentials.username.trim()) {
-            newErrors.username = 'Email is required';
-        } else if (!/\S+@\S+\.\S+/.test(credentials.username)) {
-            newErrors.username = 'Please enter a valid email';
+        if (!formData.email.trim()) {
+            newErrors.email = 'Email is required';
+        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+            newErrors.email = 'Please enter a valid email';
         }
 
-        if (!credentials.password) {
+        if (!formData.password) {
             newErrors.password = 'Password is required';
+        } else if (formData.password.length < 6) {
+            newErrors.password = 'Password must be at least 6 characters';
+        }
+
+        if (formData.password !== formData.confirmPassword) {
+            newErrors.confirmPassword = 'Passwords do not match';
         }
 
         setErrors(newErrors);
@@ -43,25 +52,21 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        if (!validateForm()) return;
+        if (!validateForm()) {
+            setLoading(false);
+            return;
+        }
 
         try {
-            const data = await authService.login(credentials);
-            dispatch(login(data));
-
-            // Redirect based on user role
-            if (data.user.role === 'admin') {
-                navigate('/admin/dashboard');
-            } else if (data.user.role === 'teacher') {
-                navigate('/teacher/dashboard');
-            } else if (data.user.role === 'student') {
-                navigate('/student/dashboard');
-            } else {
-                navigate('/');
-            }
+            // Add your registration logic here
+            console.log('Form submitted:', formData);
+            const response = await authService.register(formData);
+            console.log('Registration response:', response);
+            // After successful registration
+            navigate('/login');
         } catch (error) {
             setErrors({
-                general: error.message || 'Invalid credentials. Please try again.'
+                general: error.message || 'Registration failed. Please try again.'
             });
         } finally {
             setLoading(false);
@@ -72,25 +77,6 @@ const Login = () => {
         <div className="min-h-screen bg-gradient-to-br from-green-50 to-indigo-100 flex items-center justify-center p-4">
             <div className="w-full max-w-md">
                 <div className="text-center mb-8">
-                    {/* <motion.div
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.5 }}
-                    >
-                        <img
-                            src="https://dmch.swastik.ai/media/img/dmc-logo.webp"
-                            alt="DMC Logo"
-                            className="mx-auto h-24 mb-4 rounded-lg"
-                        />
-                    </motion.div> */}
-                    {/* <motion.h2
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 0.2, duration: 0.5 }}
-                        className="text-2xl font-bold text-gray-800"
-                    >
-                        Attendance Management System
-                    </motion.h2> */}
                     <motion.h2
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
@@ -108,8 +94,8 @@ const Login = () => {
                 >
                     {/* Header */}
                     <div className="bg-gradient-to-r from-green-600 to-green-700 px-8 py-6 text-center">
-                        <h1 className="text-white text-3xl font-bold">Welcome Back</h1>
-                        <p className="text-green-100 mt-2">Sign in to your account</p>
+                        <h1 className="text-white text-3xl font-bold">Create Account</h1>
+                        <p className="text-green-100 mt-2">Join NetZero to start your sustainability journey</p>
                     </div>
 
                     {/* Form */}
@@ -125,6 +111,32 @@ const Login = () => {
                             </motion.div>
                         )}
 
+                        {/* Role Selection */}
+                        <div className="mb-6 flex space-x-4">
+                            <button
+                                type="button"
+                                onClick={() => setFormData({ ...formData, role: 'company' })}
+                                className={`flex-1 flex items-center justify-center px-4 py-3 rounded-xl border-2 transition-all duration-200 ${formData.role === 'company'
+                                    ? 'border-green-500 bg-green-50 text-green-700'
+                                    : 'border-gray-200 hover:border-green-300'
+                                    }`}
+                            >
+                                <FaBuilding className="mr-2" />
+                                <span className="font-medium">Company</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setFormData({ ...formData, role: 'supplier' })}
+                                className={`flex-1 flex items-center justify-center px-4 py-3 rounded-xl border-2 transition-all duration-200 ${formData.role === 'supplier'
+                                    ? 'border-green-500 bg-green-50 text-green-700'
+                                    : 'border-gray-200 hover:border-green-300'
+                                    }`}
+                            >
+                                <FaTruck className="mr-2" />
+                                <span className="font-medium">Supplier</span>
+                            </button>
+                        </div>
+
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div>
                                 <label className="block text-gray-700 text-sm font-medium mb-2">Email Address</label>
@@ -134,15 +146,15 @@ const Login = () => {
                                     </div>
                                     <input
                                         type="email"
-                                        name="username"
-                                        value={credentials.username}
+                                        name="email"
+                                        value={formData.email}
                                         onChange={handleChange}
-                                        className={`w-full pl-10 pr-4 py-3 border ${errors.username ? 'border-red-500' : 'border-gray-300'} rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all`}
+                                        className={`w-full pl-10 pr-4 py-3 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all`}
                                         placeholder="your.email@example.com"
                                     />
                                 </div>
-                                {errors.username && (
-                                    <p className="mt-1 text-sm text-red-600">{errors.username}</p>
+                                {errors.email && (
+                                    <p className="mt-1 text-sm text-red-600">{errors.email}</p>
                                 )}
                             </div>
 
@@ -155,7 +167,7 @@ const Login = () => {
                                     <input
                                         type={showPassword ? "text" : "password"}
                                         name="password"
-                                        value={credentials.password}
+                                        value={formData.password}
                                         onChange={handleChange}
                                         className={`w-full pl-10 pr-12 py-3 border ${errors.password ? 'border-red-500' : 'border-gray-300'} rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all`}
                                         placeholder="••••••••"
@@ -175,24 +187,24 @@ const Login = () => {
                                 )}
                             </div>
 
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center">
+                            <div>
+                                <label className="block text-gray-700 text-sm font-medium mb-2">Confirm Password</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <FiLock className="h-5 w-5 text-gray-400" />
+                                    </div>
                                     <input
-                                        id="remember-me"
-                                        name="remember-me"
-                                        type="checkbox"
-                                        className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                        type={showPassword ? "text" : "password"}
+                                        name="confirmPassword"
+                                        value={formData.confirmPassword}
+                                        onChange={handleChange}
+                                        className={`w-full pl-10 pr-12 py-3 border ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'} rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all`}
+                                        placeholder="••••••••"
                                     />
-                                    <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                                        Remember me
-                                    </label>
                                 </div>
-
-                                <div className="text-sm">
-                                    <Link to="/forgot-password" className="font-medium text-green-600 hover:text-green-500">
-                                        Forgot password?
-                                    </Link>
-                                </div>
+                                {errors.confirmPassword && (
+                                    <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+                                )}
                             </div>
 
                             <button
@@ -206,43 +218,27 @@ const Login = () => {
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
-                                        Signing in...
+                                        Creating account...
                                     </>
                                 ) : (
-                                    'Sign in'
+                                    'Create Account'
                                 )}
                             </button>
                         </form>
+
                         <div className="mt-6 text-center">
                             <p className="text-sm text-gray-600">
-                                Don't have an account?{' '}
-                                <Link to="/register" className="font-medium text-green-600 hover:text-green-500">
-                                    Sign up
+                                Already have an account?{' '}
+                                <Link to="/login" className="font-medium text-green-600 hover:text-green-500">
+                                    Sign in
                                 </Link>
                             </p>
                         </div>
                     </div>
-
-
-
-                    {/* Footer */}
-                    {/* <div className="px-8 py-4 bg-gray-50 border-t border-gray-100 text-center">
-                        <p className="text-xs text-gray-500">
-                            Made with ❤️ by{' '}
-                            <a
-                                href="https://swastik.ai"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="font-medium text-green-600 hover:text-green-800"
-                            >
-                                Shwastik Tech Solutions Pvt Ltd
-                            </a>
-                        </p>
-                    </div> */}
                 </motion.div>
             </div>
         </div>
     );
 };
 
-export default Login; 
+export default Register; 

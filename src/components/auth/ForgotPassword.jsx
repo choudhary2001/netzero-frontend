@@ -111,7 +111,7 @@ const ForgotPassword = () => {
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                         placeholder="your.email@example.com"
                         required
                     />
@@ -121,7 +121,7 @@ const ForgotPassword = () => {
             <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
             >
                 {loading ? (
                     <>
@@ -147,7 +147,7 @@ const ForgotPassword = () => {
                         type="text"
                         value={otp}
                         onChange={(e) => setOtp(e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-center text-lg tracking-widest"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-center text-lg tracking-widest"
                         placeholder="Enter 6-digit OTP"
                         maxLength="6"
                         required
@@ -161,7 +161,7 @@ const ForgotPassword = () => {
             <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
             >
                 {loading ? (
                     <>
@@ -180,7 +180,7 @@ const ForgotPassword = () => {
                 <button
                     type="button"
                     onClick={() => setStep('request')}
-                    className="text-sm text-blue-600 hover:text-blue-500 flex items-center"
+                    className="text-sm text-green-600 hover:text-green-500 flex items-center"
                 >
                     <FiArrowLeft className="mr-1" /> Back
                 </button>
@@ -188,7 +188,7 @@ const ForgotPassword = () => {
                 <button
                     type="button"
                     onClick={handleRequestOTP}
-                    className="text-sm text-blue-600 hover:text-blue-500"
+                    className="text-sm text-green-600 hover:text-green-500"
                 >
                     Resend OTP
                 </button>
@@ -204,7 +204,7 @@ const ForgotPassword = () => {
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                     placeholder="Enter new password"
                     required
                 />
@@ -216,7 +216,7 @@ const ForgotPassword = () => {
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                     placeholder="Confirm new password"
                     required
                 />
@@ -225,7 +225,7 @@ const ForgotPassword = () => {
             <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
             >
                 {loading ? (
                     <>
@@ -243,7 +243,7 @@ const ForgotPassword = () => {
     );
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gradient-to-br from-green-50 to-indigo-100 flex items-center justify-center p-4">
             <div className="w-full max-w-md">
                 <div className="text-center mb-8">
                     {/* <motion.div
@@ -281,13 +281,13 @@ const ForgotPassword = () => {
                     className="bg-white rounded-2xl shadow-xl overflow-hidden"
                 >
                     {/* Header */}
-                    <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6 text-center">
+                    <div className="bg-gradient-to-r from-green-600 to-green-700 px-8 py-6 text-center">
                         <h1 className="text-white text-2xl font-bold">
                             {step === 'request' && 'Forgot Password'}
                             {step === 'verify' && 'Verify OTP'}
                             {step === 'reset' && 'Reset Password'}
                         </h1>
-                        <p className="text-blue-100 mt-2">
+                        <p className="text-green-100 mt-2">
                             {step === 'request' && 'Enter your email to receive a verification code'}
                             {step === 'verify' && 'Enter the OTP sent to your email'}
                             {step === 'reset' && 'Create a new password for your account'}
@@ -327,7 +327,7 @@ const ForgotPassword = () => {
                     <div className="px-8 py-4 bg-gray-50 border-t border-gray-100 text-center">
                         <p className="text-sm text-gray-600">
                             Remember your password?{' '}
-                            <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
+                            <Link to="/login" className="font-medium text-green-600 hover:text-green-500">
                                 Sign in
                             </Link>
                         </p>

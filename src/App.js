@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useSelector } from 'react-redux';
 import Layout from './components/layout/Layout';
 import Login from './components/auth/Login';
-
+import Register from './components/auth/Register';
 import SupplierDashboard from './components/supplier/Dashboard';
 
 import { ToastContainer } from 'react-toastify';
@@ -148,6 +148,7 @@ const App = () => {
 
           {/* Forgot Password Route */}
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/register" element={<Register />} />
 
           {/* Default Route */}
           <Route path="/" element={

@@ -3,6 +3,39 @@ import { loginStart, loginSuccess, loginFailure, logout } from '../store/slices/
 import store from '../store';
 
 const authService = {
+    register: async (userData) => {
+        try {
+            const response = await api.post('/auth/register', {
+                email: userData.email,
+                password: userData.password,
+                role: userData.role
+            });
+            return response.data;
+        } catch (error) {
+            if (error.response?.data) {
+                throw new Error(error.response.data.detail || 'Registration failed');
+            }
+            throw error;
+        }
+    },
+
+    verifyOTP: async (email, otp, password, role) => {
+        try {
+            const response = await api.post('/auth/verify-otp', {
+                email,
+                otp,
+                password,
+                role
+            });
+            return response.data;
+        } catch (error) {
+            if (error.response?.data) {
+                throw new Error(error.response.data.detail || 'OTP verification failed');
+            }
+            throw error;
+        }
+    },
+
     login: async (credentials) => {
         try {
             const response = await api.post('/token/', {
@@ -56,16 +89,6 @@ const authService = {
             return response.data;
         } catch (error) {
             console.error('Error requesting password reset:', error);
-            throw error;
-        }
-    },
-
-    verifyOTP: async (email, otp) => {
-        try {
-            const response = await api.post('/password-reset/verify-otp/', { email, otp });
-            return response.data;
-        } catch (error) {
-            console.error('Error verifying OTP:', error);
             throw error;
         }
     },
