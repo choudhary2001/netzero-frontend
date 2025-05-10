@@ -17,7 +17,9 @@ const CompanyInfoForm = () => {
         ],
         certificates: [
             { type: '', level: '', validity: '' }
-        ]
+        ],
+        remarks: '',
+        points: 0
     });
 
     const [loading, setLoading] = useState(false);
@@ -207,7 +209,7 @@ const CompanyInfoForm = () => {
                 const uploadResponse = await esgService.uploadCertificate(
                     formData.registrationCertificate,
                     'companyInfo',
-                    'registrationCertificate'
+                    'registrationCertificate',
                 );
 
                 if (uploadResponse.success) {
@@ -358,6 +360,15 @@ const CompanyInfoForm = () => {
                                 <p className="text-xs text-gray-500 mt-1">
                                     Registration certificate, company profile, business license, etc.
                                 </p>
+                                {
+                                    formData.points > 0 && (
+                                        <p>
+                                            Rating: {formData.points.toFixed(2)}/1
+                                            <br />
+                                            Remarks: {formData.remarks}
+                                        </p>
+                                    )
+                                }
                             </div>
                         </div>
                     </div>

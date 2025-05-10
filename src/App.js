@@ -18,13 +18,17 @@ import CompanyInfo from './components/supplier/CompanyInfoForm';
 import Environment from './components/supplier/EnvironmentForm';
 import Social from './components/supplier/SocialForm';
 import Governance from './components/supplier/Governance';
-
+import HelpSupport from './components/supplier/HelpSupport';
+import AccountSettings from './components/supplier/AccountSettings';
+import KPIDashboard from './components/supplier/KPIDashboard';
+import Messages from './components/supplier/SupplierChat';
 import AdminDashboard from './components/admin/AdminDashboard';
 import CompanyInfoManagement from './components/admin/CompanyInfoManagement';
 import EnvironmentManagement from './components/admin/EnvironmentManagement';
 import GovernanceManagement from './components/admin/GovernanceManagement';
 import SocialManagement from './components/admin/SocialManagement';
 import UserManagement from './components/admin/UserManagement';
+import ChatPage from './components/admin/AdminChat';
 
 
 const App = () => {
@@ -100,6 +104,13 @@ const App = () => {
               </Layout>
             </RoleBasedRoute>
           } />
+          <Route path="/admin/chat" element={
+            <RoleBasedRoute allowedRoles={['admin']}>
+              <Layout>
+                <ChatPage />
+              </Layout>
+            </RoleBasedRoute>
+          } />
 
           {/* supplier Routes */}
           <Route path="/supplier" element={
@@ -144,7 +155,35 @@ const App = () => {
               </Layout>
             </RoleBasedRoute>
           } />
+          <Route path="/supplier/kpi" element={
+            <RoleBasedRoute allowedRoles={['supplier']}>
+              <Layout>
+                <KPIDashboard />
+              </Layout>
+            </RoleBasedRoute>
+          } />
 
+          <Route path="/supplier/help-support" element={
+            <RoleBasedRoute allowedRoles={['supplier']}>
+              <Layout>
+                <HelpSupport />
+              </Layout>
+            </RoleBasedRoute>
+          } />
+          <Route path="/supplier/account-settings" element={
+            <RoleBasedRoute allowedRoles={['supplier']}>
+              <Layout>
+                <AccountSettings />
+              </Layout>
+            </RoleBasedRoute>
+          } />
+          <Route path="/supplier/chat" element={
+            <RoleBasedRoute allowedRoles={['supplier']}>
+              <Layout>
+                <Messages />
+              </Layout>
+            </RoleBasedRoute>
+          } />
 
           {/* Forgot Password Route */}
           <Route path="/forgot-password" element={<ForgotPassword />} />

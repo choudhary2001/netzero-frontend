@@ -7,19 +7,27 @@ const SocialForm = () => {
     const [formData, setFormData] = useState({
         swachhWorkplace: {
             value: '',
-            certificate: null
+            certificate: null,
+            points: 0,
+            remarks: ''
         },
         occupationalSafety: {
             value: '',
-            certificate: null
+            certificate: null,
+            points: 0,
+            remarks: ''
         },
         hrManagement: {
             value: '',
-            certificate: null
+            certificate: null,
+            points: 0,
+            remarks: ''
         },
         csrResponsibility: {
             value: '',
-            certificate: null
+            certificate: null,
+            points: 0,
+            remarks: ''
         }
     });
 
@@ -95,7 +103,9 @@ const SocialForm = () => {
                         if (socialData[key]) {
                             newFormData[key] = {
                                 value: socialData[key].value || '',
-                                certificate: socialData[key].certificate || null
+                                certificate: socialData[key].certificate || null,
+                                points: socialData[key].points || 0,
+                                remarks: socialData[key].remarks || ''
                             };
 
                             if (socialData[key].certificate) {
@@ -292,6 +302,20 @@ const SocialForm = () => {
                 <p className="text-xs text-gray-500 mt-1">
                     {description}
                 </p>
+                {
+                    formData[section].points > 0 && (
+                        <p>
+                            Rating: {formData[section].points.toFixed(2)}/1
+                        </p>
+                    )
+                }
+                {
+                    formData[section].remarks && (
+                        <p>
+                            Remarks: {formData[section].remarks}
+                        </p>
+                    )
+                }
             </div>
         </div>
     );

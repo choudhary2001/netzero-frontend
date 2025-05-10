@@ -85,20 +85,25 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             path: '/admin/company-info',
             icon: <FiUser className="h-5 w-5" />
           },
+          // {
+          //   name: 'Environment',
+          //   path: '/admin/environment',
+          //   icon: <FiUsers className="h-5 w-5" />
+          // },
+          // {
+          //   name: 'Governance',
+          //   path: '/admin/governance',
+          //   icon: <FiCalendar className="h-5 w-5" />
+          // },
+          // {
+          //   name: 'Social',
+          //   path: '/admin/social',
+          //   icon: <FiBook className="h-5 w-5" />
+          // },
           {
-            name: 'Environment',
-            path: '/admin/environment',
-            icon: <FiUsers className="h-5 w-5" />
-          },
-          {
-            name: 'Governance',
-            path: '/admin/governance',
-            icon: <FiCalendar className="h-5 w-5" />
-          },
-          {
-            name: 'Social',
-            path: '/admin/social',
-            icon: <FiBook className="h-5 w-5" />
+            name: 'Chat',
+            path: '/admin/chat',
+            icon: <FiMessageSquare className="h-5 w-5" />
           },
 
         ];
@@ -176,7 +181,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           },
           {
             name: 'Message',
-            path: '/supplier/message',
+            path: '/supplier/chat',
             icon: <FiMessageSquare className="h-5 w-5" />
           },
           {

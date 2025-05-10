@@ -18,6 +18,35 @@ const esgService = {
         }
     },
 
+    // Get dashboard data for supplier
+    getDashboardData: async () => {
+        try {
+            const response = await api.get('/dashboard');
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching dashboard data:', error);
+            return {
+                success: false,
+                message: error.message || 'Failed to fetch dashboard data',
+                data: {
+                    esgScores: {
+                        environmental: 0,
+                        social: 0,
+                        governance: 0,
+                        overall: 0
+                    },
+                    formCompletion: {
+                        company: 0,
+                        environmental: 0,
+                        social: 0,
+                        governance: 0
+                    },
+                    recentUpdates: []
+                }
+            };
+        }
+    },
+
     // Get ESG data for current user
     getESGData: async () => {
         try {

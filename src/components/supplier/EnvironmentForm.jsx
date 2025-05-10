@@ -7,23 +7,33 @@ const EnvironmentForm = () => {
     const [formData, setFormData] = useState({
         renewableEnergy: {
             value: '',
-            certificate: null
+            certificate: null,
+            remarks: '',
+            points: 0
         },
         waterConsumption: {
             value: '',
-            certificate: null
+            certificate: null,
+            remarks: '',
+            points: 0
         },
         rainwaterHarvesting: {
             value: '',
-            certificate: null
+            certificate: null,
+            remarks: '',
+            points: 0
         },
         emissionControl: {
             value: '',
-            certificate: null
+            certificate: null,
+            remarks: '',
+            points: 0
         },
         resourceConservation: {
             value: '',
-            certificate: null
+            certificate: null,
+            remarks: '',
+            points: 0
         }
     });
 
@@ -89,7 +99,7 @@ const EnvironmentForm = () => {
             try {
                 setLoading(true);
                 const response = await esgService.getESGData();
-
+                console.log(response);
                 // The service now returns a consistent response structure even on errors
                 if (response.success && response.data && response.data.environment) {
                     // Update form data with existing values
@@ -104,6 +114,8 @@ const EnvironmentForm = () => {
                             updatedFormData[key].value = envData[key].value || '';
                             updatedFileLabels[key] = envData[key].certificate ? 'Certificate uploaded' : 'No file chosen';
                             updatedSaved[key] = true;
+                            updatedFormData[key].points = envData[key].points || 0;
+                            updatedFormData[key].remarks = envData[key].remarks || '';
                         }
                     });
 
@@ -276,7 +288,8 @@ const EnvironmentForm = () => {
     };
 
     // Helper function to render file upload section
-    const renderFileUpload = (section, label, description) => (
+    const renderFileUpload = (section, label, description, remarks, points) => (
+        console.log(remarks, points),
         <div className="mt-2 mb-4">
             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
                 {label}
@@ -303,6 +316,20 @@ const EnvironmentForm = () => {
                 <p className="text-xs text-gray-500 mt-1">
                     {description}
                 </p>
+                {
+                    points > 0 && (
+                        <p className="">
+                            Rating: {points.toFixed(2)}/1
+                        </p>
+                    )
+                }
+                {
+                    remarks && (
+                        <p className="">
+                            Remarks: {remarks}
+                        </p>
+                    )
+                }
             </div>
         </div>
     );
@@ -310,7 +337,7 @@ const EnvironmentForm = () => {
     // Current section content based on step
     const renderStepContent = () => {
         const currentSection = steps[currentStep].id;
-
+        console.log(formData);
         switch (currentSection) {
             case 'energy':
                 return (
@@ -331,7 +358,9 @@ const EnvironmentForm = () => {
                         {renderFileUpload(
                             'renewableEnergy',
                             'Upload Supporting Documents',
-                            'Renewable energy certificates, generation data (solar, wind), etc.'
+                            'Renewable energy certificates, generation data (solar, wind), etc.',
+                            formData.renewableEnergy.remarks,
+                            formData.renewableEnergy.points
                         )}
                     </div>
                 );
@@ -354,7 +383,9 @@ const EnvironmentForm = () => {
                         {renderFileUpload(
                             'waterConsumption',
                             'Upload Supporting Documents',
-                            'Water bills, meter readings, water audit reports, etc.'
+                            'Water bills, meter readings, water audit reports, etc.',
+                            formData.waterConsumption.remarks,
+                            formData.waterConsumption.points
                         )}
                     </div>
                 );
@@ -377,7 +408,9 @@ const EnvironmentForm = () => {
                         {renderFileUpload(
                             'rainwaterHarvesting',
                             'Upload Supporting Documents',
-                            'System design documents, collection logs, maintenance records, etc.'
+                            'System design documents, collection logs, maintenance records, etc.',
+                            formData.rainwaterHarvesting.remarks,
+                            formData.rainwaterHarvesting.points
                         )}
                     </div>
                 );
@@ -400,7 +433,9 @@ const EnvironmentForm = () => {
                         {renderFileUpload(
                             'emissionControl',
                             'Upload Supporting Documents',
-                            'Compliance certificates, environmental audit reports, training records, etc.'
+                            'Compliance certificates, environmental audit reports, training records, etc.',
+                            formData.emissionControl.remarks,
+                            formData.emissionControl.points
                         )}
                     </div>
                 );
@@ -423,7 +458,9 @@ const EnvironmentForm = () => {
                         {renderFileUpload(
                             'resourceConservation',
                             'Upload Supporting Documents',
-                            'Resource consumption logs, conservation targets, training records, etc.'
+                            'Resource consumption logs, conservation targets, training records, etc.',
+                            formData.resourceConservation.remarks,
+                            formData.resourceConservation.points
                         )}
                     </div>
                 );

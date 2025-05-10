@@ -15,11 +15,14 @@ import {
     FiUsers,
     FiBell,
     FiUmbrella,
-    FiInfo
+    FiInfo,
+    FiLoader,
+    FiAlertTriangle
 } from 'react-icons/fi';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { useAuth } from '../../contexts/AuthContext';
+import esgService from '../../services/esgService';
 
 const StatCard = ({ title, value, icon: Icon, color, trend, description }) => (
     <motion.div
@@ -49,37 +52,71 @@ const StatCard = ({ title, value, icon: Icon, color, trend, description }) => (
 
 const Dashboard = () => {
     const { user } = useAuth();
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [dashboardData, setDashboardData] = useState({
+        esgScores: {
+            environmental: 0,
+            social: 0,
+            governance: 0,
+            overall: 0
+        },
+        formCompletion: {
+            company: 0,
+            environmental: 0,
+            social: 0,
+            governance: 0
+        },
+        recentUpdates: [],
+        status: 'draft'
+    });
 
-    // Sample data for charts and stats
-    const esgScores = {
-        environmental: 72,
-        social: 65,
-        governance: 80,
-        overall: 72
-    };
-
-    const recentUpdates = [
-        { id: 1, title: 'Environmental report updated', date: '2 days ago', status: 'Completed', type: 'environment' },
-        { id: 2, title: 'Governance documentation pending', date: '3 days ago', status: 'Pending', type: 'governance' },
-        { id: 3, title: 'Social responsibility review', date: '1 week ago', status: 'In Progress', type: 'social' },
-        { id: 4, title: 'Carbon footprint assessment', date: '1 week ago', status: 'Completed', type: 'environment' }
-    ];
-
+    // Upcoming deadlines - this could also come from the backend in future
     const upcomingDeadlines = [
-        { id: 1, title: 'Quarterly ESG Report', date: '15 Jun 2023', priority: 'High' },
-        { id: 2, title: 'Sustainability Audit', date: '30 Jun 2023', priority: 'Medium' },
-        { id: 3, title: 'Governance Review Meeting', date: '10 Jul 2023', priority: 'Low' }
+        { id: 1, title: 'Quarterly ESG Report', date: '15 Jun 2024', priority: 'High' },
+        { id: 2, title: 'Sustainability Audit', date: '30 Jun 2024', priority: 'Medium' },
+        { id: 3, title: 'Governance Review Meeting', date: '10 Jul 2024', priority: 'Low' }
     ];
+
+    // Fetch dashboard data from the backend
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                setLoading(true);
+                const response = await esgService.getDashboardData();
+
+                if (response.success && response.data) {
+                    setDashboardData(response.data);
+                } else {
+                    console.error('Error fetching dashboard data:', response.message);
+                    setError(response.message || 'Failed to load dashboard data');
+                }
+            } catch (err) {
+                console.error('Error fetching dashboard data:', err);
+                setError('Failed to load dashboard data. Please try again later.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDashboardData();
+    }, []);
 
     const getStatusIcon = (status) => {
         switch (status) {
             case 'Completed':
+            case 'Reviewed':
                 return <FiCheckCircle className="text-green-500" />;
             case 'Pending':
                 return <FiClock className="text-orange-500" />;
             case 'In Progress':
                 return <FiBarChart2 className="text-blue-500" />;
+            case 'Submitted':
+                return <FiFileText className="text-blue-500" />;
+            case 'Approved':
+                return <FiAward className="text-green-600" />;
+            case 'Rejected':
+                return <FiAlertTriangle className="text-red-500" />;
             default:
                 return <FiInfo className="text-gray-500" />;
         }
@@ -93,6 +130,10 @@ const Dashboard = () => {
                 return <FiUsers className="text-blue-500" />;
             case 'governance':
                 return <FiBell className="text-purple-500" />;
+            case 'company':
+                return <FiBook className="text-orange-500" />;
+            case 'status':
+                return <FiFileText className="text-gray-500" />;
             default:
                 return <FiInfo className="text-gray-500" />;
         }
@@ -115,7 +156,7 @@ const Dashboard = () => {
     const DonutChart = ({ percentage, color, size = 120, strokeWidth = 8 }) => {
         const radius = (size - strokeWidth) / 2;
         const circumference = 2 * Math.PI * radius;
-        const strokeDashoffset = circumference - (percentage / 100) * circumference;
+        const strokeDashoffset = circumference - (percentage / 1) * circumference;
 
         return (
             <div className="relative" style={{ width: size, height: size }}>
@@ -147,16 +188,131 @@ const Dashboard = () => {
         );
     };
 
+    // Show loading state
+    if (loading) {
+        return (
+            <div className="container mx-auto px-4 py-6 flex justify-center items-center h-64">
+                <FiLoader className="animate-spin text-green-600 text-3xl mr-2" />
+                <p className="text-gray-600">Loading dashboard data...</p>
+            </div>
+        );
+    }
+
+    // Show error state
+    if (error) {
+        return (
+            <div className="container mx-auto px-4 py-6">
+                <div className="bg-red-50 border border-red-300 rounded-md p-4 mb-6">
+                    <div className="flex items-center">
+                        <FiAlertCircle className="text-red-500 mr-2" />
+                        <h2 className="text-red-700 font-medium">Error loading dashboard data</h2>
+                    </div>
+                    <p className="text-red-600 mt-2">{error}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="mt-3 bg-red-100 px-4 py-2 rounded-md text-red-700 hover:bg-red-200"
+                    >
+                        Retry
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    const { esgScores, formCompletion, recentUpdates, status } = dashboardData;
+
     return (
         <div className="container mx-auto px-4 py-6">
             {/* Welcome Section */}
             <div className="mb-8">
                 <h1 className="text-2xl font-bold text-gray-800 mb-2">
-                    Welcome back, {user?.first_name || 'Supplier'}!
+                    Welcome back, {user?.name || user?.role || 'Supplier'}!
                 </h1>
                 <p className="text-gray-600">
                     Here's an overview of your ESG performance and upcoming deadlines.
                 </p>
+            </div>
+
+            {/* Status bar if submission is in progress */}
+            {status && status !== 'draft' && (
+                <div className={`mb-6 p-4 rounded-md ${status === 'submitted' ? 'bg-blue-50 border border-blue-200' :
+                    status === 'approved' ? 'bg-green-50 border border-green-200' :
+                        status === 'rejected' ? 'bg-red-50 border border-red-200' :
+                            'bg-gray-50 border border-gray-200'
+                    }`}>
+                    <div className="flex items-center">
+                        {status === 'submitted' && <FiClock className="text-blue-500 mr-2" />}
+                        {status === 'approved' && <FiCheckCircle className="text-green-500 mr-2" />}
+                        {status === 'rejected' && <FiAlertCircle className="text-red-500 mr-2" />}
+                        <p className={`font-medium ${status === 'submitted' ? 'text-blue-700' :
+                            status === 'approved' ? 'text-green-700' :
+                                status === 'rejected' ? 'text-red-700' :
+                                    'text-gray-700'
+                            }`}>
+                            Your ESG submission is {status}
+                        </p>
+                    </div>
+                    <p className="mt-1 text-sm text-gray-600">
+                        {status === 'submitted' && 'Your data is currently under review by our team.'}
+                        {status === 'approved' && 'Congratulations! Your ESG data has been approved.'}
+                        {status === 'rejected' && 'Your submission needs some changes. Please review the feedback.'}
+                    </p>
+                </div>
+            )}
+
+            {/* Form Completion Progress */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div className="bg-white rounded-lg shadow p-6">
+                    <h3 className="font-medium text-gray-700 mb-2">Company Info</h3>
+                    <div className="relative pt-1">
+                        <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
+                            <div style={{ width: `${formCompletion.company}%` }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-orange-500 transition-all duration-500"></div>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-600">
+                            <span>{formCompletion.company}% Complete</span>
+                            <Link to="/supplier/company-info" className="text-orange-600 hover:underline">Update</Link>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow p-6">
+                    <h3 className="font-medium text-gray-700 mb-2">Environment</h3>
+                    <div className="relative pt-1">
+                        <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
+                            <div style={{ width: `${formCompletion.environmental}%` }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500 transition-all duration-500"></div>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-600">
+                            <span>{formCompletion.environmental}% Complete</span>
+                            <Link to="/supplier/environment" className="text-green-600 hover:underline">Update</Link>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow p-6">
+                    <h3 className="font-medium text-gray-700 mb-2">Social</h3>
+                    <div className="relative pt-1">
+                        <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
+                            <div style={{ width: `${formCompletion.social}%` }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500 transition-all duration-500"></div>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-600">
+                            <span>{formCompletion.social}% Complete</span>
+                            <Link to="/supplier/social" className="text-blue-600 hover:underline">Update</Link>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow p-6">
+                    <h3 className="font-medium text-gray-700 mb-2">Governance</h3>
+                    <div className="relative pt-1">
+                        <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
+                            <div style={{ width: `${formCompletion.governance}%` }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-purple-500 transition-all duration-500"></div>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-600">
+                            <span>{formCompletion.governance}% Complete</span>
+                            <Link to="/supplier/governance" className="text-purple-600 hover:underline">Update</Link>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* ESG Score Cards */}
@@ -220,48 +376,58 @@ const Dashboard = () => {
                 <div className="bg-white rounded-lg shadow lg:col-span-2">
                     <div className="p-6">
                         <h2 className="text-lg font-bold text-gray-800 mb-4">Recent Updates</h2>
-                        <div className="overflow-hidden">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead>
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Update
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Date
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Status
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {recentUpdates.map((update) => (
-                                        <tr key={update.id}>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="flex items-center">
-                                                    <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-gray-100">
-                                                        {getTypeIcon(update.type)}
-                                                    </div>
-                                                    <div className="ml-4">
-                                                        <div className="text-sm font-medium text-gray-900">{update.title}</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm text-gray-500">{update.date}</div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="flex items-center">
-                                                    {getStatusIcon(update.status)}
-                                                    <span className="ml-1.5 text-sm text-gray-500">{update.status}</span>
-                                                </div>
-                                            </td>
+                        {recentUpdates && recentUpdates.length > 0 ? (
+                            <div className="overflow-hidden">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead>
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Update
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Date
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Status
+                                            </th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        {recentUpdates.map((update) => (
+                                            <tr key={update.id}>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center">
+                                                        <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-gray-100">
+                                                            {getTypeIcon(update.type)}
+                                                        </div>
+                                                        <div className="ml-4">
+                                                            <div className="text-sm font-medium text-gray-900">{update.title}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm text-gray-500">{update.date}</div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center">
+                                                        {getStatusIcon(update.status)}
+                                                        <span className="ml-2 text-sm font-medium text-gray-900">
+                                                            {update.status}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <div className="text-center py-6 text-gray-500">
+                                <FiInfo className="mx-auto text-gray-400 text-3xl mb-2" />
+                                <p>No recent updates available</p>
+                                <p className="text-sm mt-2">Start filling out your ESG forms to see updates here</p>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -271,86 +437,25 @@ const Dashboard = () => {
                         <h2 className="text-lg font-bold text-gray-800 mb-4">Upcoming Deadlines</h2>
                         <div className="space-y-4">
                             {upcomingDeadlines.map((deadline) => (
-                                <div key={deadline.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
-                                    <div className="flex items-start">
-                                        <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-gray-100">
-                                            <FiCalendar className="text-gray-500" />
+                                <div key={deadline.id} className="flex items-start">
+                                    <div className="flex-shrink-0 w-4 h-4 rounded-full bg-green-400 mt-1"></div>
+                                    <div className="ml-3">
+                                        <div className="flex items-center">
+                                            <h3 className="text-sm font-medium text-gray-900">{deadline.title}</h3>
+                                            <span className={`ml-2 px-2 py-0.5 text-xs rounded-full ${getPriorityColor(deadline.priority)}`}>
+                                                {deadline.priority}
+                                            </span>
                                         </div>
-                                        <div className="ml-4 flex-1">
-                                            <div className="flex justify-between">
-                                                <h3 className="text-sm font-medium text-gray-900">{deadline.title}</h3>
-                                                <span
-                                                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(
-                                                        deadline.priority
-                                                    )}`}
-                                                >
-                                                    {deadline.priority}
-                                                </span>
-                                            </div>
-                                            <p className="mt-1 text-sm text-gray-500">Due: {deadline.date}</p>
+                                        <div className="mt-1 flex items-center text-sm text-gray-500">
+                                            <FiCalendar className="mr-1" />
+                                            <span>{deadline.date}</span>
                                         </div>
                                     </div>
                                 </div>
                             ))}
                         </div>
-                        <div className="mt-6">
-                            <Link
-                                to="#"
-                                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                            >
-                                View All Deadlines
-                            </Link>
-                        </div>
                     </div>
                 </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
-                <Link
-                    to="/supplier/environment"
-                    className="bg-white shadow rounded-lg p-6 hover:shadow-md transition duration-150 ease-in-out"
-                >
-                    <div className="flex flex-col items-center text-center">
-                        <div className="p-3 rounded-full bg-green-100 mb-4">
-                            <FiUmbrella className="h-6 w-6 text-green-600" />
-                        </div>
-                        <h3 className="text-sm font-medium text-gray-900">Update Environmental Data</h3>
-                    </div>
-                </Link>
-                <Link
-                    to="/supplier/social"
-                    className="bg-white shadow rounded-lg p-6 hover:shadow-md transition duration-150 ease-in-out"
-                >
-                    <div className="flex flex-col items-center text-center">
-                        <div className="p-3 rounded-full bg-blue-100 mb-4">
-                            <FiUsers className="h-6 w-6 text-blue-600" />
-                        </div>
-                        <h3 className="text-sm font-medium text-gray-900">Update Social Data</h3>
-                    </div>
-                </Link>
-                <Link
-                    to="/supplier/governance"
-                    className="bg-white shadow rounded-lg p-6 hover:shadow-md transition duration-150 ease-in-out"
-                >
-                    <div className="flex flex-col items-center text-center">
-                        <div className="p-3 rounded-full bg-purple-100 mb-4">
-                            <FiBell className="h-6 w-6 text-purple-600" />
-                        </div>
-                        <h3 className="text-sm font-medium text-gray-900">Update Governance Data</h3>
-                    </div>
-                </Link>
-                <Link
-                    to="/supplier/help-support"
-                    className="bg-white shadow rounded-lg p-6 hover:shadow-md transition duration-150 ease-in-out"
-                >
-                    <div className="flex flex-col items-center text-center">
-                        <div className="p-3 rounded-full bg-gray-100 mb-4">
-                            <FiInfo className="h-6 w-6 text-gray-600" />
-                        </div>
-                        <h3 className="text-sm font-medium text-gray-900">Help & Support</h3>
-                    </div>
-                </Link>
             </div>
         </div>
     );

@@ -11,23 +11,33 @@ const GovernanceForm = () => {
         },
         qualityManagement: {
             value: '',
-            certificate: null
+            certificate: null,
+            points: 0,
+            remarks: ''
         },
         processControl: {
             value: '',
-            certificate: null
+            certificate: null,
+            points: 0,
+            remarks: ''
         },
         materialManagement: {
             value: '',
-            certificate: null
+            certificate: null,
+            points: 0,
+            remarks: ''
         },
         maintenanceCalibration: {
             value: '',
-            certificate: null
+            certificate: null,
+            points: 0,
+            remarks: ''
         },
         technologyUpgradation: {
             value: '',
-            certificate: null
+            certificate: null,
+            points: 0,
+            remarks: ''
         }
     });
 
@@ -109,7 +119,9 @@ const GovernanceForm = () => {
                         if (governanceData[key]) {
                             newFormData[key] = {
                                 value: governanceData[key].value || '',
-                                certificate: governanceData[key].certificate || null
+                                certificate: governanceData[key].certificate || null,
+                                points: governanceData[key].points || 0,
+                                remarks: governanceData[key].remarks || ''
                             };
 
                             if (governanceData[key].certificate) {
@@ -312,6 +324,20 @@ const GovernanceForm = () => {
                 <p className="text-xs text-gray-500 mt-1">
                     {description}
                 </p>
+                {
+                    formData[section].points > 0 && (
+                        <p>
+                            Rating: {formData[section].points.toFixed(2)}/1
+                        </p>
+                    )
+                }
+                {
+                    formData[section].remarks && (
+                        <p>
+                            Remarks: {formData[section].remarks}
+                        </p>
+                    )
+                }
             </div>
         </div>
     );

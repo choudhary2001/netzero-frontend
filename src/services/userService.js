@@ -120,10 +120,20 @@ const userService = {
 
     updateProfile: async (data) => {
         try {
-            const response = await api.patch('/users/profile/', data);
+            const response = await api.post('/users/profile/', data);
             return response;
         } catch (error) {
             console.error('Error updating profile:', error);
+            throw error;
+        }
+    },
+
+    changePassword: async (data) => {
+        try {
+            const response = await api.post('/users/change-password/', data);
+            return response;
+        } catch (error) {
+            console.error('Error changing password:', error);
             throw error;
         }
     }

@@ -56,7 +56,7 @@ const Profile = () => {
                     icon={FiBook}
                     title="Today's Classes"
                     value={profileData.todayClasses}
-                    color="border-blue-500"
+                    color="border-green-500"
                 />
                 <StatCard
                     icon={FiCalendar}
@@ -82,19 +82,19 @@ const Profile = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-white rounded-xl shadow-sm p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                        <FiBook className="mr-2 text-blue-500" />
+                        <FiBook className="mr-2 text-green-500" />
                         Teaching Subjects
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {profileData.subjects?.map(subject => (
                             <div key={subject.id}
-                                className="bg-blue-50 rounded-lg p-4 flex items-start space-x-3">
+                                className="bg-green-50 rounded-lg p-4 flex items-start space-x-3">
                                 <div className="flex-shrink-0">
-                                    <FiHash className="text-blue-500" />
+                                    <FiHash className="text-green-500" />
                                 </div>
                                 <div>
-                                    <p className="font-medium text-blue-900">{subject.name}</p>
-                                    <p className="text-sm text-blue-600">{subject.code}</p>
+                                    <p className="font-medium text-green-900">{subject.name}</p>
+                                    <p className="text-sm text-green-600">{subject.code}</p>
                                 </div>
                             </div>
                         ))}
@@ -121,7 +121,7 @@ const Profile = () => {
                 <div className="bg-white rounded-xl shadow-sm p-6">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-semibold text-gray-900">Overall Attendance</h3>
-                        <FiBarChart2 className="text-blue-500" />
+                        <FiBarChart2 className="text-green-500" />
                     </div>
                     <div className="w-32 h-32 mx-auto">
                         <CircularProgressbar
@@ -152,7 +152,7 @@ const Profile = () => {
                     icon={FiCalendar}
                     title="Present Classes"
                     value={profileData.attendance?.present_classes || 0}
-                    color="border-blue-500"
+                    color="border-green-500"
                 />
             </div>
 
@@ -160,7 +160,7 @@ const Profile = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="bg-white rounded-xl shadow-sm p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                        <FiBriefcase className="mr-2 text-blue-500" />
+                        <FiBriefcase className="mr-2 text-green-500" />
                         Department
                     </h3>
                     <p className="text-gray-700">{profileData.department?.name}</p>
@@ -188,7 +188,7 @@ const Profile = () => {
     if (loading) {
         return (
             <div className="flex justify-center items-center min-h-screen">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
             </div>
         );
     }
@@ -199,7 +199,7 @@ const Profile = () => {
             <div className="bg-white rounded-xl shadow-sm mb-6">
                 <div className="md:flex md:items-center md:justify-between p-6">
                     <div className="flex items-center">
-                        <div className="h-24 w-24 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
+                        <div className="h-24 w-24 rounded-full bg-gradient-to-r from-green-500 to-green-500 flex items-center justify-center">
                             <span className="text-3xl font-bold text-white">
                                 {profileData?.full_name?.charAt(0)}
                             </span>

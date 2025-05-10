@@ -1,9 +1,17 @@
 import axios from 'axios';
 import store from '../store';
 import { logout, refreshToken } from '../store/authSlice';
+import { API_BASE_URL } from '../config';
 
 const api = axios.create({
-    baseURL: 'http://localhost:8000/api'
+    baseURL: API_BASE_URL,
+    timeout: 10000, // 10 second timeout
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    // Add retry configuration
+    retry: 2,
+    retryDelay: 1000
 });
 
 let isRefreshing = false;
@@ -21,7 +29,7 @@ const processQueue = (error, token = null) => {
     failedQueue = [];
 };
 
-// Request interceptor - ONLY adds the current token to requests
+// Request interceptor - adds the current token to requests and handles request timeout
 api.interceptors.request.use(
     (config) => {
         const token = store.getState().auth.token;
@@ -40,6 +48,27 @@ api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
+
+        // Handle network errors gracefully
+        if (error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED') {
+            console.error('Network error detected:', error.message);
+            // You can dispatch a global notification here if needed
+            return Promise.reject({
+                ...error,
+                code: error.code, // Ensure error code is preserved
+                customMessage: 'Network connection issue detected. Please check your internet connection and try again.'
+            });
+        }
+
+        // Handle resource errors
+        if (error.code === 'ERR_INSUFFICIENT_RESOURCES') {
+            console.error('Resource error detected:', error.message);
+            return Promise.reject({
+                ...error,
+                code: error.code, // Ensure error code is preserved
+                customMessage: 'The server is experiencing high load. Please try again later.'
+            });
+        }
 
         // Skip token refresh for login and token endpoints
         const skipRefreshUrls = ['/token/', '/token/refresh/', '/token/blacklist/'];
@@ -69,7 +98,7 @@ api.interceptors.response.use(
                     throw new Error('No refresh token available');
                 }
 
-                const response = await axios.post('http://localhost:8000/api/token/refresh/', {
+                const response = await axios.post(`${API_BASE_URL}/token/refresh/`, {
                     refresh: refreshTokenValue
                 });
 

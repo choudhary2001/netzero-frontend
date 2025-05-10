@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaBuilding, FaCheckCircle, FaClock, FaChartLine, FaChartPie, FaUsers, FaUserPlus } from 'react-icons/fa';
+import { FaBuilding, FaCheckCircle, FaClock, FaChartLine, FaChartPie, FaUsers, FaUserPlus, FaSpinner } from 'react-icons/fa';
 import {
     LineChart,
     Line,
@@ -16,47 +16,64 @@ import {
     BarChart,
     Bar
 } from 'recharts';
-
-// Dummy Data
-const summaryData = {
-    totalCompanies: 58,
-    pendingApprovals: 5,
-    recentSubmissions: 12,
-    totalUsers: 12,
-};
-
-const submissionsData = [
-    { name: 'Jan', submissions: 4 },
-    { name: 'Feb', submissions: 8 },
-    { name: 'Mar', submissions: 5 },
-    { name: 'Apr', submissions: 11 },
-    { name: 'May', submissions: 9 },
-    { name: 'Jun', submissions: 15 },
-    { name: 'Jul', submissions: 12 },
-];
-
-const categoryData = [
-    { name: 'Environment', value: 400 },
-    { name: 'Social', value: 300 },
-    { name: 'Governance', value: 300 },
-    { name: 'Company Info', value: 200 },
-];
+import adminService from '../../services/adminService';
+import { toast } from 'react-toastify';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
-// Dummy recent activity data
-const recentActivities = [
-    { id: 1, user: 'supplier@example.com', action: 'submitted Environment data.', time: '2 hours ago' },
-    { id: 2, user: 'company.user@netzero.com', action: 'updated Company Info.', time: '5 hours ago' },
-    { id: 3, user: 'admin@gmail.com', action: 'approved Supplier registration.', time: '1 day ago' },
-    { id: 4, user: 'supplier.manager@ecocorp.com', action: 'submitted Social metrics.', time: '2 days ago' },
-    { id: 5, user: 'compliance.officer@green.com', action: 'requested data clarification.', time: '3 days ago' },
-];
-
 const AdminDashboard = () => {
+    const [loading, setLoading] = useState(true);
+    const [dashboardData, setDashboardData] = useState({
+        userCounts: {
+            total: 0,
+            admin: 0,
+            supplier: 0,
+            company: 0
+        },
+        pendingApprovals: 0,
+        recentSubmissions: 0,
+        submissionTrend: [],
+        categoryDistribution: [],
+        recentActivities: []
+    });
+
+    useEffect(() => {
+        fetchDashboardData();
+    }, []);
+
+    const fetchDashboardData = async () => {
+        try {
+            setLoading(true);
+            const response = await adminService.getDashboardSummary();
+            if (response.success) {
+                setDashboardData(response.data);
+            } else {
+                toast.error('Failed to fetch dashboard data');
+            }
+        } catch (error) {
+            console.error('Error fetching dashboard data:', error);
+            toast.error('Error loading dashboard data');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Show loading state
+    if (loading) {
+        return (
+            <div className="container mx-auto p-4">
+                <h1 className="text-3xl font-semibold text-gray-800 mb-6">Admin Dashboard</h1>
+                <div className="flex justify-center items-center h-64">
+                    <FaSpinner className="animate-spin text-green-600 text-4xl" />
+                    <p className="ml-2 text-gray-600">Loading dashboard data...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className='container'>
-            <div className='container'>
+            <div className='container mx-auto p-4'>
                 <h1 className="text-3xl font-semibold text-gray-800 mb-6">Admin Dashboard</h1>
 
                 {/* Summary Cards */}
@@ -64,25 +81,25 @@ const AdminDashboard = () => {
                     <DashboardCard
                         icon={<FaBuilding className="text-blue-500" size={24} />}
                         title="Total Companies"
-                        value={summaryData.totalCompanies}
+                        value={dashboardData.userCounts.company}
                         bgColor="bg-blue-50"
                     />
                     <DashboardCard
                         icon={<FaClock className="text-yellow-500" size={24} />}
                         title="Pending Approvals"
-                        value={summaryData.pendingApprovals}
+                        value={dashboardData.pendingApprovals}
                         bgColor="bg-yellow-50"
                     />
                     <DashboardCard
                         icon={<FaCheckCircle className="text-green-500" size={24} />}
                         title="Recent Submissions (Month)"
-                        value={summaryData.recentSubmissions}
+                        value={dashboardData.recentSubmissions}
                         bgColor="bg-green-50"
                     />
                     <DashboardCard
                         icon={<FaUsers className="text-purple-500" size={24} />}
                         title="Total Users"
-                        value={summaryData.totalUsers}
+                        value={dashboardData.userCounts.total}
                         bgColor="bg-purple-50"
                     />
                 </div>
@@ -95,7 +112,7 @@ const AdminDashboard = () => {
                             <FaChartLine className="mr-2 text-indigo-500" /> Submissions Trend (Last 6 Months)
                         </h2>
                         <ResponsiveContainer width="100%" height={300}>
-                            <LineChart data={submissionsData}>
+                            <LineChart data={dashboardData.submissionTrend}>
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="name" />
                                 <YAxis />
@@ -114,7 +131,7 @@ const AdminDashboard = () => {
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
                                 <Pie
-                                    data={categoryData}
+                                    data={dashboardData.categoryDistribution}
                                     cx="50%"
                                     cy="50%"
                                     labelLine={false}
@@ -123,7 +140,7 @@ const AdminDashboard = () => {
                                     dataKey="value"
                                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                                 >
-                                    {categoryData.map((entry, index) => (
+                                    {dashboardData.categoryDistribution.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                     ))}
                                 </Pie>
@@ -141,22 +158,20 @@ const AdminDashboard = () => {
                             <FaClock className="mr-2 text-gray-500" /> Recent Activity
                         </h2>
                         {/* Link to User Management */}
-                        <Link to="/admin/users" className="text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center">
+                        <Link to="/admin/user-management" className="text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center">
                             Manage Users <FaUsers className="ml-1" />
                         </Link>
                     </div>
                     {/* List of Activities */}
                     <div className="space-y-3">
-                        {recentActivities.map((activity) => (
+                        {dashboardData.recentActivities.length > 0 ? dashboardData.recentActivities.map((activity) => (
                             <div key={activity.id} className="border-t pt-3 text-sm text-gray-600 flex justify-between items-center">
                                 <div>
                                     <span className="font-medium text-gray-800">{activity.user}</span> {activity.action}
                                 </div>
                                 <span className="text-xs text-gray-400 whitespace-nowrap pl-2">{activity.time}</span>
                             </div>
-                        ))}
-                        {/* Placeholder if no activities */}
-                        {recentActivities.length === 0 && (
+                        )) : (
                             <p className="text-gray-500 text-center py-4">No recent activity to display.</p>
                         )}
                     </div>
