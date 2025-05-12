@@ -312,7 +312,7 @@ const GovernanceForm = () => {
                 />
                 <label
                     htmlFor={`${section}Certificate`}
-                    className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 border border-green-500 text-green-500 rounded-md hover:bg-green-500 hover:text-white cursor-pointer mr-2 sm:mr-3 text-sm sm:text-base"
+                    className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 border border-green-500 text-green-500 rounded-md hover:bg-green-500 hover:text-white cursor-pointer mr-2 sm:mr-3 text-sm sm:text-base transition-colors duration-200"
                 >
                     <FaCloudUploadAlt className="mr-2" />
                     Upload File
@@ -324,20 +324,41 @@ const GovernanceForm = () => {
                 <p className="text-xs text-gray-500 mt-1">
                     {description}
                 </p>
-                {
-                    formData[section].points > 0 && (
-                        <p>
-                            Rating: {formData[section].points.toFixed(2)}/1
-                        </p>
-                    )
-                }
-                {
-                    formData[section].remarks && (
-                        <p>
-                            Remarks: {formData[section].remarks}
-                        </p>
-                    )
-                }
+
+                {/* Rating and Remarks Container */}
+                {formData[section].points > 0 && (
+                    <div className="mt-4 space-y-3 bg-gray-50 rounded-lg p-4 border border-gray-100">
+                        {formData[section].points > 0 && (
+                            <div className="flex items-center space-x-2">
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <span className="text-sm font-medium text-gray-700">Rating</span>
+                                        <span className="text-sm font-semibold text-green-600">{formData[section].points.toFixed(2)}/1</span>
+                                    </div>
+                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                        <div
+                                            className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                                            style={{ width: `${Math.min(formData[section].points * 100, 100)}%` }}
+                                        ></div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {formData[section].remarks && (
+                            <div className="border-t border-gray-200 pt-3">
+                                <div className="flex items-start space-x-2">
+                                    <div className="flex-1">
+                                        <span className="text-sm font-medium text-gray-700 block mb-1">Remarks</span>
+                                        <p className="text-sm text-gray-600 bg-white p-3 rounded-md border border-gray-200 shadow-sm">
+                                            {formData[section].remarks}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );

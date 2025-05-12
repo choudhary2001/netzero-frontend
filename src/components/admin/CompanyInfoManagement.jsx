@@ -53,7 +53,7 @@ const CompanyInfoManagement = () => {
     const handleViewCompany = (company) => {
         setSelectedCompany(company);
         setViewMode('details');
-        console.log('company', company);
+        console.log('company', company.companyInfo);
         // Initialize document rating and remarks based on company data
         if (company) {
             const docs = {};
@@ -453,9 +453,76 @@ const CompanyInfoManagement = () => {
 
         const documentPath = companyDocuments[currentDocKey].path;
         const fullDocumentUrl = getMediaUrl(documentPath);
+        const documentData = companyDocuments[currentDocKey];
+
+        // Helper function to get unit based on document key
+        const getUnit = (key) => {
+            if (key.includes('renewableEnergy')) return 'kWh/month';
+            if (key.includes('waterConsumption')) return 'm³/month';
+            if (key.includes('rainwaterHarvesting')) return 'm³/year';
+            if (key.includes('emissionControl')) return 'tons/year';
+            if (key.includes('resourceConservation')) return '%';
+            return '';
+        };
 
         return (
             <div className="space-y-6">
+
+
+                {/* Document Preview */}
+                <div className="bg-white p-4 rounded-md border border-gray-300">
+                    {documentPath ? (
+                        documentPath.endsWith('.pdf') ? (
+                            <iframe
+                                src={fullDocumentUrl}
+                                className="w-full h-[70vh] rounded border border-gray-200"
+                                title="Document Preview"
+                            />
+                        ) : documentPath.match(/\.(jpg|jpeg|png|gif)$/i) ? (
+                            <img
+                                src={fullDocumentUrl}
+                                alt="Document Preview"
+                                className="max-w-full h-auto max-h-96 mx-auto"
+                            />
+                        ) : (
+                            <div className="bg-gray-800 p-4 rounded-md text-center text-white">
+                                <p>Document Preview Not Available</p>
+                                <p className="text-sm text-gray-400 mt-2">
+                                    The document format is not supported for preview.
+                                </p>
+                                <a
+                                    href={fullDocumentUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-400 hover:text-blue-300 mt-2 inline-block"
+                                >
+                                    Open Document
+                                </a>
+                            </div>
+                        )
+                    ) : (
+                        <div className="bg-gray-800 p-4 rounded-md text-center text-white">
+                            <p>No Document Available</p>
+                        </div>
+                    )}
+
+                    {/* Value and Unit Display */}
+                    {documentData.value && (
+                        <div className="mt-4 p-4 bg-gray-50 rounded-md">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h5 className="text-sm font-medium text-gray-700">Reported Value</h5>
+                                    <p className="text-lg font-semibold text-gray-900">
+                                        {documentData.value} {getUnit(currentDocKey)}
+                                    </p>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    )}
+                </div>
+
                 <div className="bg-gray-50 p-4 rounded-md">
                     <h3 className="text-lg font-medium text-gray-900 mb-4">Document Review</h3>
 
@@ -511,44 +578,6 @@ const CompanyInfoManagement = () => {
                             <FaSave className="mr-2" /> Save Rating & Remarks
                         </button>
                     </div>
-                </div>
-
-                {/* Document Preview */}
-                <div className="bg-white p-4 rounded-md border border-gray-300">
-                    {documentPath ? (
-                        documentPath.endsWith('.pdf') ? (
-                            <iframe
-                                src={fullDocumentUrl}
-                                className="w-full h-96 rounded border border-gray-200"
-                                title="Document Preview"
-                            />
-                        ) : documentPath.match(/\.(jpg|jpeg|png|gif)$/i) ? (
-                            <img
-                                src={fullDocumentUrl}
-                                alt="Document Preview"
-                                className="max-w-full h-auto max-h-96 mx-auto"
-                            />
-                        ) : (
-                            <div className="bg-gray-800 p-4 rounded-md text-center text-white">
-                                <p>Document Preview Not Available</p>
-                                <p className="text-sm text-gray-400 mt-2">
-                                    The document format is not supported for preview.
-                                </p>
-                                <a
-                                    href={fullDocumentUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-400 hover:text-blue-300 mt-2 inline-block"
-                                >
-                                    Open Document
-                                </a>
-                            </div>
-                        )
-                    ) : (
-                        <div className="bg-gray-800 p-4 rounded-md text-center text-white">
-                            <p>No Document Available</p>
-                        </div>
-                    )}
                 </div>
             </div>
         );

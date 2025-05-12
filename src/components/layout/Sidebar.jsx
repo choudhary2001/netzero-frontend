@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -24,12 +24,80 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 import { logout as logoutAction } from '../../store/authSlice';
 import authService from '../../services/authService';
+import api from '../../services/api';
+import socketService from '../../services/socketService';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Initial fetch of unread count
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await api.get('/chat/unread');
+      if (response.data && response.data.totalUnread !== undefined) {
+        console.log('Fetched unread count:', response.data.totalUnread);
+        setUnreadCount(response.data.totalUnread);
+      }
+    } catch (error) {
+      console.error('Error fetching unread count:', error);
+    }
+  };
+
+  // Set up socket connection and unread count handling
+  useEffect(() => {
+    socketService.connect();
+    // Fetch initially
+    fetchUnreadCount();
+
+    // Set up socket event handlers for unread counts
+    const unsubscribeMessage = socketService.onMessage(async (message) => {
+      console.log('Message received in sidebar:', message);
+      // Update unread count based on the message
+      if (message.unreadCount !== undefined) {
+        console.log('Updating unread count from message:', message.unreadCount);
+        setUnreadCount(message.unreadCount);
+      } else {
+        // If unread count not in message, fetch it
+        fetchUnreadCount();
+      }
+    });
+
+    const unsubscribeConversationUpdate = socketService.onConversationUpdate(async (data) => {
+      console.log('Conversation update in sidebar:', data);
+      // Update unread count based on the conversation update
+      if (data.conversation && data.conversation.unreadCount !== undefined) {
+        const totalUnread = data.conversation.unreadCount[user?.role] || 0;
+        console.log('Updating unread count from conversation:', totalUnread);
+        setUnreadCount(totalUnread);
+      } else {
+        // If unread count not in update, fetch it
+        fetchUnreadCount();
+      }
+    });
+
+    // Cleanup on unmount
+    return () => {
+      unsubscribeMessage();
+      unsubscribeConversationUpdate();
+      socketService.disconnect();
+    };
+  }, [user?.role]);
+
+  // Fetch unread message count
+  useEffect(() => {
+    // Fetch initially
+    fetchUnreadCount();
+
+    // Set up polling every 30 seconds
+    const interval = setInterval(fetchUnreadCount, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
 
   // Close sidebar on route change for mobile
   useEffect(() => {
@@ -103,7 +171,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           {
             name: 'Chat',
             path: '/admin/chat',
-            icon: <FiMessageSquare className="h-5 w-5" />
+            icon: <FiMessageSquare className="h-5 w-5" />,
+            badge: unreadCount > 0 ? unreadCount : null
           },
 
         ];
@@ -182,7 +251,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           {
             name: 'Message',
             path: '/supplier/chat',
-            icon: <FiMessageSquare className="h-5 w-5" />
+            icon: <FiMessageSquare className="h-5 w-5" />,
+            badge: unreadCount > 0 ? unreadCount : null
           },
           {
             name: 'Help & Support',
@@ -261,7 +331,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                     `}
                   >
                     {item.icon}
-                    <span className="ml-3">{item.name}</span>
+                    <span className="ml-3 flex-1">{item.name}</span>
+                    {item.badge && (
+                      <span className="ml-2 bg-green-500 text-white text-xs font-medium px-2 py-0.5 rounded-full">
+                        {item.badge}
+                      </span>
+                    )}
                   </Link>
                 ))}
               </div>

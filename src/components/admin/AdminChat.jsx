@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import adminService from '../../services/adminService';
+import socketService from '../../services/socketService';
 import { useAuth } from '../../hooks/useAuth';
 
 const AdminChat = () => {
@@ -12,61 +13,70 @@ const AdminChat = () => {
     const [error, setError] = useState(null);
     const [suppliers, setSuppliers] = useState([]);
     const messagesEndRef = useRef(null);
-    const [pollingInterval, setPollingInterval] = useState(null);
-    const [retryCount, setRetryCount] = useState(0);
-    const maxRetries = 5;
     const [isBackendAvailable, setIsBackendAvailable] = useState(true);
 
-    // Fetch all conversations on component mount
+    // Connect to socket on component mount
     useEffect(() => {
-        fetchConversations();
-        fetchSuppliers();
+        socketService.connect();
 
-        // Set up polling with exponential backoff
-        // const interval = setInterval(() => {
-        //     if (isBackendAvailable) {
-        //         if (selectedConversation && retryCount < maxRetries) {
-        //             fetchMessages(selectedConversation._id);
-        //         }
-        //         if (retryCount < maxRetries) {
-        //             fetchConversations();
-        //         }
-        //     }
-        // }, 50000 + (retryCount * 1000)); // Using 50 seconds as base polling interval
-
-        // setPollingInterval(interval);
-
-        // return () => {
-        //     if (pollingInterval) clearInterval(pollingInterval);
-        // };
-    }, [pollingInterval, selectedConversation, retryCount, isBackendAvailable]);
-
-    // Scroll to bottom whenever messages change
-    // useEffect(() => {
-    //     scrollToBottom();
-    // }, [messages]);
-
-    // Fetch messages when selected conversation changes
-    useEffect(() => {
-        let intervalId;
-
-        if (selectedConversation && isBackendAvailable) {
-            // Fetch immediately
-            fetchMessages(selectedConversation._id);
-
-            // Then set up the interval
-            intervalId = setInterval(() => {
+        // Set up socket event handlers
+        const unsubscribeMessage = socketService.onMessage((message) => {
+            if (selectedConversation && message.conversationId === selectedConversation?._id) {
+                setMessages(prev => [...prev, message]);
                 fetchMessages(selectedConversation._id);
-            }, 10000);
-        }
+                scrollToBottom();
+            }
+            fetchMessages(message.conversationId);
+            scrollToBottom();
+            fetchConversations();
+        });
 
-        // Cleanup interval on dependency change or unmount
+        const unsubscribeConnect = socketService.onConnect(() => {
+            setIsBackendAvailable(true);
+            if (selectedConversation) {
+                socketService.joinConversation(selectedConversation._id);
+                fetchMessages(selectedConversation._id);
+            }
+        });
+
+        const unsubscribeDisconnect = socketService.onDisconnect(() => {
+            setIsBackendAvailable(false);
+        });
+
+        // Cleanup on unmount
         return () => {
-            if (intervalId) {
-                clearInterval(intervalId);
+            unsubscribeMessage();
+            unsubscribeConnect();
+            unsubscribeDisconnect();
+            if (selectedConversation) {
+                socketService.leaveConversation(selectedConversation._id);
+                fetchConversations();
+                fetchMessages(selectedConversation._id);
+            }
+            socketService.disconnect();
+        };
+    }, []);
+
+    // Handle conversation selection
+    useEffect(() => {
+        if (selectedConversation) {
+            // Leave previous conversation room if any
+            if (socketService.isConnected()) {
+                socketService.joinConversation(selectedConversation._id);
+            }
+            fetchMessages(selectedConversation._id);
+        }
+        return () => {
+            if (selectedConversation && socketService.isConnected()) {
+                socketService.leaveConversation(selectedConversation._id);
             }
         };
-    }, [selectedConversation, isBackendAvailable]);
+    }, [selectedConversation]);
+
+    // Scroll to bottom whenever messages change
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -76,19 +86,15 @@ const AdminChat = () => {
         try {
             setLoading(true);
             const data = await adminService.getChats();
+            console.log(data);
             if (data && data.conversations) {
                 setConversations(data.conversations);
-                setRetryCount(0); // Reset retry count on success
                 setIsBackendAvailable(true);
             }
         } catch (err) {
             console.error('Error fetching conversations:', err);
             setError('Failed to load conversations. The server might be unavailable.');
-            setRetryCount(prev => Math.min(prev + 1, maxRetries)); // Increment retry count
-
-            if (err.code === 'ERR_NETWORK' || err.code === 'ERR_INSUFFICIENT_RESOURCES') {
-                setIsBackendAvailable(false);
-            }
+            setIsBackendAvailable(false);
         } finally {
             setLoading(false);
         }
@@ -99,39 +105,34 @@ const AdminChat = () => {
 
         try {
             const response = await adminService.getAllSuppliers();
+            console.log(response);
             if (response) {
                 setSuppliers(response.suppliers || []);
-                setRetryCount(0); // Reset retry count on success
             }
         } catch (err) {
             console.error('Failed to load suppliers:', err);
-            // Don't increment retry count for this non-critical operation
         }
     };
+
+    useEffect(() => {
+        fetchSuppliers();
+        fetchConversations();
+    }, []);
 
     const fetchMessages = async (conversationId) => {
         if (!conversationId || !isBackendAvailable) return;
 
         try {
-            // setLoading(true);
             const data = await adminService.getChat(conversationId);
             if (data && data.messages) {
                 setMessages(data.messages);
-                setRetryCount(0); // Reset retry count on success
-                // Mark messages as read
                 await adminService.markMessagesAsRead(conversationId);
                 setIsBackendAvailable(true);
             }
         } catch (err) {
             console.error('Error fetching messages:', err);
             setError('Failed to load messages. The server might be unavailable.');
-            setRetryCount(prev => Math.min(prev + 1, maxRetries)); // Increment retry count
-
-            if (err.code === 'ERR_NETWORK' || err.code === 'ERR_INSUFFICIENT_RESOURCES') {
-                setIsBackendAvailable(false);
-            }
-        } finally {
-            setLoading(false);
+            setIsBackendAvailable(false);
         }
     };
 
@@ -140,17 +141,13 @@ const AdminChat = () => {
         if (!messageInput.trim() || !selectedConversation || !isBackendAvailable) return;
 
         try {
-            await adminService.sendMessage(selectedConversation._id, messageInput);
+            // Send message through socket
+            socketService.sendMessage(selectedConversation._id, messageInput);
             setMessageInput('');
-            // Fetch updated messages
-            fetchMessages(selectedConversation._id);
         } catch (err) {
             console.error('Error sending message:', err);
             setError('Failed to send message. The server might be unavailable.');
-
-            if (err.code === 'ERR_NETWORK' || err.code === 'ERR_INSUFFICIENT_RESOURCES') {
-                setIsBackendAvailable(false);
-            }
+            setIsBackendAvailable(false);
         }
     };
 
@@ -214,7 +211,6 @@ const AdminChat = () => {
                         <button
                             onClick={() => {
                                 setIsBackendAvailable(true);
-                                setRetryCount(0);
                                 fetchConversations();
                             }}
                             className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
@@ -249,9 +245,11 @@ const AdminChat = () => {
                     </div>
 
                     {/* Conversation list */}
-                    <div className="overflow-y-auto h-full">
+                    <div className="overflow-y-auto h-[calc(100vh-200px)]">
                         {loading && conversations.length === 0 ? (
                             <div className="p-4 text-center text-gray-500">Loading...</div>
+                        ) : conversations.length === 0 ? (
+                            <div className="p-4 text-center text-gray-500">No conversations yet</div>
                         ) : (
                             <>
                                 {conversations.map((conv) => (
@@ -261,7 +259,6 @@ const AdminChat = () => {
                                             }`}
                                         onClick={() => {
                                             setSelectedConversation(conv);
-                                            fetchMessages(conv._id);
                                         }}
                                     >
                                         <div className="flex justify-between items-center">
@@ -286,26 +283,6 @@ const AdminChat = () => {
                                         )}
                                     </div>
                                 ))}
-
-                                {/* New conversation dropdown */}
-                                {/* <div className="p-3">
-                                    <p className="text-sm font-medium mb-2">Start new conversation</p>
-                                    <select
-                                        className="w-full p-2 border rounded"
-                                        onChange={(e) => {
-                                            if (e.target.value) startNewConversation(e.target.value);
-                                        }}
-                                        value=""
-                                        disabled={loading}
-                                    >
-                                        <option value="">Select a supplier</option>
-                                        {getAvailableSuppliers().map((supplier) => (
-                                            <option key={supplier._id} value={supplier._id}>
-                                                {supplier.name || supplier.email}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div> */}
                             </>
                         )}
                     </div>
@@ -326,7 +303,7 @@ const AdminChat = () => {
                             </div>
 
                             {/* Messages */}
-                            <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+                            <div className="flex-1 overflow-y-auto p-4 bg-gray-50" style={{ height: 'calc(100vh - 280px)' }}>
                                 {loading && messages.length === 0 ? (
                                     <div className="text-center text-gray-500 mt-4">
                                         Loading messages...
@@ -336,33 +313,34 @@ const AdminChat = () => {
                                         No messages yet. Start the conversation!
                                     </div>
                                 ) : (
-                                    messages.map((msg, index) => {
-                                        const isFromAdmin = msg.sender === user?._id;
-                                        return (
-                                            <div
-                                                key={index}
-                                                className={`mb-4 flex ${isFromAdmin ? 'justify-end' : 'justify-start'
-                                                    }`}
-                                            >
+                                    <div className="space-y-4">
+                                        {messages.map((msg, index) => {
+                                            const isFromAdmin = msg.sender === user?._id;
+                                            return (
                                                 <div
-                                                    className={`max-w-[70%] rounded-lg p-3 ${isFromAdmin
-                                                        ? 'bg-green-500 text-white rounded-br-none'
-                                                        : 'bg-white border rounded-bl-none'
-                                                        }`}
+                                                    key={index}
+                                                    className={`flex ${isFromAdmin ? 'justify-end' : 'justify-start'}`}
                                                 >
-                                                    <p>{msg.content}</p>
-                                                    <p
-                                                        className={`text-xs mt-1 ${isFromAdmin ? 'text-green-100' : 'text-gray-400'
+                                                    <div
+                                                        className={`max-w-[70%] rounded-lg p-3 ${isFromAdmin
+                                                            ? 'bg-green-500 text-white rounded-br-none'
+                                                            : 'bg-white border rounded-bl-none'
                                                             }`}
                                                     >
-                                                        {formatDate(msg.timestamp)}
-                                                    </p>
+                                                        <p>{msg.content}</p>
+                                                        <p
+                                                            className={`text-xs mt-1 ${isFromAdmin ? 'text-green-100' : 'text-gray-400'
+                                                                }`}
+                                                        >
+                                                            {formatDate(msg.timestamp)}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        );
-                                    })
+                                            );
+                                        })}
+                                        <div ref={messagesEndRef} />
+                                    </div>
                                 )}
-                                <div ref={messagesEndRef} />
                             </div>
 
                             {/* Message input */}

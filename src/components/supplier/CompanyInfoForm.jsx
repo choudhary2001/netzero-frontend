@@ -362,13 +362,41 @@ const CompanyInfoForm = () => {
                                 </p>
                                 {
                                     formData.points > 0 && (
-                                        <p>
-                                            Rating: {formData.points.toFixed(2)}/1
-                                            <br />
-                                            Remarks: {formData.remarks}
-                                        </p>
+                                        <div className="mt-4 space-y-3 bg-gray-50 rounded-lg p-4 border border-gray-100">
+                                            {formData.points > 0 && (
+                                                <div className="flex items-center space-x-2">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center justify-between mb-1">
+                                                            <span className="text-sm font-medium text-gray-700">Rating</span>
+                                                            <span className="text-sm font-semibold text-green-600">{formData.points.toFixed(2)}/1</span>
+                                                        </div>
+                                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                                            <div
+                                                                className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                                                                style={{ width: `${Math.min(formData.points * 100, 100)}%` }}
+                                                            ></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {formData.remarks && (
+                                                <div className="border-t border-gray-200 pt-3">
+                                                    <div className="flex items-start space-x-2">
+                                                        <div className="flex-1">
+                                                            <span className="text-sm font-medium text-gray-700 block mb-1">Remarks</span>
+                                                            <p className="text-sm text-gray-600 bg-white p-3 rounded-md border border-gray-200 shadow-sm">
+                                                                {formData.remarks}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
                                     )
                                 }
+
+
                             </div>
                         </div>
                     </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import supplierService from '../../services/supplierService';
+import socketService from '../../services/socketService';
 
 // Import services
 import api from '../../services/api';
@@ -15,64 +16,107 @@ const SupplierChat = () => {
     const [error, setError] = useState(null);
     const [admins, setAdmins] = useState([]);
     const messagesEndRef = useRef(null);
-    const [pollingInterval, setPollingInterval] = useState(null);
-    const [retryCount, setRetryCount] = useState(0);
-    const maxRetries = 5;
     const [isBackendAvailable, setIsBackendAvailable] = useState(true);
 
-    // Fetch all conversations on component mount
+    // Connect to socket on component mount
     useEffect(() => {
+        socketService.connect();
+
+        // Set up socket event handlers
+        const unsubscribeMessage = socketService.onMessage(async (message) => {
+            console.log('Received message:', message);
+            // Always update messages if it's for the current conversation
+            console.log('Selected conversation:', selectedConversation, message.conversationId, message.conversationId === selectedConversation?._id);
+            if (selectedConversation && message.conversationId === selectedConversation._id) {
+                // Fetch latest messages to ensure we have the complete conversation
+                try {
+                    const data = await supplierService.getChat(selectedConversation._id);
+                    if (data && data.messages) {
+                        setMessages(data.messages);
+                        // Mark messages as read
+                        await supplierService.markMessagesAsRead(selectedConversation._id);
+                    }
+                } catch (err) {
+                    console.error('Error fetching messages after new message:', err);
+                }
+                scrollToBottom();
+            }
+            fetchMessages(message.conversationId);
+            fetchConversations();
+            scrollToBottom();
+        });
+
+        const unsubscribeConversationUpdate = socketService.onConversationUpdate((data) => {
+            console.log('Received conversation update:', data);
+            // Update the conversation in the list
+            setConversations(prev =>
+                prev.map(conv =>
+                    conv._id === data.conversation._id ? data.conversation : conv
+                )
+            );
+            // If this is the current conversation, update it and fetch latest messages
+            if (selectedConversation && selectedConversation._id === data.conversation._id) {
+                setSelectedConversation(data.conversation);
+                fetchMessages(data.conversation._id);
+            }
+        });
+
+        const unsubscribeConnect = socketService.onConnect(() => {
+            console.log('Socket connected'); // Debug log
+            setIsBackendAvailable(true);
+            if (selectedConversation) {
+                socketService.joinConversation(selectedConversation._id);
+                fetchMessages(selectedConversation._id);
+            }
+        });
+
+        const unsubscribeDisconnect = socketService.onDisconnect(() => {
+            console.log('Socket disconnected'); // Debug log
+            setIsBackendAvailable(false);
+        });
+
+        // Initial data fetch
         fetchConversations();
         fetchAdmins();
 
-        // Set up polling with a higher initial interval to reduce server load
-        // const interval = setInterval(() => {
-        //     if (isBackendAvailable) {
-        //         if (selectedConversation && retryCount < maxRetries) {
-        //             fetchMessages(selectedConversation._id);
-        //         }
-        //         if (retryCount < maxRetries) {
-        //             fetchConversations();
-        //         }
-        //     }
-        // }, 50000 + (retryCount * 1000)); // Using 50 seconds as base polling interval
-
-        // setPollingInterval(interval);
-
-        // return () => {
-        //     if (pollingInterval) clearInterval(pollingInterval);
-        // };
-        if (selectedConversation && isBackendAvailable) {
-            fetchMessages(selectedConversation._id);
-        }
+        // Cleanup on unmount
+        return () => {
+            unsubscribeMessage();
+            unsubscribeConversationUpdate();
+            unsubscribeConnect();
+            unsubscribeDisconnect();
+            if (selectedConversation) {
+                socketService.leaveConversation(selectedConversation._id);
+                fetchConversations();
+                fetchMessages(selectedConversation._id);
+            }
+            socketService.disconnect();
+        };
     }, []);
 
-    // Scroll to bottom whenever messages change
-    // useEffect(() => {
-    //     scrollToBottom();
-    // }, [messages]);
-
-    // Fetch messages when selected conversation changes
+    // Handle conversation selection
     useEffect(() => {
-        let intervalId;
-
-        if (selectedConversation && isBackendAvailable) {
-            // Fetch immediately
+        if (selectedConversation) {
+            console.log('Joining conversation:', selectedConversation._id);
+            // Leave previous conversation room if any
+            if (socketService.isConnected()) {
+                socketService.joinConversation(selectedConversation._id);
+            }
+            // Fetch messages when conversation is selected
             fetchMessages(selectedConversation._id);
-
-            // Then set up the interval
-            intervalId = setInterval(() => {
-                fetchMessages(selectedConversation._id);
-            }, 10000);
         }
-
-        // Cleanup interval on dependency change or unmount
         return () => {
-            if (intervalId) {
-                clearInterval(intervalId);
+            if (selectedConversation && socketService.isConnected()) {
+                console.log('Leaving conversation:', selectedConversation._id);
+                socketService.leaveConversation(selectedConversation._id);
             }
         };
-    }, [selectedConversation, isBackendAvailable]);
+    }, [selectedConversation]);
+
+    // Scroll to bottom whenever messages change
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -84,19 +128,12 @@ const SupplierChat = () => {
             const data = await supplierService.getChats();
             if (data && data.conversations) {
                 setConversations(data.conversations);
-                // Reset retry count on success
-                setRetryCount(0);
                 setIsBackendAvailable(true);
             }
         } catch (err) {
             console.error('Error fetching conversations:', err);
             setError('Failed to load conversations. The server might be unavailable.');
-            // Increment retry count on failure
-            setRetryCount(prev => Math.min(prev + 1, maxRetries));
-
-            if (err.code === 'ERR_NETWORK' || err.code === 'ERR_INSUFFICIENT_RESOURCES') {
-                setIsBackendAvailable(false);
-            }
+            setIsBackendAvailable(false);
         } finally {
             setLoading(false);
         }
@@ -106,12 +143,10 @@ const SupplierChat = () => {
         if (!isBackendAvailable) return;
 
         try {
-            // Use the proper service method
             const response = await supplierService.getAdminUsers();
             setAdmins(response || []);
         } catch (err) {
             console.error('Failed to load admins:', err);
-            // Don't set isBackendAvailable to false for this non-critical operation
         }
     };
 
@@ -119,12 +154,10 @@ const SupplierChat = () => {
         if (!conversationId || !isBackendAvailable) return;
 
         try {
-            // setLoading(true);
+            setLoading(true);
             const data = await supplierService.getChat(conversationId);
             if (data && data.messages) {
                 setMessages(data.messages);
-                // Reset retry count on success
-                setRetryCount(0);
                 // Mark messages as read
                 await supplierService.markMessagesAsRead(conversationId);
                 setIsBackendAvailable(true);
@@ -132,12 +165,7 @@ const SupplierChat = () => {
         } catch (err) {
             console.error('Error fetching messages:', err);
             setError('Failed to load messages. The server might be unavailable.');
-            // Increment retry count on failure
-            setRetryCount(prev => Math.min(prev + 1, maxRetries));
-
-            if (err.code === 'ERR_NETWORK' || err.code === 'ERR_INSUFFICIENT_RESOURCES') {
-                setIsBackendAvailable(false);
-            }
+            setIsBackendAvailable(false);
         } finally {
             setLoading(false);
         }
@@ -148,17 +176,21 @@ const SupplierChat = () => {
         if (!messageInput.trim() || !selectedConversation || !isBackendAvailable) return;
 
         try {
-            await supplierService.sendMessage(selectedConversation._id, messageInput);
+            console.log('Sending message to conversation:', selectedConversation._id);
+            // Send message through socket
+            socketService.sendMessage(selectedConversation._id, messageInput);
             setMessageInput('');
-            // Fetch updated messages
-            fetchMessages(selectedConversation._id);
+
+            // Fetch latest messages after sending
+            const data = await supplierService.getChat(selectedConversation._id);
+            if (data && data.messages) {
+                setMessages(data.messages);
+                scrollToBottom();
+            }
         } catch (err) {
             console.error('Error sending message:', err);
             setError('Failed to send message. The server might be unavailable.');
-
-            if (err.code === 'ERR_NETWORK' || err.code === 'ERR_INSUFFICIENT_RESOURCES') {
-                setIsBackendAvailable(false);
-            }
+            setIsBackendAvailable(false);
         }
     };
 
@@ -212,7 +244,6 @@ const SupplierChat = () => {
                         <button
                             onClick={() => {
                                 setIsBackendAvailable(true);
-                                setRetryCount(0);
                                 fetchConversations();
                             }}
                             className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
@@ -250,9 +281,11 @@ const SupplierChat = () => {
                         </div>
 
                         {/* Conversation list */}
-                        <div className="overflow-y-auto h-full">
+                        <div className="overflow-y-auto h-[calc(100vh-200px)]">
                             {loading && conversations.length === 0 ? (
                                 <div className="p-4 text-center text-gray-500">Loading...</div>
+                            ) : conversations.length === 0 ? (
+                                <div className="p-4 text-center text-gray-500">No conversations yet</div>
                             ) : (
                                 <>
                                     {conversations.map((conv) => (
@@ -261,9 +294,14 @@ const SupplierChat = () => {
                                             className={`p-3 border-b cursor-pointer hover:bg-gray-100 ${selectedConversation?._id === conv._id ? 'bg-green-50' : ''
                                                 }`}
                                             onClick={() => {
-                                                setSelectedConversation(conv);
-                                                fetchMessages(conv._id);
+                                                if (!selectedConversation || selectedConversation._id !== conv._id) {
+                                                    setSelectedConversation(conv);
+                                                } else {
+                                                    // Optionally handle reselecting the same conversation
+                                                    console.log('Already selected');
+                                                }
                                             }}
+
                                         >
                                             <div className="flex justify-between items-center">
                                                 <div>
@@ -294,7 +332,7 @@ const SupplierChat = () => {
                 )}
 
                 {/* Chat area */}
-                <div className="flex-1 flex flex-col">
+                <div className={`flex-1 flex flex-col ${!hasAdminConversation ? 'w-full' : ''}`}>
                     {selectedConversation ? (
                         <>
                             {/* Chat header */}
@@ -308,7 +346,7 @@ const SupplierChat = () => {
                             </div>
 
                             {/* Messages */}
-                            <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+                            <div className="flex-1 overflow-y-auto p-4 bg-gray-50" style={{ height: 'calc(100vh - 280px)' }}>
                                 {loading && messages.length === 0 ? (
                                     <div className="text-center text-gray-500 mt-4">
                                         Loading messages...
@@ -318,34 +356,34 @@ const SupplierChat = () => {
                                         No messages yet. Start the conversation!
                                     </div>
                                 ) : (
-                                    messages.map((msg, index) => {
-                                        console.log(msg.sender, user?._id);
-                                        const isFromSupplier = msg.sender === user?._id;
-                                        return (
-                                            <div
-                                                key={index}
-                                                className={`mb-4 flex ${isFromSupplier ? 'justify-end' : 'justify-start'
-                                                    }`}
-                                            >
+                                    <div className="space-y-4">
+                                        {messages.map((msg, index) => {
+                                            const isFromSupplier = msg.sender === user?._id;
+                                            return (
                                                 <div
-                                                    className={`max-w-[70%] rounded-lg p-3 ${isFromSupplier
-                                                        ? 'bg-green-500 text-white rounded-br-none'
-                                                        : 'bg-white border rounded-bl-none'
-                                                        }`}
+                                                    key={index}
+                                                    className={`flex ${isFromSupplier ? 'justify-end' : 'justify-start'}`}
                                                 >
-                                                    <p>{msg.content}</p>
-                                                    <p
-                                                        className={`text-xs mt-1 ${isFromSupplier ? 'text-green-100' : 'text-gray-400'
+                                                    <div
+                                                        className={`max-w-[70%] rounded-lg p-3 ${isFromSupplier
+                                                            ? 'bg-green-500 text-white rounded-br-none'
+                                                            : 'bg-white border rounded-bl-none'
                                                             }`}
                                                     >
-                                                        {formatDate(msg.timestamp)}
-                                                    </p>
+                                                        <p>{msg.content}</p>
+                                                        <p
+                                                            className={`text-xs mt-1 ${isFromSupplier ? 'text-green-100' : 'text-gray-400'
+                                                                }`}
+                                                        >
+                                                            {formatDate(msg.timestamp)}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        );
-                                    })
+                                            );
+                                        })}
+                                        <div ref={messagesEndRef} />
+                                    </div>
                                 )}
-                                <div ref={messagesEndRef} />
                             </div>
 
                             {/* Message input */}
@@ -379,8 +417,6 @@ const SupplierChat = () => {
                                         <p className="mb-4">Start a conversation with our support team to get help with your questions.</p>
                                         <button
                                             onClick={() => {
-                                                // For simplicity, we'll just start a conversation with the first admin
-                                                // In a real app, you'd want a proper selection process or a dedicated support account
                                                 if (admins.length > 0) {
                                                     startNewConversation(admins[0]._id);
                                                 } else {

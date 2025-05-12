@@ -98,7 +98,7 @@ const adminService = {
     // Update company info remarks
     updateCompanyInfoRemarks: async (esgDataId, rating, remarks) => {
         try {
-            const response = await api.post('/company-info', {
+            const response = await api.post('/company-info/rating', {
                 esgDataId,
                 rating,
                 remarks

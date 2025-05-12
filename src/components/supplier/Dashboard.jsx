@@ -156,7 +156,9 @@ const Dashboard = () => {
     const DonutChart = ({ percentage, color, size = 120, strokeWidth = 8 }) => {
         const radius = (size - strokeWidth) / 2;
         const circumference = 2 * Math.PI * radius;
-        const strokeDashoffset = circumference - (percentage / 1) * circumference;
+        // Convert score from 0-1 to percentage (0-100)
+        const scorePercentage = Math.round(percentage * 100);
+        const strokeDashoffset = circumference - (scorePercentage / 100) * circumference;
 
         return (
             <div className="relative" style={{ width: size, height: size }}>
@@ -182,7 +184,7 @@ const Dashboard = () => {
                     />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-2xl font-bold">{percentage}%</span>
+                    <span className="text-2xl font-bold">{scorePercentage}%</span>
                 </div>
             </div>
         );
@@ -315,26 +317,31 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* ESG Score Cards */}
+            {/* ESG Scores Section */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
                     <h3 className="font-medium text-gray-500 mb-2">Overall ESG Score</h3>
-                    <DonutChart percentage={esgScores.overall} color="#10B981" />
+                    <DonutChart
+                        percentage={esgScores.overall}
+                        color="#10B981"
+                        size={140}
+                    />
                     <div className="mt-4 text-center">
                         <p className="text-sm text-gray-500">Your overall sustainability rating</p>
-                    </div>
-                    <div className="mt-auto pt-4">
-                        <Link to="/supplier/company-info" className="text-green-600 hover:text-green-800 text-sm font-medium">
-                            View Details →
-                        </Link>
+                        <p className="text-xs text-gray-400 mt-1">Score range: 0-1</p>
                     </div>
                 </div>
 
                 <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
                     <h3 className="font-medium text-gray-500 mb-2">Environment</h3>
-                    <DonutChart percentage={esgScores.environmental} color="#047857" />
+                    <DonutChart
+                        percentage={esgScores.environmental}
+                        color="#047857"
+                        size={140}
+                    />
                     <div className="mt-4 text-center">
                         <p className="text-sm text-gray-500">Carbon footprint & sustainability</p>
+                        <p className="text-xs text-gray-400 mt-1">Score range: 0-1</p>
                     </div>
                     <div className="mt-auto pt-4">
                         <Link to="/supplier/environment" className="text-green-600 hover:text-green-800 text-sm font-medium">
@@ -345,9 +352,14 @@ const Dashboard = () => {
 
                 <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
                     <h3 className="font-medium text-gray-500 mb-2">Social</h3>
-                    <DonutChart percentage={esgScores.social} color="#3B82F6" />
+                    <DonutChart
+                        percentage={esgScores.social}
+                        color="#3B82F6"
+                        size={140}
+                    />
                     <div className="mt-4 text-center">
                         <p className="text-sm text-gray-500">Workplace & community impact</p>
+                        <p className="text-xs text-gray-400 mt-1">Score range: 0-1</p>
                     </div>
                     <div className="mt-auto pt-4">
                         <Link to="/supplier/social" className="text-green-600 hover:text-green-800 text-sm font-medium">
@@ -358,9 +370,14 @@ const Dashboard = () => {
 
                 <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
                     <h3 className="font-medium text-gray-500 mb-2">Governance</h3>
-                    <DonutChart percentage={esgScores.governance} color="#8B5CF6" />
+                    <DonutChart
+                        percentage={esgScores.governance}
+                        color="#8B5CF6"
+                        size={140}
+                    />
                     <div className="mt-4 text-center">
                         <p className="text-sm text-gray-500">Quality & compliance management</p>
+                        <p className="text-xs text-gray-400 mt-1">Score range: 0-1</p>
                     </div>
                     <div className="mt-auto pt-4">
                         <Link to="/supplier/governance" className="text-green-600 hover:text-green-800 text-sm font-medium">
