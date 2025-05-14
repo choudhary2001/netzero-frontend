@@ -80,7 +80,7 @@ const CompanyInfoForm = () => {
 
                     // Update file label if certificate exists
                     if (companyData.registrationCertificate) {
-                        setFileLabel('Certificate uploaded');
+                        setFileLabel(companyData.registrationCertificate.split('\\').pop());
                     }
 
                     setSaved(true);

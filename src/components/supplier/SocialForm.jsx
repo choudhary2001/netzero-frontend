@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { FaArrowRight, FaArrowLeft, FaCheckCircle, FaCloudUploadAlt, FaSpinner } from 'react-icons/fa';
 import esgService from '../../services/esgService';
 import { toast } from 'react-toastify';
-
+import { useLocation } from 'react-router-dom';
 const SocialForm = () => {
+    const location = useLocation();
+    const [view, setView] = useState(location.search.includes('view=true'));
     const [formData, setFormData] = useState({
         swachhWorkplace: {
             value: '',
@@ -109,7 +111,7 @@ const SocialForm = () => {
                             };
 
                             if (socialData[key].certificate) {
-                                newFileLabels[key] = 'Certificate uploaded';
+                                newFileLabels[key] = socialData[key].certificate.split('/').pop();
                                 newSaved[key] = true;
                             }
                         }
@@ -287,6 +289,7 @@ const SocialForm = () => {
                     onChange={(e) => handleFileChange(section, e)}
                     className="hidden"
                     accept="image/*,.pdf"
+                    disabled={view}
                 />
                 <label
                     htmlFor={`${section}Certificate`}
@@ -354,6 +357,7 @@ const SocialForm = () => {
                                 Are cleaning and hygiene SOPs in place and is the workplace maintained as per guidelines?
                             </label>
                             <input
+                                disabled={view}
                                 type="text"
                                 value={formData.swachhWorkplace.value}
                                 onChange={(e) => handleChange('swachhWorkplace', e.target.value)}
@@ -377,6 +381,7 @@ const SocialForm = () => {
                                 Is there a formal safety policy with regular training, PPE usage, mock drills, and incident reporting?
                             </label>
                             <input
+                                disabled={view}
                                 type="text"
                                 value={formData.occupationalSafety.value}
                                 onChange={(e) => handleChange('occupationalSafety', e.target.value)}
@@ -400,6 +405,7 @@ const SocialForm = () => {
                                 Are HR processes defined, including employee induction, skill mapping, and training & engagement programs?
                             </label>
                             <input
+                                disabled={view}
                                 type="text"
                                 value={formData.hrManagement.value}
                                 onChange={(e) => handleChange('hrManagement', e.target.value)}
@@ -423,6 +429,7 @@ const SocialForm = () => {
                                 Is there a CSR policy with action plans addressing governance, labor, environment, and community development?
                             </label>
                             <input
+                                disabled={view}
                                 type="text"
                                 value={formData.csrResponsibility.value}
                                 onChange={(e) => handleChange('csrResponsibility', e.target.value)}

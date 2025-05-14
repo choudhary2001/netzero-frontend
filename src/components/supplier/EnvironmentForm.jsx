@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { FaCloudUploadAlt, FaArrowRight, FaArrowLeft, FaCheckCircle, FaSpinner } from 'react-icons/fa';
 import esgService from '../../services/esgService';
 import { toast } from 'react-toastify';
+import { useLocation } from 'react-router-dom';
 
 const EnvironmentForm = () => {
+    const location = useLocation();
+    const [view, setView] = useState(location.search.includes('view=true'));
     const [formData, setFormData] = useState({
         renewableEnergy: {
             value: '',
@@ -118,7 +121,7 @@ const EnvironmentForm = () => {
                             };
 
                             if (envData[key].certificate) {
-                                updatedFileLabels[key] = 'Certificate uploaded';
+                                updatedFileLabels[key] = envData[key].certificate.split('/').pop();
                                 updatedSaved[key] = true;
                             }
                         }
@@ -299,6 +302,7 @@ const EnvironmentForm = () => {
                     onChange={(e) => handleFileChange(section, e)}
                     className="hidden"
                     accept="image/*,.pdf"
+                    disabled={view}
                 />
                 <label
                     htmlFor={`${section}Certificate`}
@@ -366,6 +370,7 @@ const EnvironmentForm = () => {
                                 What portion of your energy consumption is from renewable sources (in kWh/month or as a percentage)?
                             </label>
                             <input
+                                disabled={view}
                                 type="text"
                                 value={formData.renewableEnergy.value}
                                 onChange={(e) => handleChange('renewableEnergy', e.target.value)}
@@ -391,6 +396,7 @@ const EnvironmentForm = () => {
                                 What is your facility's total water consumption (in cubic meters/month or year)?
                             </label>
                             <input
+                                disabled={view}
                                 type="text"
                                 value={formData.waterConsumption.value}
                                 onChange={(e) => handleChange('waterConsumption', e.target.value)}
@@ -416,6 +422,7 @@ const EnvironmentForm = () => {
                                 Are you practicing rainwater harvesting? If yes, what is the total volume collected (in cubic meters)?
                             </label>
                             <input
+                                disabled={view}
                                 type="text"
                                 value={formData.rainwaterHarvesting.value}
                                 onChange={(e) => handleChange('rainwaterHarvesting', e.target.value)}
@@ -441,6 +448,7 @@ const EnvironmentForm = () => {
                                 Are systems in place to manage emissions, effluent discharges, and waste per local norms?
                             </label>
                             <input
+                                disabled={view}
                                 type="text"
                                 value={formData.emissionControl.value}
                                 onChange={(e) => handleChange('emissionControl', e.target.value)}
@@ -466,6 +474,7 @@ const EnvironmentForm = () => {
                                 Are targets set to reduce non-renewable resource use and maximize renewable?
                             </label>
                             <input
+                                disabled={view}
                                 type="text"
                                 value={formData.resourceConservation.value}
                                 onChange={(e) => handleChange('resourceConservation', e.target.value)}

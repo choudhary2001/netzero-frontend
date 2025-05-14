@@ -344,7 +344,7 @@ const Dashboard = () => {
                         <p className="text-xs text-gray-400 mt-1">Score range: 0-1</p>
                     </div>
                     <div className="mt-auto pt-4">
-                        <Link to="/supplier/environment" className="text-green-600 hover:text-green-800 text-sm font-medium">
+                        <Link to="/supplier/environment?view=true" className="text-green-600 hover:text-green-800 text-sm font-medium">
                             View Details →
                         </Link>
                     </div>
@@ -362,7 +362,7 @@ const Dashboard = () => {
                         <p className="text-xs text-gray-400 mt-1">Score range: 0-1</p>
                     </div>
                     <div className="mt-auto pt-4">
-                        <Link to="/supplier/social" className="text-green-600 hover:text-green-800 text-sm font-medium">
+                        <Link to="/supplier/social?view=true" className="text-green-600 hover:text-green-800 text-sm font-medium">
                             View Details →
                         </Link>
                     </div>
@@ -380,7 +380,7 @@ const Dashboard = () => {
                         <p className="text-xs text-gray-400 mt-1">Score range: 0-1</p>
                     </div>
                     <div className="mt-auto pt-4">
-                        <Link to="/supplier/governance" className="text-green-600 hover:text-green-800 text-sm font-medium">
+                        <Link to="/supplier/governance?view=true" className="text-green-600 hover:text-green-800 text-sm font-medium">
                             View Details →
                         </Link>
                     </div>

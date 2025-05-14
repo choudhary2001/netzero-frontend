@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { FaArrowRight, FaArrowLeft, FaCheckCircle, FaCloudUploadAlt, FaSpinner } from 'react-icons/fa';
 import esgService from '../../services/esgService';
 import { toast } from 'react-toastify';
-
+import { useState, useEffect } from 'react';
 const GovernanceForm = () => {
+    const location = useLocation();
+    const [view, setView] = useState(location.search.includes('view=true'));
     const [formData, setFormData] = useState({
         deliveryPerformance: {
             value: '',
@@ -125,7 +127,7 @@ const GovernanceForm = () => {
                             };
 
                             if (governanceData[key].certificate) {
-                                newFileLabels[key] = 'Certificate uploaded';
+                                newFileLabels[key] = governanceData[key].certificate.split('/').pop();
                                 newSaved[key] = true;
                             }
                         }
@@ -304,6 +306,7 @@ const GovernanceForm = () => {
             </label>
             <div className="mt-1">
                 <input
+                    disabled={view}
                     type="file"
                     id={`${section}Certificate`}
                     onChange={(e) => handleFileChange(section, e)}
@@ -376,6 +379,7 @@ const GovernanceForm = () => {
                                 Is delivery performance monitored and periodically reviewed by management?
                             </label>
                             <input
+                                disabled={view}
                                 type="text"
                                 value={formData.deliveryPerformance.value}
                                 onChange={(e) => handleChange('deliveryPerformance', e.target.value)}
@@ -399,6 +403,7 @@ const GovernanceForm = () => {
                                 Are quality standards defined and are testing/certification processes in place?
                             </label>
                             <input
+                                disabled={view}
                                 type="text"
                                 value={formData.qualityManagement.value}
                                 onChange={(e) => handleChange('qualityManagement', e.target.value)}
@@ -422,6 +427,7 @@ const GovernanceForm = () => {
                                 Are SOPs established for critical processes with continuous monitoring and periodic reviews?
                             </label>
                             <input
+                                disabled={view}
                                 type="text"
                                 value={formData.processControl.value}
                                 onChange={(e) => handleChange('processControl', e.target.value)}
@@ -445,6 +451,7 @@ const GovernanceForm = () => {
                                 Is there a plan for optimal inventory control and proper material handling?
                             </label>
                             <input
+                                disabled={view}
                                 type="text"
                                 value={formData.materialManagement.value}
                                 onChange={(e) => handleChange('materialManagement', e.target.value)}
@@ -468,6 +475,7 @@ const GovernanceForm = () => {
                                 Are preventive maintenance and calibration plans implemented with MTTR/MTBF tracking?
                             </label>
                             <input
+                                disabled={view}
                                 type="text"
                                 value={formData.maintenanceCalibration.value}
                                 onChange={(e) => handleChange('maintenanceCalibration', e.target.value)}
@@ -491,6 +499,7 @@ const GovernanceForm = () => {
                                 Is there a proactive plan for technology upgrades, including digital tools (IoT, sensors, smart machines)?
                             </label>
                             <input
+                                disabled={view}
                                 type="text"
                                 value={formData.technologyUpgradation.value}
                                 onChange={(e) => handleChange('technologyUpgradation', e.target.value)}
