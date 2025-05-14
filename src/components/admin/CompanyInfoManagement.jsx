@@ -3,8 +3,10 @@ import { FaEye, FaCheck, FaTimes, FaSpinner, FaPaperclip, FaCommentAlt, FaSave }
 import adminService from '../../services/adminService';
 import { toast } from 'react-toastify';
 import { getMediaUrl } from './../../config';
+import { useNavigate } from 'react-router-dom';
 
 const CompanyInfoManagement = () => {
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [companies, setCompanies] = useState([]);
     const [selectedCompany, setSelectedCompany] = useState(null);
@@ -216,6 +218,17 @@ const CompanyInfoManagement = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleOpenChat = (company) => {
+        console.log('company', company);
+        // Navigate to chat with the company
+        navigate(`/admin/chat/${company.userId._id}`, {
+            state: {
+                companyName: company.companyInfo?.companyName,
+                companyId: company.userId._id
+            }
+        });
     };
 
     const renderCompanyDetails = () => {
@@ -641,7 +654,13 @@ const CompanyInfoManagement = () => {
                                             >
                                                 <FaEye />
                                             </button>
-                                            {/* {company.status === 'submitted' && ( */}
+                                            <button
+                                                className="text-blue-600 hover:text-blue-900"
+                                                title="Chat"
+                                                onClick={() => handleOpenChat(company)}
+                                            >
+                                                <FaCommentAlt />
+                                            </button>
                                             <>
                                                 <button
                                                     className="text-green-600 hover:text-green-900"
@@ -658,7 +677,6 @@ const CompanyInfoManagement = () => {
                                                     <FaTimes />
                                                 </button>
                                             </>
-                                            {/* )} */}
                                         </td>
                                     </tr>
                                 ))
@@ -700,7 +718,12 @@ const CompanyInfoManagement = () => {
                                     >
                                         Close
                                     </button>
-                                    {/* {selectedCompany.status === 'submitted' && ( */}
+                                    <button
+                                        className="mr-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
+                                        onClick={() => handleOpenChat(selectedCompany)}
+                                    >
+                                        <FaCommentAlt className="mr-1" /> Chat
+                                    </button>
                                     <>
                                         <button
                                             className="mr-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
@@ -715,7 +738,6 @@ const CompanyInfoManagement = () => {
                                             <FaTimes className="inline mr-1" /> Reject
                                         </button>
                                     </>
-                                    {/* )} */}
                                 </>
                             )}
                         </div>

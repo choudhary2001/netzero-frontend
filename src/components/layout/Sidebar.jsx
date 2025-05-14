@@ -153,21 +153,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             path: '/admin/company-info',
             icon: <FiUser className="h-5 w-5" />
           },
-          // {
-          //   name: 'Environment',
-          //   path: '/admin/environment',
-          //   icon: <FiUsers className="h-5 w-5" />
-          // },
-          // {
-          //   name: 'Governance',
-          //   path: '/admin/governance',
-          //   icon: <FiCalendar className="h-5 w-5" />
-          // },
-          // {
-          //   name: 'Social',
-          //   path: '/admin/social',
-          //   icon: <FiBook className="h-5 w-5" />
-          // },
           {
             name: 'Chat',
             path: '/admin/chat',
@@ -176,40 +161,63 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           },
 
         ];
-      case 'teacher':
+      case 'company':
         return [
+
           {
             name: 'Dashboard',
-            path: '/teacher/dashboard',
+            path: '/company/dashboard',
             icon: <FiHome className="h-5 w-5" />
           },
           {
-            name: 'My Schedule',
-            path: '/teacher/schedule',
-            icon: <FiCalendar className="h-5 w-5" />
+            name: 'Company Info',
+            path: '/supplier/company-info',
+            icon: (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            )
           },
           {
-            name: 'My Attendence',
-            path: '/teacher/attendance-report',
-            icon: <FiCheckSquare className="h-5 w-5" />
+            name: 'Environment',
+            path: '/supplier/environment',
+            icon: <FiUmbrella className="h-5 w-5" />
           },
-
-          // {
-          //   name: 'Mark Attendance',
-          //   path: '/teacher/attendance',
-          //   icon: <FiCheckSquare className="h-5 w-5" />
-          // },
           {
-            name: 'Timetables With Holidays',
-            path: '/teacher/timetable',
+            name: 'Social',
+            path: '/supplier/social',
+            icon: <FiUsers className="h-5 w-5" />
+          },
+          {
+            name: 'Governance',
+            path: '/supplier/governance',
+            icon: <FiBell className="h-5 w-5" />
+          },
+          {
+            name: 'KPI',
+            path: '/supplier/kpi',
             icon: <FiClock className="h-5 w-5" />
           },
-          // {
-          //   name: 'Exam Results',
-          //   path: '/teacher/exam-results',
-          //   icon: <FiGift className="h-5 w-5" />
-          // },
+          {
+            name: 'Message',
+            path: '/supplier/chat',
+            icon: <FiMessageSquare className="h-5 w-5" />,
+            badge: unreadCount > 0 ? unreadCount : null
+          },
+          {
+            name: 'Help & Support',
+            path: '/supplier/help-support',
+            icon: <FiGift className="h-5 w-5" />
+          },
+          {
+            name: 'Account Settings',
+            path: '/supplier/account-settings',
+            icon: <FiSettings className="h-5 w-5" />
+          },
+
         ];
+
       case 'supplier':
         return [
 
@@ -266,11 +274,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           },
 
         ];
-      case 'guardian':
-        return [
-          { to: '/guardian', label: 'Dashboard' },
-          { to: '/guardian/attendance', label: 'Ward Attendance' },
-        ];
+
       default:
         return [];
     }
@@ -354,7 +358,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               </div>
               <div className="ml-3 flex-1 cursor-pointer" onClick={handleProfile}>
                 <p className="text-sm font-medium text-gray-900">
-                  {user?.first_name} {user?.last_name}
+                  {user?.name}
                 </p>
                 <p className="text-xs text-gray-500">
                   {user?.role?.charAt(0).toUpperCase() + user?.role?.slice(1)}

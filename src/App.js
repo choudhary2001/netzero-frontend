@@ -54,7 +54,7 @@ const App = () => {
           {/* Admin Routes */}
 
           <Route path="/profile/" element={
-            <RoleBasedRoute allowedRoles={['admin', 'supplier', 'guardian']}>
+            <RoleBasedRoute allowedRoles={['admin', 'supplier', 'company']}>
               <Layout>
                 <Profile />
               </Layout>
@@ -112,51 +112,66 @@ const App = () => {
             </RoleBasedRoute>
           } />
 
+          <Route path="/admin/chat/:companyId" element={
+            <RoleBasedRoute allowedRoles={['admin']}>
+              <Layout>
+                <ChatPage />
+              </Layout>
+            </RoleBasedRoute>
+          } />
+
           {/* supplier Routes */}
           <Route path="/supplier" element={
-            <RoleBasedRoute allowedRoles={['supplier']}>
+            <RoleBasedRoute allowedRoles={['supplier', 'company']}>
               <Layout>
                 <SupplierDashboard />
               </Layout>
             </RoleBasedRoute>
           } />
           <Route path="/supplier/dashboard" element={
-            <RoleBasedRoute allowedRoles={['supplier']}>
+            <RoleBasedRoute allowedRoles={['supplier', 'company']}>
+              <Layout>
+                <SupplierDashboard />
+              </Layout>
+            </RoleBasedRoute>
+          } />
+          <Route path="/company/dashboard" element={
+            <RoleBasedRoute allowedRoles={['supplier', 'company']}>
               <Layout>
                 <SupplierDashboard />
               </Layout>
             </RoleBasedRoute>
           } />
           <Route path="/supplier/company-info" element={
-            <RoleBasedRoute allowedRoles={['supplier']}>
+            <RoleBasedRoute allowedRoles={['supplier', 'company']}>
               <Layout>
                 <CompanyInfo />
               </Layout>
             </RoleBasedRoute>
           } />
           <Route path="/supplier/environment" element={
-            <RoleBasedRoute allowedRoles={['supplier']}>
+            <RoleBasedRoute allowedRoles={['supplier', 'company']}>
               <Layout>
                 <Environment />
               </Layout>
             </RoleBasedRoute>
           } />
           <Route path="/supplier/social" element={
-            <RoleBasedRoute allowedRoles={['supplier']}>
+            <RoleBasedRoute allowedRoles={['supplier', 'company']}>
               <Layout>
                 <Social />
               </Layout>
             </RoleBasedRoute>
           } />
           <Route path="/supplier/governance" element={
-            <RoleBasedRoute allowedRoles={['supplier']}>
+            <RoleBasedRoute allowedRoles={['supplier', 'company']}>
               <Layout>
                 <Governance />
               </Layout>
             </RoleBasedRoute>
           } />
           <Route path="/supplier/kpi" element={
-            <RoleBasedRoute allowedRoles={['supplier']}>
+            <RoleBasedRoute allowedRoles={['supplier', 'company']}>
               <Layout>
                 <KPIDashboard />
               </Layout>
@@ -164,21 +179,21 @@ const App = () => {
           } />
 
           <Route path="/supplier/help-support" element={
-            <RoleBasedRoute allowedRoles={['supplier']}>
+            <RoleBasedRoute allowedRoles={['supplier', 'company']}>
               <Layout>
                 <HelpSupport />
               </Layout>
             </RoleBasedRoute>
           } />
           <Route path="/supplier/account-settings" element={
-            <RoleBasedRoute allowedRoles={['supplier']}>
+            <RoleBasedRoute allowedRoles={['supplier', 'company']}>
               <Layout>
                 <AccountSettings />
               </Layout>
             </RoleBasedRoute>
           } />
           <Route path="/supplier/chat" element={
-            <RoleBasedRoute allowedRoles={['supplier']}>
+            <RoleBasedRoute allowedRoles={['supplier', 'company']}>
               <Layout>
                 <Messages />
               </Layout>
@@ -194,9 +209,8 @@ const App = () => {
             <PrivateRoute>
               <Layout>
                 {user?.role === 'admin' && <Navigate to="/admin/dashboard" />}
-                {user?.role === 'teacher' && <Navigate to="/teacher/dashboard" />}
+                {user?.role === 'company' && <Navigate to="/company/dashboard" />}
                 {user?.role === 'supplier' && <Navigate to="/supplier/dashboard" />}
-                {user?.role === 'guardian' && <Navigate to="/guardian" />}
               </Layout>
             </PrivateRoute>
           } />

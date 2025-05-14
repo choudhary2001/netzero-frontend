@@ -19,13 +19,11 @@ const authService = {
         }
     },
 
-    verifyOTP: async (email, otp, password, role) => {
+    verifyOTP: async (otp, data) => {
         try {
-            const response = await api.post('/auth/verify-otp', {
-                email,
+            const response = await api.post('/otp-verification', {
                 otp,
-                password,
-                role
+                data
             });
             return response.data;
         } catch (error) {

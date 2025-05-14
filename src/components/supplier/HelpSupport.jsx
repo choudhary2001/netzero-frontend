@@ -46,7 +46,7 @@ const HelpSupport = () => {
     ];
 
     return (
-        <div className="px-6 py-8 max-w-6xl mx-auto">
+        <div className="container mx-auto">
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-2xl font-bold text-gray-800">Help & Support</h1>
             </div>

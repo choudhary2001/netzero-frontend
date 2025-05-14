@@ -2,8 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import adminService from '../../services/adminService';
 import socketService from '../../services/socketService';
 import { useAuth } from '../../hooks/useAuth';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 
 const AdminChat = () => {
+    const { companyId } = useParams();
+    const location = useLocation();
+    const navigate = useNavigate();
     const { user } = useAuth();
     const [conversations, setConversations] = useState([]);
     const [selectedConversation, setSelectedConversation] = useState(null);
@@ -14,6 +18,60 @@ const AdminChat = () => {
     const [suppliers, setSuppliers] = useState([]);
     const messagesEndRef = useRef(null);
     const [isBackendAvailable, setIsBackendAvailable] = useState(true);
+    const initialFetchDone = useRef(false);
+
+    // Single useEffect for initial data fetching
+    useEffect(() => {
+        if (!initialFetchDone.current) {
+            initialFetchDone.current = true;
+            fetchInitialData();
+        }
+    }, []);
+
+    const fetchInitialData = async () => {
+        try {
+            setLoading(true);
+            // Fetch conversations and suppliers in parallel
+            const [conversationsData, suppliersData] = await Promise.all([
+                adminService.getChats(),
+                adminService.getAllSuppliers()
+            ]);
+
+            if (conversationsData && conversationsData.conversations) {
+                setConversations(conversationsData.conversations);
+
+                // If companyId is present, find or create chat
+                if (companyId) {
+                    const existingChat = conversationsData.conversations.find(
+                        conv => conv.participants?.company?._id === companyId
+                    );
+
+                    if (existingChat) {
+                        setSelectedConversation(existingChat);
+                        fetchMessages(existingChat._id);
+                    } else {
+                        const newChatData = await adminService.createChat(companyId);
+                        if (newChatData && newChatData.conversation) {
+                            setConversations(prev => [...prev, newChatData.conversation]);
+                            setSelectedConversation(newChatData.conversation);
+                        }
+                    }
+                }
+            }
+
+            if (suppliersData) {
+                setSuppliers(suppliersData.suppliers || []);
+            }
+
+            setIsBackendAvailable(true);
+        } catch (err) {
+            console.error('Error fetching initial data:', err);
+            setError('Failed to load initial data');
+            setIsBackendAvailable(false);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Connect to socket on component mount
     useEffect(() => {
@@ -182,19 +240,6 @@ const AdminChat = () => {
         }).format(date);
     };
 
-    // Get suppliers not in existing conversations
-    const getAvailableSuppliers = () => {
-        if (!suppliers || !conversations) return [];
-
-        const existingSupplierIds = conversations
-            .filter(conv => conv.participants && conv.participants.supplier)
-            .map(conv => conv.participants.supplier._id);
-
-        return suppliers.filter(
-            supplier => !existingSupplierIds.includes(supplier._id)
-        );
-    };
-
     // Handle server unavailability
     if (!isBackendAvailable) {
         return (
@@ -263,8 +308,16 @@ const AdminChat = () => {
                                     >
                                         <div className="flex justify-between items-center">
                                             <div>
-                                                <h3 className="font-medium">
-                                                    {conv.participants?.supplier?.name || 'Supplier'}
+                                                <h3 className="font-medium flex items-center justify-between w-full gap-2">
+                                                    {conv.participants?.supplier?.name || 'Supplier'}<p
+                                                        className={`text-xs text-white rounded-full px-2 py-1 ${conv.participants?.supplier?.role === 'supplier'
+                                                            ? 'bg-blue-500'
+                                                            : 'bg-green-500'
+                                                            }`}
+                                                    >
+                                                        {conv.participants?.supplier?.role}
+                                                    </p>
+
                                                 </h3>
                                                 <p className="text-sm text-gray-500 truncate">
                                                     {conv.lastMessage?.content || 'No messages yet'}
@@ -366,7 +419,11 @@ const AdminChat = () => {
                     ) : (
                         <div className="flex-1 flex items-center justify-center bg-gray-50">
                             <div className="text-center text-gray-500">
-                                <p className="mb-2">Select a conversation or start a new one</p>
+                                {companyId ? (
+                                    <p className="mb-2">Loading chat...</p>
+                                ) : (
+                                    <p className="mb-2">Select a conversation or start a new one</p>
+                                )}
                             </div>
                         </div>
                     )}
