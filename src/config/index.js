@@ -4,10 +4,10 @@
  */
 
 // Base API URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://netzero-backend-ne4a.onrender.com/api';
 
 // Base URL for media files
-const MEDIA_BASE_URL = process.env.REACT_APP_MEDIA_URL || 'http://localhost:8000';
+const MEDIA_BASE_URL = process.env.REACT_APP_MEDIA_URL || 'https://netzero-backend-ne4a.onrender.com';
 
 export {
     API_BASE_URL,

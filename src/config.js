@@ -1,6 +1,6 @@
 // API Configuration
-export const API_BASE_URL = 'http://localhost:8000/api';
-export const API_MEDIA_BASE_URL = 'http://localhost:8000';
+export const API_BASE_URL = 'https://netzero-backend-ne4a.onrender.com/api';
+export const API_MEDIA_BASE_URL = 'https://netzero-backend-ne4a.onrender.com';
 
 // Other configuration constants can be added here
 export const APP_NAME = 'NetZero';
