@@ -427,12 +427,19 @@ const CompanyInfoManagement = () => {
                                             selectedCompany.environment[section]?.certificate && (
                                                 <div key={`env_${section}`} className="flex items-center justify-between p-2 bg-white rounded border border-blue-100">
                                                     <span className="text-sm text-gray-700">{section.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
-                                                    <button
-                                                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                                                        onClick={() => handleDocumentView(`environment_${section}`)}
-                                                    >
-                                                        <FaEye className="inline mr-1" /> View
-                                                    </button>
+                                                    <div className="flex items-center space-x-3">
+                                                        {companyDocuments[`environment_${section}`]?.rating > 0 && (
+                                                            <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                                                                {companyDocuments[`environment_${section}`]?.rating}/1
+                                                            </span>
+                                                        )}
+                                                        <button
+                                                            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                                                            onClick={() => handleDocumentView(`environment_${section}`)}
+                                                        >
+                                                            <FaEye className="inline mr-1" /> View
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             )
                                         ))}
@@ -449,12 +456,19 @@ const CompanyInfoManagement = () => {
                                             selectedCompany.social[section]?.certificate && (
                                                 <div key={`social_${section}`} className="flex items-center justify-between p-2 bg-white rounded border border-purple-100">
                                                     <span className="text-sm text-gray-700">{section.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
-                                                    <button
-                                                        className="text-purple-600 hover:text-purple-800 text-sm font-medium"
-                                                        onClick={() => handleDocumentView(`social_${section}`)}
-                                                    >
-                                                        <FaEye className="inline mr-1" /> View
-                                                    </button>
+                                                    <div className="flex items-center space-x-3">
+                                                        {companyDocuments[`social_${section}`]?.rating > 0 && (
+                                                            <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                                                                {companyDocuments[`social_${section}`]?.rating}/1
+                                                            </span>
+                                                        )}
+                                                        <button
+                                                            className="text-purple-600 hover:text-purple-800 text-sm font-medium"
+                                                            onClick={() => handleDocumentView(`social_${section}`)}
+                                                        >
+                                                            <FaEye className="inline mr-1" /> View
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             )
                                         ))}
@@ -471,12 +485,19 @@ const CompanyInfoManagement = () => {
                                             selectedCompany.quality[section]?.certificate && (
                                                 <div key={`qual_${section}`} className="flex items-center justify-between p-2 bg-white rounded border border-green-100">
                                                     <span className="text-sm text-gray-700">{section.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
-                                                    <button
-                                                        className="text-green-600 hover:text-green-800 text-sm font-medium"
-                                                        onClick={() => handleDocumentView(`quality_${section}`)}
-                                                    >
-                                                        <FaEye className="inline mr-1" /> View
-                                                    </button>
+                                                    <div className="flex items-center space-x-3">
+                                                        {companyDocuments[`quality_${section}`]?.rating > 0 && (
+                                                            <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                                                                {companyDocuments[`quality_${section}`]?.rating}/1
+                                                            </span>
+                                                        )}
+                                                        <button
+                                                            className="text-green-600 hover:text-green-800 text-sm font-medium"
+                                                            onClick={() => handleDocumentView(`quality_${section}`)}
+                                                        >
+                                                            <FaEye className="inline mr-1" /> View
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             )
                                         ))}
@@ -493,12 +514,19 @@ const CompanyInfoManagement = () => {
                                             selectedCompany.governance[section]?.certificate && (
                                                 <div key={`gov_${section}`} className="flex items-center justify-between p-2 bg-white rounded border border-amber-100">
                                                     <span className="text-sm text-gray-700">{section.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
-                                                    <button
-                                                        className="text-amber-600 hover:text-amber-800 text-sm font-medium"
-                                                        onClick={() => handleDocumentView(`governance_${section}`)}
-                                                    >
-                                                        <FaEye className="inline mr-1" /> View
-                                                    </button>
+                                                    <div className="flex items-center space-x-3">
+                                                        {companyDocuments[`governance_${section}`]?.rating > 0 && (
+                                                            <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
+                                                                {companyDocuments[`governance_${section}`]?.rating}/1
+                                                            </span>
+                                                        )}
+                                                        <button
+                                                            className="text-amber-600 hover:text-amber-800 text-sm font-medium"
+                                                            onClick={() => handleDocumentView(`governance_${section}`)}
+                                                        >
+                                                            <FaEye className="inline mr-1" /> View
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             )
                                         ))}
@@ -606,19 +634,120 @@ const CompanyInfoManagement = () => {
                                 </div>
                             )}
 
-                            {/* Value and Unit Display */}
-                            {documentData.value && (
-                                <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
-                                    <div className="flex items-center justify-between">
+                            {/* Document Data Section */}
+                            <div className="mt-6 space-y-4">
+                                {/* Value and Unit Display */}
+                                {documentData.value && (
+                                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
                                         <div>
-                                            <h5 className="text-sm font-medium text-gray-700">Reported Value</h5>
+                                            <h5 className="text-sm font-medium text-gray-700 mb-1">Reported Value</h5>
                                             <p className="text-lg font-semibold text-gray-900">
                                                 {documentData.value} {getUnit(currentDocKey)}
                                             </p>
                                         </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
+
+                                {/* Additional Saved Data */}
+                                {currentDocKey && currentDocKey !== 'registrationCertificate' && (
+                                    <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                        <h5 className="text-sm font-medium text-gray-700 mb-3">Document Information</h5>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {/* Extract category and section from currentDocKey */}
+                                            {(() => {
+                                                if (!currentDocKey.includes('_')) return null;
+
+                                                const [category, section] = currentDocKey.split('_');
+                                                const categoryData = selectedCompany[category];
+
+                                                if (!categoryData || !categoryData[section]) return null;
+
+                                                // Display all key-value pairs from the section data
+                                                return Object.entries(categoryData[section])
+                                                    .filter(([key]) => !['certificate', 'remarks', 'points'].includes(key))
+                                                    .map(([key, value]) => {
+                                                        // Handle different types of values
+                                                        let displayValue = 'N/A';
+
+                                                        if (value === null || value === undefined) {
+                                                            displayValue = 'N/A';
+                                                        } else if (typeof value === 'boolean') {
+                                                            displayValue = value ? 'Yes' : 'No';
+                                                        } else if (typeof value === 'object') {
+                                                            // Handle arrays
+                                                            if (Array.isArray(value)) {
+                                                                if (value.length === 0) {
+                                                                    displayValue = 'None';
+                                                                } else if (value.every(item => typeof item === 'object')) {
+                                                                    // For arrays of objects, show a summary
+                                                                    displayValue = `${value.length} items`;
+                                                                } else {
+                                                                    displayValue = value.join(', ');
+                                                                }
+                                                            }
+                                                            // Handle nested objects
+                                                            else if (value !== null) {
+                                                                // For objects with specific known structures
+                                                                if (key === 'initiatives' || key === 'programs') {
+                                                                    displayValue = value.length ? `${value.length} items` : 'None';
+                                                                } else if (key === 'localHiring' || key === 'participation' || key === 'spend' ||
+                                                                    key === 'measurement' || key === 'reporting' || key === 'feedback') {
+                                                                    // For these specific objects, show a summary of their properties
+                                                                    const summary = Object.entries(value)
+                                                                        .filter(([k, v]) => v !== null && v !== undefined)
+                                                                        .map(([k, v]) => `${k}: ${typeof v === 'boolean' ? (v ? 'Yes' : 'No') : v}`)
+                                                                        .join(', ');
+                                                                    displayValue = summary || 'None';
+                                                                } else {
+                                                                    // For other objects, show a count of properties
+                                                                    const propCount = Object.keys(value).length;
+                                                                    displayValue = propCount ? `${propCount} properties` : 'None';
+                                                                }
+                                                            }
+                                                        } else {
+                                                            // For primitive values
+                                                            displayValue = String(value);
+                                                        }
+
+                                                        return (
+                                                            <div key={key} className="p-3 bg-white rounded border border-gray-100">
+                                                                <p className="text-xs font-medium text-gray-500 mb-1">
+                                                                    {key.replace(/([A-Z])/g, ' $1').trim().replace(/^./, str => str.toUpperCase())}
+                                                                </p>
+                                                                <p className="text-gray-800 break-words">
+                                                                    {displayValue}
+                                                                </p>
+                                                            </div>
+                                                        );
+                                                    });
+                                            })()}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Registration Certificate Additional Data */}
+                                {currentDocKey === 'registrationCertificate' && selectedCompany.companyInfo && (
+                                    <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                        <h5 className="text-sm font-medium text-gray-700 mb-3">Company Registration Information</h5>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {Object.entries(selectedCompany.companyInfo)
+                                                .filter(([key]) => !['registrationCertificate', 'remarks', 'points', 'organizationRoles'].includes(key))
+                                                .map(([key, value]) => (
+                                                    <div key={key} className="p-3 bg-white rounded border border-gray-100">
+                                                        <p className="text-xs font-medium text-gray-500 mb-1">
+                                                            {key.replace(/([A-Z])/g, ' $1').trim().replace(/^./, str => str.toUpperCase())}
+                                                        </p>
+                                                        <p className="text-gray-800">
+                                                            {typeof value === 'boolean'
+                                                                ? (value ? 'Yes' : 'No')
+                                                                : (value || 'N/A')}
+                                                        </p>
+                                                    </div>
+                                                ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
 
