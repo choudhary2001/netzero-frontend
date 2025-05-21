@@ -195,8 +195,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             icon: <FiBell className="h-5 w-5" />
           },
           {
-            name: 'KPI',
-            path: '/supplier/kpi',
+            name: 'Carbon Emission',
+            path: '/supplier/carbon-emission',
             icon: <FiClock className="h-5 w-5" />
           },
           {

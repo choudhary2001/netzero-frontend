@@ -185,6 +185,18 @@ const CompanyInfoManagement = () => {
                         }
                     }));
 
+                    // Refresh companies to get updated scores
+                    await fetchCompanies();
+
+                    // Update the selected company with fresh data
+                    const updatedCompanies = await adminService.getAllESGSubmissions();
+                    if (updatedCompanies.success) {
+                        const freshCompanyData = updatedCompanies.data.find(c => c._id === selectedCompany._id);
+                        if (freshCompanyData) {
+                            setSelectedCompany(freshCompanyData);
+                        }
+                    }
+
                     setViewMode('details');
                 } else {
                     toast.error('Failed to save company document rating and remarks');
@@ -215,23 +227,18 @@ const CompanyInfoManagement = () => {
                         }
                     }));
 
-                    // Update the selected company's score if it exists
-                    if (selectedCompany && selectedCompany[category] && selectedCompany[category][section]) {
-                        setSelectedCompany(prev => ({
-                            ...prev,
-                            [category]: {
-                                ...prev[category],
-                                [section]: {
-                                    ...prev[category][section],
-                                    points: documentRating,
-                                    remarks: remark
-                                }
-                            }
-                        }));
+                    // Refresh companies list first
+                    await fetchCompanies();
+
+                    // Get fresh data for the selected company
+                    const updatedCompanies = await adminService.getAllESGSubmissions();
+                    if (updatedCompanies.success) {
+                        const freshCompanyData = updatedCompanies.data.find(c => c._id === selectedCompany._id);
+                        if (freshCompanyData) {
+                            setSelectedCompany(freshCompanyData);
+                        }
                     }
 
-                    // Refresh companies to get updated scores
-                    fetchCompanies();
                     setViewMode('details');
                 } else {
                     toast.error('Failed to save document rating and remarks');
@@ -674,19 +681,8 @@ const CompanyInfoManagement = () => {
                                                         } else if (typeof value === 'boolean') {
                                                             displayValue = value ? 'Yes' : 'No';
                                                         } else if (typeof value === 'object') {
-                                                            // Handle arrays
-                                                            if (Array.isArray(value)) {
-                                                                if (value.length === 0) {
-                                                                    displayValue = 'None';
-                                                                } else if (value.every(item => typeof item === 'object')) {
-                                                                    // For arrays of objects, show a summary
-                                                                    displayValue = `${value.length} items`;
-                                                                } else {
-                                                                    displayValue = value.join(', ');
-                                                                }
-                                                            }
                                                             // Handle nested objects
-                                                            else if (value !== null) {
+                                                            if (value !== null) {
                                                                 // For objects with specific known structures
                                                                 if (key === 'initiatives' || key === 'programs') {
                                                                     displayValue = value.length ? `${value.length} items` : 'None';
@@ -699,24 +695,48 @@ const CompanyInfoManagement = () => {
                                                                         .join(', ');
                                                                     displayValue = summary || 'None';
                                                                 } else {
-                                                                    // For other objects, show a count of properties
-                                                                    const propCount = Object.keys(value).length;
-                                                                    displayValue = propCount ? `${propCount} properties` : 'None';
+                                                                    // For any other object, convert to string representation
+                                                                    try {
+                                                                        // Format the object in a more readable way
+                                                                        if (Object.keys(value).length > 0) {
+                                                                            // Create a structured view for objects
+                                                                            displayValue = (
+                                                                                <div className="space-y-2">
+                                                                                    {Object.entries(value).map(([subKey, subValue]) => (
+                                                                                        <div key={subKey} className="pl-3 border-l-2 border-gray-200">
+                                                                                            <span className="text-xs font-medium text-gray-500">{subKey.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase())}: </span>
+                                                                                            <span className="text-gray-700">
+                                                                                                {typeof subValue === 'boolean'
+                                                                                                    ? (subValue ? 'Yes' : 'No')
+                                                                                                    : Array.isArray(subValue)
+                                                                                                        ? subValue.join(', ')
+                                                                                                        : (subValue || 'N/A')}
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    ))}
+                                                                                </div>
+                                                                            );
+                                                                        } else {
+                                                                            displayValue = 'No data';
+                                                                        }
+                                                                    } catch (e) {
+                                                                        displayValue = 'Complex Object';
+                                                                    }
                                                                 }
                                                             }
                                                         } else {
-                                                            // For primitive values
+                                                            // For primitive values (string, number, etc.)
                                                             displayValue = String(value);
                                                         }
 
                                                         return (
-                                                            <div key={key} className="p-3 bg-white rounded border border-gray-100">
-                                                                <p className="text-xs font-medium text-gray-500 mb-1">
-                                                                    {key.replace(/([A-Z])/g, ' $1').trim().replace(/^./, str => str.toUpperCase())}
-                                                                </p>
-                                                                <p className="text-gray-800 break-words">
+                                                            <div key={key} className="space-y-1">
+                                                                <dt className="text-sm font-medium text-gray-500">
+                                                                    {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                                                                </dt>
+                                                                <dd className="text-sm text-gray-900">
                                                                     {displayValue}
-                                                                </p>
+                                                                </dd>
                                                             </div>
                                                         );
                                                     });
@@ -732,18 +752,47 @@ const CompanyInfoManagement = () => {
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {Object.entries(selectedCompany.companyInfo)
                                                 .filter(([key]) => !['registrationCertificate', 'remarks', 'points', 'organizationRoles'].includes(key))
-                                                .map(([key, value]) => (
-                                                    <div key={key} className="p-3 bg-white rounded border border-gray-100">
-                                                        <p className="text-xs font-medium text-gray-500 mb-1">
-                                                            {key.replace(/([A-Z])/g, ' $1').trim().replace(/^./, str => str.toUpperCase())}
-                                                        </p>
-                                                        <p className="text-gray-800">
-                                                            {typeof value === 'boolean'
-                                                                ? (value ? 'Yes' : 'No')
-                                                                : (value || 'N/A')}
-                                                        </p>
-                                                    </div>
-                                                ))}
+                                                .map(([key, value]) => {
+                                                    // Handle different types of values
+                                                    let displayValue = 'N/A';
+
+                                                    if (value === null || value === undefined) {
+                                                        displayValue = 'N/A';
+                                                    } else if (typeof value === 'boolean') {
+                                                        displayValue = value ? 'Yes' : 'No';
+                                                    } else if (typeof value === 'object') {
+                                                        // Handle objects and arrays
+                                                        if (Array.isArray(value)) {
+                                                            displayValue = value.length ? `${value.length} items` : 'None';
+                                                        } else {
+                                                            // Handle special case for objects with type, level, validity, _id
+                                                            if (value && typeof value === 'object' && 'type' in value && 'level' in value && 'validity' in value && '_id' in value) {
+                                                                displayValue = `${value.type || ''} (Level: ${value.level || ''})`;
+                                                            } else {
+                                                                // For other objects
+                                                                try {
+                                                                    displayValue = JSON.stringify(value);
+                                                                } catch (e) {
+                                                                    displayValue = 'Complex Object';
+                                                                }
+                                                            }
+                                                        }
+                                                    } else {
+                                                        // For primitive values
+                                                        displayValue = String(value);
+                                                    }
+
+                                                    return (
+                                                        <div key={key} className="p-3 bg-white rounded border border-gray-100">
+                                                            <p className="text-xs font-medium text-gray-500 mb-1">
+                                                                {key.replace(/([A-Z])/g, ' $1').trim().replace(/^./, str => str.toUpperCase())}
+                                                            </p>
+                                                            <p className="text-gray-800">
+                                                                {displayValue}
+                                                            </p>
+                                                        </div>
+                                                    );
+                                                })}
                                         </div>
                                     </div>
                                 )}
@@ -1002,7 +1051,7 @@ const CompanyInfoManagement = () => {
             {/* Company Detail Modal */}
             {selectedCompany && (
                 <div className="fixed inset-0 bg-gray-900 bg-opacity-75 overflow-y-auto h-full w-full flex items-center justify-center z-50">
-                    <div className="relative mx-auto w-full max-w-5xl bg-white rounded-lg shadow-2xl overflow-hidden">
+                    <div className="relative mx-auto w-full max-w-7xl bg-white rounded-lg shadow-2xl overflow-hidden">
                         {/* Modal Header with gradient background */}
                         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-4 text-white">
                             <div className="flex justify-between items-center">
