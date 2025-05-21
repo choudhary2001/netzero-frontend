@@ -1,14 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaSpinner, FaSave, FaTimes } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaSpinner, FaSave, FaTimes, FaSearch, FaFilter } from 'react-icons/fa';
+import { useLocation } from 'react-router-dom';
 import adminService from '../../services/adminService';
 import { toast } from 'react-toastify';
 
 const UserManagement = () => {
+    const location = useLocation();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
     const [selectedUser, setSelectedUser] = useState(null);
+    const [filters, setFilters] = useState(() => {
+        const searchParams = new URLSearchParams(location.search);
+        const type = searchParams.get('type');
+        return {
+            role: type === 'company' ? 'company' : 'all',
+            status: 'all',
+            search: ''
+        };
+    });
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -20,6 +31,17 @@ const UserManagement = () => {
     useEffect(() => {
         fetchUsers();
     }, []);
+
+    useEffect(() => {
+        const searchParams = new URLSearchParams(location.search);
+        const type = searchParams.get('type');
+        if (type === 'company') {
+            setFilters(prev => ({
+                ...prev,
+                role: 'company'
+            }));
+        }
+    }, [location.search]);
 
     const fetchUsers = async () => {
         try {
@@ -125,8 +147,37 @@ const UserManagement = () => {
     const supplierCount = users.filter(user => user.role === 'supplier').length;
     const companyCount = users.filter(user => user.role === 'company').length;
 
+    // Add filter handling functions
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFilters(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSearchChange = (e) => {
+        setFilters(prev => ({
+            ...prev,
+            search: e.target.value
+        }));
+    };
+
+    // Filter users based on current filters
+    const filteredUsers = users.filter(user => {
+        const matchesRole = filters.role === 'all' || user.role === filters.role;
+        const matchesStatus = filters.status === 'all' ||
+            (filters.status === 'active' && user.isActive !== false) ||
+            (filters.status === 'inactive' && user.isActive === false);
+        const matchesSearch = filters.search === '' ||
+            user.name?.toLowerCase().includes(filters.search.toLowerCase()) ||
+            user.email?.toLowerCase().includes(filters.search.toLowerCase());
+
+        return matchesRole && matchesStatus && matchesSearch;
+    });
+
     return (
-        <div className='container mx-auto '>
+        <div className='container mx-auto'>
             <h1 className="text-3xl font-semibold text-gray-800 mb-6">User Management</h1>
 
             {loading && users.length === 0 ? (
@@ -166,6 +217,55 @@ const UserManagement = () => {
                         </div>
                     </div>
 
+                    {/* Filter Controls */}
+                    <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <FaSearch className="text-gray-400" />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Search users..."
+                                value={filters.search}
+                                onChange={handleSearchChange}
+                                className="pl-10 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                            />
+                        </div>
+                        <div>
+                            <select
+                                name="role"
+                                value={filters.role}
+                                onChange={handleFilterChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                            >
+                                <option value="all">All Roles</option>
+                                <option value="admin">Admin</option>
+                                <option value="supplier">Supplier</option>
+                                <option value="company">Company</option>
+                            </select>
+                        </div>
+                        <div>
+                            <select
+                                name="status"
+                                value={filters.status}
+                                onChange={handleFilterChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                            >
+                                <option value="all">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                        <div className="flex items-center justify-end">
+                            <button
+                                onClick={() => setFilters({ role: 'all', status: 'all', search: '' })}
+                                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 flex items-center"
+                            >
+                                <FaFilter className="mr-2" /> Clear Filters
+                            </button>
+                        </div>
+                    </div>
+
                     {/* Users Table */}
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
@@ -180,14 +280,14 @@ const UserManagement = () => {
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {users.length === 0 ? (
+                                {filteredUsers.length === 0 ? (
                                     <tr>
                                         <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
-                                            No users found
+                                            {users.length === 0 ? 'No users found' : 'No users match the current filters'}
                                         </td>
                                     </tr>
                                 ) : (
-                                    users.map((user) => (
+                                    filteredUsers.map((user) => (
                                         <tr key={user._id}>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.name || 'N/A'}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.email}</td>

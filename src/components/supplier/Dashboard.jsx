@@ -58,13 +58,15 @@ const Dashboard = () => {
         esgScores: {
             environmental: 0,
             social: 0,
-            governance: 0,
-            overall: 0
+            quality: 0,
+            overall: 0,
+            governance: 0
         },
         formCompletion: {
             company: 0,
             environmental: 0,
             social: 0,
+            quality: 0,
             governance: 0
         },
         recentUpdates: [],
@@ -128,8 +130,8 @@ const Dashboard = () => {
                 return <FiUmbrella className="text-green-500" />;
             case 'social':
                 return <FiUsers className="text-blue-500" />;
-            case 'governance':
-                return <FiBell className="text-purple-500" />;
+            case 'quality':
+                return <FiCheckCircle className="text-purple-500" />;
             case 'company':
                 return <FiBook className="text-orange-500" />;
             case 'status':
@@ -228,7 +230,7 @@ const Dashboard = () => {
             {/* Welcome Section */}
             <div className="mb-8">
                 <h1 className="text-2xl font-bold text-gray-800 mb-2">
-                    Welcome back, {user?.name || user?.role || 'Supplier'}!
+                    Welcome back, {user?.name || user?.role || 'Supplier'}! ({user?.role})
                 </h1>
                 <p className="text-gray-600">
                     Here's an overview of your ESG performance and upcoming deadlines.
@@ -263,7 +265,7 @@ const Dashboard = () => {
             )}
 
             {/* Form Completion Progress */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
                 <div className="bg-white rounded-lg shadow p-6">
                     <h3 className="font-medium text-gray-700 mb-2">Company Info</h3>
                     <div className="relative pt-1">
@@ -304,21 +306,34 @@ const Dashboard = () => {
                 </div>
 
                 <div className="bg-white rounded-lg shadow p-6">
+                    <h3 className="font-medium text-gray-700 mb-2">Quality</h3>
+                    <div className="relative pt-1">
+                        <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
+                            <div style={{ width: `${formCompletion.quality}%` }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-purple-500 transition-all duration-500"></div>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-600">
+                            <span>{formCompletion.quality}% Complete</span>
+                            <Link to="/supplier/quality" className="text-purple-600 hover:underline">Update</Link>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow p-6">
                     <h3 className="font-medium text-gray-700 mb-2">Governance</h3>
                     <div className="relative pt-1">
                         <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
-                            <div style={{ width: `${formCompletion.governance}%` }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-purple-500 transition-all duration-500"></div>
+                            <div style={{ width: `${formCompletion.governance}%` }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-500 transition-all duration-500"></div>
                         </div>
                         <div className="flex justify-between text-xs text-gray-600">
                             <span>{formCompletion.governance}% Complete</span>
-                            <Link to="/supplier/governance" className="text-purple-600 hover:underline">Update</Link>
+                            <Link to="/supplier/governance" className="text-indigo-600 hover:underline">Update</Link>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* ESG Scores Section */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
                 <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
                     <h3 className="font-medium text-gray-500 mb-2">Overall ESG Score</h3>
                     <DonutChart
@@ -369,14 +384,32 @@ const Dashboard = () => {
                 </div>
 
                 <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
-                    <h3 className="font-medium text-gray-500 mb-2">Governance</h3>
+                    <h3 className="font-medium text-gray-500 mb-2">Quality</h3>
                     <DonutChart
-                        percentage={esgScores.governance}
+                        percentage={esgScores.quality}
                         color="#8B5CF6"
                         size={140}
                     />
                     <div className="mt-4 text-center">
-                        <p className="text-sm text-gray-500">Quality & compliance management</p>
+                        <p className="text-sm text-gray-500">Quality & process management</p>
+                        <p className="text-xs text-gray-400 mt-1">Score range: 0-1</p>
+                    </div>
+                    <div className="mt-auto pt-4">
+                        <Link to="/supplier/quality?view=true" className="text-green-600 hover:text-green-800 text-sm font-medium">
+                            View Details →
+                        </Link>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
+                    <h3 className="font-medium text-gray-500 mb-2">Governance</h3>
+                    <DonutChart
+                        percentage={esgScores.governance}
+                        color="#4F46E5"
+                        size={140}
+                    />
+                    <div className="mt-4 text-center">
+                        <p className="text-sm text-gray-500">Governance & compliance</p>
                         <p className="text-xs text-gray-400 mt-1">Score range: 0-1</p>
                     </div>
                     <div className="mt-auto pt-4">

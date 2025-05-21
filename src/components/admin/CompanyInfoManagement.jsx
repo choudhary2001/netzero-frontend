@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { FaEye, FaCheck, FaTimes, FaSpinner, FaPaperclip, FaCommentAlt, FaSave } from 'react-icons/fa';
+import { FaEye, FaCheck, FaTimes, FaSpinner, FaPaperclip, FaCommentAlt, FaSave, FaSearch, FaFilter, FaCalendarAlt, FaBuilding, FaChartLine, FaUsers } from 'react-icons/fa';
+import { useLocation } from 'react-router-dom';
 import adminService from '../../services/adminService';
 import { toast } from 'react-toastify';
 import { getMediaUrl } from './../../config';
@@ -7,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 
 const CompanyInfoManagement = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [loading, setLoading] = useState(true);
     const [companies, setCompanies] = useState([]);
     const [selectedCompany, setSelectedCompany] = useState(null);
@@ -16,9 +18,32 @@ const CompanyInfoManagement = () => {
     const [companyDocuments, setCompanyDocuments] = useState({});
     const [currentDocKey, setCurrentDocKey] = useState(null);
 
+    // Add filters state
+    const [filters, setFilters] = useState(() => {
+        const searchParams = new URLSearchParams(location.search);
+        return {
+            status: searchParams.get('status') || 'all',
+            type: searchParams.get('type') || 'all',
+            search: ''
+        };
+    });
+
     useEffect(() => {
         fetchCompanies();
     }, []);
+
+    // Update filters when URL changes
+    useEffect(() => {
+        const searchParams = new URLSearchParams(location.search);
+        const status = searchParams.get('status');
+        const type = searchParams.get('type');
+
+        setFilters(prev => ({
+            ...prev,
+            status: status || 'all',
+            type: type || 'all'
+        }));
+    }, [location.search]);
 
     const fetchCompanies = async () => {
         try {
@@ -55,7 +80,7 @@ const CompanyInfoManagement = () => {
     const handleViewCompany = (company) => {
         setSelectedCompany(company);
         setViewMode('details');
-        console.log('company', company.companyInfo);
+        console.log('company', company);
         // Initialize document rating and remarks based on company data
         if (company) {
             const docs = {};
@@ -69,8 +94,8 @@ const CompanyInfoManagement = () => {
                 };
             }
 
-            // Add environment, social, governance documents if they exist
-            ['environment', 'social', 'governance'].forEach(category => {
+            // Add environment, social, quality documents if they exist
+            ['environment', 'social', 'quality'].forEach(category => {
                 if (company[category]) {
                     Object.keys(company[category]).forEach(section => {
                         if (company[category][section] && company[category][section].certificate) {
@@ -238,55 +263,116 @@ const CompanyInfoManagement = () => {
         if (!companyInfo) return <p>No company information available</p>;
 
         return (
-            <div className="space-y-6">
-                <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Basic Information</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-md">
-                        <div>
-                            <p className="text-sm font-medium text-gray-500">Company Name</p>
-                            <p className="text-gray-800">{companyInfo.companyName || 'N/A'}</p>
+            <div className="space-y-8">
+                {/* Overall ESG Score Card */}
+                <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg p-5 border border-blue-100">
+                    <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                        <FaChartLine className="mr-2 text-indigo-600" /> ESG Performance Overview
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <div className="bg-white p-4 rounded-lg shadow-sm flex flex-col items-center justify-center col-span-1 md:col-span-1">
+                            <div className="text-3xl font-bold text-indigo-700">
+                                {selectedCompany.overallScore?.total ? (selectedCompany.overallScore.total * 100).toFixed(0) : '0'}
+                                <span className="text-lg font-normal text-indigo-400">%</span>
+                            </div>
+                            <div className="mt-1 text-sm font-medium text-gray-500">Overall Score</div>
                         </div>
-                        <div>
-                            <p className="text-sm font-medium text-gray-500">Registration Number</p>
-                            <p className="text-gray-800">{companyInfo.registrationNumber || 'N/A'}</p>
+                        <div className="bg-white p-4 rounded-lg shadow-sm flex flex-col items-center justify-center">
+                            <div className="text-2xl font-bold text-blue-600">
+                                {selectedCompany.overallScore?.environment ? (selectedCompany.overallScore.environment * 100).toFixed(0) : '0'}%
+                            </div>
+                            <div className="mt-1 text-sm font-medium text-gray-500">Environment</div>
                         </div>
-                        <div>
-                            <p className="text-sm font-medium text-gray-500">Establishment Year</p>
-                            <p className="text-gray-800">{companyInfo.establishmentYear || 'N/A'}</p>
+                        <div className="bg-white p-4 rounded-lg shadow-sm flex flex-col items-center justify-center">
+                            <div className="text-2xl font-bold text-purple-600">
+                                {selectedCompany.overallScore?.social ? (selectedCompany.overallScore.social * 100).toFixed(0) : '0'}%
+                            </div>
+                            <div className="mt-1 text-sm font-medium text-gray-500">Social</div>
                         </div>
-                        <div>
-                            <p className="text-sm font-medium text-gray-500">Business Type</p>
-                            <p className="text-gray-800">{companyInfo.businessType || 'N/A'}</p>
+                        <div className="bg-white p-4 rounded-lg shadow-sm flex flex-col items-center justify-center">
+                            <div className="text-2xl font-bold text-green-600">
+                                {selectedCompany.overallScore?.quality ? (selectedCompany.overallScore.quality * 100).toFixed(0) : '0'}%
+                            </div>
+                            <div className="mt-1 text-sm font-medium text-gray-500">Quality</div>
                         </div>
-                        <div className="md:col-span-2">
-                            <p className="text-sm font-medium text-gray-500">Company Address</p>
-                            <p className="text-gray-800">{companyInfo.companyAddress || 'N/A'}</p>
+                        <div className="bg-white p-4 rounded-lg shadow-sm flex flex-col items-center justify-center">
+                            <div className="text-2xl font-bold text-amber-600">
+                                {selectedCompany.overallScore?.governance ? (selectedCompany.overallScore.governance * 100).toFixed(0) : '0'}%
+                            </div>
+                            <div className="mt-1 text-sm font-medium text-gray-500">Governance</div>
                         </div>
-                        <div className="md:col-span-2">
-                            <p className="text-sm font-medium text-gray-500">Roles Defined Clearly</p>
-                            <p className="text-gray-800">{companyInfo.rolesDefinedClearly || 'N/A'}</p>
+                    </div>
+                </div>
+
+                {/* Basic Information Section */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div className="border-b border-gray-200 bg-gray-50 px-6 py-3 rounded-t-lg">
+                        <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                            <FaBuilding className="mr-2 text-gray-600" /> Company Information
+                        </h3>
+                    </div>
+                    <div className="p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 className="text-sm uppercase font-semibold text-gray-500 tracking-wider mb-3">Company Details</h4>
+                                <div className="space-y-4">
+                                    <div>
+                                        <p className="text-xs font-medium text-gray-500">Company Name</p>
+                                        <p className="text-gray-800 font-medium">{companyInfo.companyName || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-medium text-gray-500">Registration Number</p>
+                                        <p className="text-gray-800 font-medium">{companyInfo.registrationNumber || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-medium text-gray-500">Business Type</p>
+                                        <p className="text-gray-800 font-medium">{companyInfo.businessType || 'N/A'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 className="text-sm uppercase font-semibold text-gray-500 tracking-wider mb-3">Additional Information</h4>
+                                <div className="space-y-4">
+                                    <div>
+                                        <p className="text-xs font-medium text-gray-500">Establishment Year</p>
+                                        <p className="text-gray-800 font-medium">{companyInfo.establishmentYear || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-medium text-gray-500">Company Address</p>
+                                        <p className="text-gray-800 font-medium">{companyInfo.companyAddress || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-medium text-gray-500">Roles Defined Clearly</p>
+                                        <p className="text-gray-800 font-medium">{companyInfo.rolesDefinedClearly || 'N/A'}</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Organization Roles Section */}
                 {companyInfo.organizationRoles && companyInfo.organizationRoles.length > 0 && (
-                    <div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">Organization Roles</h3>
-                        <div className="bg-gray-50 p-4 rounded-md">
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div className="border-b border-gray-200 bg-gray-50 px-6 py-3 rounded-t-lg">
+                            <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                                <FaUsers className="mr-2 text-gray-600" /> Organization Roles
+                            </h3>
+                        </div>
+                        <div className="p-6">
                             <div className="overflow-x-auto">
                                 <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-100">
+                                    <thead>
                                         <tr>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Responsibility</th>
+                                            <th className="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-l-lg">Role</th>
+                                            <th className="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-r-lg">Responsibility</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
+                                    <tbody className="divide-y divide-gray-100">
                                         {companyInfo.organizationRoles.map((role, index) => (
-                                            <tr key={index}>
-                                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{role.role || 'N/A'}</td>
-                                                <td className="px-4 py-2 text-sm text-gray-900">{role.responsibility || 'N/A'}</td>
+                                            <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                                <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{role.role || 'N/A'}</td>
+                                                <td className="px-4 py-3 text-sm text-gray-700">{role.responsibility || 'N/A'}</td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -296,162 +382,129 @@ const CompanyInfoManagement = () => {
                     </div>
                 )}
 
-                {/* Certificates Section */}
-                {companyInfo.certificates && companyInfo.certificates.length > 0 && (
-                    <div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">Certificates</h3>
-                        <div className="bg-gray-50 p-4 rounded-md">
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-100">
-                                        <tr>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Validity</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
-                                        {companyInfo.certificates.map((cert, index) => (
-                                            <tr key={index}>
-                                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{cert.type || 'N/A'}</td>
-                                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{cert.level || 'N/A'}</td>
-                                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{cert.validity || 'N/A'}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                {/* Documents Section */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div className="border-b border-gray-200 bg-gray-50 px-6 py-3 rounded-t-lg">
+                        <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                            <FaPaperclip className="mr-2 text-gray-600" /> Documents & Certificates
+                        </h3>
                     </div>
-                )}
-
-                <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Documents</h3>
-                    <div className="bg-gray-50 p-4 rounded-md">
-                        <div className="flex items-center justify-between py-2 border-b">
-                            <span className="text-gray-700">Registration Certificate</span>
-                            {companyInfo.registrationCertificate ? (
-                                <div className="flex items-center">
-                                    <button
-                                        className="text-blue-600 hover:text-blue-800 mr-2"
-                                        onClick={() => handleDocumentView('registrationCertificate')}
-                                    >
-                                        <FaPaperclip className="mr-1 inline" /> View & Rate
-                                    </button>
-                                    {companyDocuments.registrationCertificate?.rating > 0 && (
-                                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
-                                            Rated: {companyDocuments.registrationCertificate?.rating}/1
-                                        </span>
+                    <div className="p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Registration Certificate */}
+                            <div className="p-4 border border-gray-200 rounded-lg bg-gray-50 hover:bg-blue-50 transition-colors">
+                                <div className="flex items-center justify-between mb-2">
+                                    <h4 className="font-medium text-gray-800">Registration Certificate</h4>
+                                    {companyInfo.registrationCertificate ? (
+                                        <div className="flex items-center">
+                                            <button
+                                                className="text-blue-600 hover:text-blue-800 flex items-center text-sm font-medium"
+                                                onClick={() => handleDocumentView('registrationCertificate')}
+                                            >
+                                                <FaEye className="mr-1" /> View & Rate
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <span className="text-gray-400 text-sm">Not uploaded</span>
                                     )}
                                 </div>
-                            ) : (
-                                <span className="text-gray-500 text-sm">Not uploaded</span>
+                                {companyDocuments.registrationCertificate?.rating > 0 && (
+                                    <div className="mt-2 flex justify-between items-center">
+                                        <span className="text-xs text-gray-500">Rating</span>
+                                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                                            {companyDocuments.registrationCertificate?.rating}/1
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Environment Documents */}
+                            {selectedCompany.environment && Object.keys(selectedCompany.environment).some(section => selectedCompany.environment[section]?.certificate) && (
+                                <div className="p-4 border border-gray-200 rounded-lg bg-blue-50">
+                                    <h4 className="font-medium text-blue-800 mb-3">Environment Documents</h4>
+                                    <div className="space-y-2">
+                                        {Object.keys(selectedCompany.environment).map(section => (
+                                            selectedCompany.environment[section]?.certificate && (
+                                                <div key={`env_${section}`} className="flex items-center justify-between p-2 bg-white rounded border border-blue-100">
+                                                    <span className="text-sm text-gray-700">{section.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
+                                                    <button
+                                                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                                                        onClick={() => handleDocumentView(`environment_${section}`)}
+                                                    >
+                                                        <FaEye className="inline mr-1" /> View
+                                                    </button>
+                                                </div>
+                                            )
+                                        ))}
+                                    </div>
+                                </div>
                             )}
-                        </div>
 
-                        {/* Environment Documents */}
-                        {selectedCompany.environment && (
-                            <div className="mt-4">
-                                <h4 className="font-medium text-gray-800 mb-2">Environment Documents</h4>
-                                {Object.keys(selectedCompany.environment).map(section => (
-                                    selectedCompany.environment[section]?.certificate && (
-                                        <div key={`env_${section}`} className="flex items-center justify-between py-2 border-b">
-                                            <span className="text-gray-700">{section.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
-                                            <div className="flex items-center">
-                                                <button
-                                                    className="text-blue-600 hover:text-blue-800 mr-2"
-                                                    onClick={() => handleDocumentView(`environment_${section}`)}
-                                                >
-                                                    <FaPaperclip className="mr-1 inline" /> View & Rate
-                                                </button>
-                                                {companyDocuments[`environment_${section}`]?.rating > 0 && (
-                                                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
-                                                        Rated: {companyDocuments[`environment_${section}`]?.rating}/1
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )
-                                ))}
-                            </div>
-                        )}
+                            {/* Social Documents */}
+                            {selectedCompany.social && Object.keys(selectedCompany.social).some(section => selectedCompany.social[section]?.certificate) && (
+                                <div className="p-4 border border-gray-200 rounded-lg bg-purple-50">
+                                    <h4 className="font-medium text-purple-800 mb-3">Social Documents</h4>
+                                    <div className="space-y-2">
+                                        {Object.keys(selectedCompany.social).map(section => (
+                                            selectedCompany.social[section]?.certificate && (
+                                                <div key={`social_${section}`} className="flex items-center justify-between p-2 bg-white rounded border border-purple-100">
+                                                    <span className="text-sm text-gray-700">{section.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
+                                                    <button
+                                                        className="text-purple-600 hover:text-purple-800 text-sm font-medium"
+                                                        onClick={() => handleDocumentView(`social_${section}`)}
+                                                    >
+                                                        <FaEye className="inline mr-1" /> View
+                                                    </button>
+                                                </div>
+                                            )
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
-                        {/* Social Documents */}
-                        {selectedCompany.social && (
-                            <div className="mt-4">
-                                <h4 className="font-medium text-gray-800 mb-2">Social Documents</h4>
-                                {Object.keys(selectedCompany.social).map(section => (
-                                    selectedCompany.social[section]?.certificate && (
-                                        <div key={`social_${section}`} className="flex items-center justify-between py-2 border-b">
-                                            <span className="text-gray-700">{section.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
-                                            <div className="flex items-center">
-                                                <button
-                                                    className="text-blue-600 hover:text-blue-800 mr-2"
-                                                    onClick={() => handleDocumentView(`social_${section}`)}
-                                                >
-                                                    <FaPaperclip className="mr-1 inline" /> View & Rate
-                                                </button>
-                                                {companyDocuments[`social_${section}`]?.rating > 0 && (
-                                                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
-                                                        Rated: {companyDocuments[`social_${section}`]?.rating}/1
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )
-                                ))}
-                            </div>
-                        )}
+                            {/* Quality Documents */}
+                            {selectedCompany.quality && Object.keys(selectedCompany.quality).some(section => selectedCompany.quality[section]?.certificate) && (
+                                <div className="p-4 border border-gray-200 rounded-lg bg-green-50">
+                                    <h4 className="font-medium text-green-800 mb-3">Quality Documents</h4>
+                                    <div className="space-y-2">
+                                        {Object.keys(selectedCompany.quality).map(section => (
+                                            selectedCompany.quality[section]?.certificate && (
+                                                <div key={`qual_${section}`} className="flex items-center justify-between p-2 bg-white rounded border border-green-100">
+                                                    <span className="text-sm text-gray-700">{section.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
+                                                    <button
+                                                        className="text-green-600 hover:text-green-800 text-sm font-medium"
+                                                        onClick={() => handleDocumentView(`quality_${section}`)}
+                                                    >
+                                                        <FaEye className="inline mr-1" /> View
+                                                    </button>
+                                                </div>
+                                            )
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
-                        {/* Governance Documents */}
-                        {selectedCompany.governance && (
-                            <div className="mt-4">
-                                <h4 className="font-medium text-gray-800 mb-2">Governance Documents</h4>
-                                {Object.keys(selectedCompany.governance).map(section => (
-                                    selectedCompany.governance[section]?.certificate && (
-                                        <div key={`gov_${section}`} className="flex items-center justify-between py-2 border-b">
-                                            <span className="text-gray-700">{section.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
-                                            <div className="flex items-center">
-                                                <button
-                                                    className="text-blue-600 hover:text-blue-800 mr-2"
-                                                    onClick={() => handleDocumentView(`governance_${section}`)}
-                                                >
-                                                    <FaPaperclip className="mr-1 inline" /> View & Rate
-                                                </button>
-                                                {companyDocuments[`governance_${section}`]?.rating > 0 && (
-                                                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
-                                                        Rated: {companyDocuments[`governance_${section}`]?.rating}/1
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">ESG Scores</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-blue-50 p-4 rounded-md text-center">
-                            <p className="text-sm font-medium text-blue-700">Environment</p>
-                            <p className="text-2xl font-bold text-blue-800">
-                                {selectedCompany.overallScore?.environment.toFixed(1) || '0'}/1
-                            </p>
-                        </div>
-                        <div className="bg-purple-50 p-4 rounded-md text-center">
-                            <p className="text-sm font-medium text-purple-700">Social</p>
-                            <p className="text-2xl font-bold text-purple-800">
-                                {selectedCompany.overallScore?.social.toFixed(1) || '0'}/1
-                            </p>
-                        </div>
-                        <div className="bg-green-50 p-4 rounded-md text-center">
-                            <p className="text-sm font-medium text-green-700">Governance</p>
-                            <p className="text-2xl font-bold text-green-800">
-                                {selectedCompany.overallScore?.governance.toFixed(1) || '0'}/1
-                            </p>
+                            {/* Governance Documents */}
+                            {selectedCompany.governance && Object.keys(selectedCompany.governance).some(section => selectedCompany.governance[section]?.certificate) && (
+                                <div className="p-4 border border-gray-200 rounded-lg bg-amber-50">
+                                    <h4 className="font-medium text-amber-800 mb-3">Governance Documents</h4>
+                                    <div className="space-y-2">
+                                        {Object.keys(selectedCompany.governance).map(section => (
+                                            selectedCompany.governance[section]?.certificate && (
+                                                <div key={`gov_${section}`} className="flex items-center justify-between p-2 bg-white rounded border border-amber-100">
+                                                    <span className="text-sm text-gray-700">{section.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
+                                                    <button
+                                                        className="text-amber-600 hover:text-amber-800 text-sm font-medium"
+                                                        onClick={() => handleDocumentView(`governance_${section}`)}
+                                                    >
+                                                        <FaEye className="inline mr-1" /> View
+                                                    </button>
+                                                </div>
+                                            )
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -467,6 +520,13 @@ const CompanyInfoManagement = () => {
         const documentPath = companyDocuments[currentDocKey].path;
         const fullDocumentUrl = getMediaUrl(documentPath);
         const documentData = companyDocuments[currentDocKey];
+        const documentName = currentDocKey === 'registrationCertificate'
+            ? 'Registration Certificate'
+            : currentDocKey.split('_').map((word, idx) =>
+                idx === 0
+                    ? word.charAt(0).toUpperCase() + word.slice(1)
+                    : word.replace(/([A-Z])/g, ' $1').trim()
+            ).join(' - ');
 
         // Helper function to get unit based on document key
         const getUnit = (key) => {
@@ -480,121 +540,193 @@ const CompanyInfoManagement = () => {
 
         return (
             <div className="space-y-6">
-
-
-                {/* Document Preview */}
-                <div className="bg-white p-4 rounded-md border border-gray-300">
-                    {documentPath ? (
-                        documentPath.endsWith('.pdf') ? (
-                            <iframe
-                                src={fullDocumentUrl}
-                                className="w-full h-[70vh] rounded border border-gray-200"
-                                title="Document Preview"
-                            />
-                        ) : documentPath.match(/\.(jpg|jpeg|png|gif)$/i) ? (
-                            <img
-                                src={fullDocumentUrl}
-                                alt="Document Preview"
-                                className="max-w-full h-auto max-h-96 mx-auto"
-                            />
-                        ) : (
-                            <div className="bg-gray-800 p-4 rounded-md text-center text-white">
-                                <p>Document Preview Not Available</p>
-                                <p className="text-sm text-gray-400 mt-2">
-                                    The document format is not supported for preview.
-                                </p>
-                                <a
-                                    href={fullDocumentUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-400 hover:text-blue-300 mt-2 inline-block"
-                                >
-                                    Open Document
-                                </a>
-                            </div>
-                        )
-                    ) : (
-                        <div className="bg-gray-800 p-4 rounded-md text-center text-white">
-                            <p>No Document Available</p>
-                        </div>
-                    )}
-
-                    {/* Value and Unit Display */}
-                    {documentData.value && (
-                        <div className="mt-4 p-4 bg-gray-50 rounded-md">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <h5 className="text-sm font-medium text-gray-700">Reported Value</h5>
-                                    <p className="text-lg font-semibold text-gray-900">
-                                        {documentData.value} {getUnit(currentDocKey)}
-                                    </p>
-                                </div>
-
-                            </div>
-
-                        </div>
-                    )}
+                {/* Document Header */}
+                <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <div>
+                        <h3 className="text-lg font-semibold text-gray-800">{documentName}</h3>
+                        <p className="text-sm text-gray-500">
+                            {documentPath ? documentPath.split('/').pop() : 'No file name available'}
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => setViewMode('details')}
+                        className="text-gray-400 hover:text-gray-600"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                    </button>
                 </div>
 
-                <div className="bg-gray-50 p-4 rounded-md">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Document Review</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Document Preview Column */}
+                    <div className="col-span-2 bg-white rounded-lg border border-gray-200 overflow-hidden">
+                        <div className="border-b border-gray-200 bg-gray-50 px-4 py-3">
+                            <h4 className="font-medium text-gray-700">Document Preview</h4>
+                        </div>
+                        <div className="p-4">
+                            {documentPath ? (
+                                documentPath.endsWith('.pdf') ? (
+                                    <iframe
+                                        src={fullDocumentUrl}
+                                        className="w-full h-[50vh] rounded border border-gray-200"
+                                        title="Document Preview"
+                                    />
+                                ) : documentPath.match(/\.(jpg|jpeg|png|gif)$/i) ? (
+                                    <img
+                                        src={fullDocumentUrl}
+                                        alt="Document Preview"
+                                        className="max-w-full h-auto max-h-96 mx-auto rounded-lg shadow-sm"
+                                    />
+                                ) : (
+                                    <div className="bg-gray-900 p-6 rounded-lg text-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-gray-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        <p className="text-white font-medium">Document Preview Not Available</p>
+                                        <p className="text-sm text-gray-400 mt-2">
+                                            This file format is not supported for preview.
+                                        </p>
+                                        <a
+                                            href={fullDocumentUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                                        >
+                                            Open Document
+                                        </a>
+                                    </div>
+                                )
+                            ) : (
+                                <div className="flex flex-col items-center justify-center h-64 bg-gray-50 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                    </svg>
+                                    <p className="mt-2 text-gray-500">No Document Available</p>
+                                </div>
+                            )}
 
-                    {/* Document Rating */}
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Rating (0-1)
-                        </label>
-                        <div className="flex items-center">
-                            <input
-                                type="range"
-                                min="0.1"
-                                max="1"
-                                step="0.1"
-                                value={documentRating}
-                                onChange={(e) => setDocumentRating(parseFloat(e.target.value))}
-                                className="mr-2 w-full"
-                            />
-                            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-md w-12 text-center">
-                                {documentRating}/1
-                            </span>
+                            {/* Value and Unit Display */}
+                            {documentData.value && (
+                                <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <h5 className="text-sm font-medium text-gray-700">Reported Value</h5>
+                                            <p className="text-lg font-semibold text-gray-900">
+                                                {documentData.value} {getUnit(currentDocKey)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    {/* Document Remarks */}
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Remarks
-                        </label>
-                        <textarea
-                            value={remark}
-                            onChange={(e) => setRemark(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            rows="4"
-                            placeholder="Add remarks about this document..."
-                        ></textarea>
-                    </div>
+                    {/* Rating Section Column */}
+                    <div className="bg-white rounded-lg border border-gray-200">
+                        <div className="border-b border-gray-200 bg-gray-50 px-4 py-3">
+                            <h4 className="font-medium text-gray-700">Document Review</h4>
+                        </div>
+                        <div className="p-4">
+                            {/* Document Rating */}
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Rating (0-1)
+                                </label>
+                                <div className="flex flex-col space-y-2">
+                                    <input
+                                        type="range"
+                                        min="0.1"
+                                        max="1"
+                                        step="0.1"
+                                        value={documentRating}
+                                        onChange={(e) => setDocumentRating(parseFloat(e.target.value))}
+                                        className="w-full accent-blue-600"
+                                    />
+                                    <div className="flex justify-between text-xs text-gray-500">
+                                        <span>0.1</span>
+                                        <span>0.5</span>
+                                        <span>1.0</span>
+                                    </div>
+                                    <div className="mt-2 text-center">
+                                        <span className="bg-blue-100 text-blue-800 px-4 py-2 rounded-full font-medium">
+                                            {documentRating.toFixed(1)}/1.0
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
 
-                    {/* Save Button */}
-                    <div className="flex justify-end">
-                        <button
-                            type="button"
-                            className="mr-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
-                            onClick={() => setViewMode('details')}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="button"
-                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
-                            onClick={handleSaveRemark}
-                        >
-                            <FaSave className="mr-2" /> Save Rating & Remarks
-                        </button>
+                            {/* Document Remarks */}
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Remarks
+                                </label>
+                                <textarea
+                                    value={remark}
+                                    onChange={(e) => setRemark(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    rows="5"
+                                    placeholder="Add your assessment remarks here..."
+                                ></textarea>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex flex-col space-y-2">
+                                <button
+                                    type="button"
+                                    className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+                                    onClick={handleSaveRemark}
+                                >
+                                    <FaSave className="mr-2" /> Save Rating & Remarks
+                                </button>
+                                <button
+                                    type="button"
+                                    className="w-full py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                                    onClick={() => setViewMode('details')}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         );
     };
+
+    // Add filter handling functions
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFilters(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSearchChange = (e) => {
+        setFilters(prev => ({
+            ...prev,
+            search: e.target.value
+        }));
+    };
+
+    // Filter companies based on current filters
+    const filteredCompanies = companies.filter(company => {
+        const matchesStatus = filters.status === 'all' || company.status === filters.status;
+        const matchesSearch = filters.search === '' ||
+            company.companyInfo?.companyName?.toLowerCase().includes(filters.search.toLowerCase()) ||
+            company.companyInfo?.registrationNumber?.toLowerCase().includes(filters.search.toLowerCase());
+
+        // Handle type filter (month)
+        if (filters.type === 'month') {
+            const lastMonth = new Date();
+            lastMonth.setMonth(lastMonth.getMonth() - 1);
+            const companyDate = new Date(company.lastUpdated);
+            return matchesStatus && matchesSearch && companyDate >= lastMonth;
+        }
+
+        return matchesStatus && matchesSearch;
+    });
 
     return (
         <div className='container mx-auto p-4'>
@@ -608,6 +740,58 @@ const CompanyInfoManagement = () => {
             ) : (
                 <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
                     <p className="text-gray-600 mb-4">Review and manage submitted company information.</p>
+
+                    {/* Filter Controls */}
+                    <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <FaSearch className="text-gray-400" />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Search companies..."
+                                value={filters.search}
+                                onChange={handleSearchChange}
+                                className="pl-10 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                            />
+                        </div>
+                        <div>
+                            <select
+                                name="status"
+                                value={filters.status}
+                                onChange={handleFilterChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                            >
+                                <option value="all">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="submitted">Submitted</option>
+                                <option value="reviewed">Reviewed</option>
+                            </select>
+                        </div>
+                        <div>
+                            <select
+                                name="type"
+                                value={filters.type}
+                                onChange={handleFilterChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                            >
+                                <option value="all">All Time</option>
+                                <option value="month">Last Month</option>
+                            </select>
+                        </div>
+                        <div className="flex items-center justify-end">
+                            <button
+                                onClick={() => setFilters({ status: 'all', type: 'all', search: '' })}
+                                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 flex items-center"
+                            >
+                                <FaFilter className="mr-2" /> Clear Filters
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Companies Table */}
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
@@ -620,14 +804,14 @@ const CompanyInfoManagement = () => {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {companies.length === 0 ? (
+                            {filteredCompanies.length === 0 ? (
                                 <tr>
                                     <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
-                                        No company information found
+                                        {companies.length === 0 ? 'No company information found' : 'No companies match the current filters'}
                                     </td>
                                 </tr>
                             ) : (
-                                companies.map((company) => (
+                                filteredCompanies.map((company) => (
                                     <tr key={company._id}>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                             {company.companyInfo?.companyName || 'Unnamed Company'}
@@ -688,58 +872,71 @@ const CompanyInfoManagement = () => {
 
             {/* Company Detail Modal */}
             {selectedCompany && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
-                    <div className="relative mx-auto p-5 border w-full max-w-4xl bg-white rounded-md shadow-lg">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-medium text-gray-900">
-                                {selectedCompany.companyInfo?.companyName || 'Company Details'}
-                            </h2>
-                            <button
-                                className="text-gray-400 hover:text-gray-600"
-                                onClick={handleCloseModal}
-                            >
-                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
+                <div className="fixed inset-0 bg-gray-900 bg-opacity-75 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+                    <div className="relative mx-auto w-full max-w-5xl bg-white rounded-lg shadow-2xl overflow-hidden">
+                        {/* Modal Header with gradient background */}
+                        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-4 text-white">
+                            <div className="flex justify-between items-center">
+                                <div className="flex items-center">
+                                    <div className="h-10 w-10 rounded-full bg-white bg-opacity-25 flex items-center justify-center mr-3">
+                                        <FaBuilding className="text-white" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl font-bold">
+                                            {selectedCompany.companyInfo?.companyName || 'Company Details'}
+                                        </h2>
+                                        <p className="text-sm text-blue-100">
+                                            {selectedCompany.companyInfo?.registrationNumber || 'No Registration Number'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    className="text-white hover:text-blue-200 transition-colors"
+                                    onClick={handleCloseModal}
+                                >
+                                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
 
-                        <div className="overflow-y-auto max-h-[70vh]">
+                        {/* Status and Actions Bar */}
+                        <div className="bg-gray-50 px-6 py-3 border-b flex flex-wrap justify-between items-center">
+                            <div className="flex items-center space-x-4">
+                                <span className={`px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full ${getStatusClass(selectedCompany.status)}`}>
+                                    {selectedCompany.status.charAt(0).toUpperCase() + selectedCompany.status.slice(1)}
+                                </span>
+                                <span className="text-sm text-gray-500">
+                                    Submitted: {selectedCompany.lastUpdated ? new Date(selectedCompany.lastUpdated).toLocaleDateString() : 'N/A'}
+                                </span>
+                            </div>
+                            <div className="flex space-x-2 mt-2 sm:mt-0">
+                                <button
+                                    className="px-3 py-1 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition-colors flex items-center text-sm"
+                                    onClick={() => handleOpenChat(selectedCompany)}
+                                >
+                                    <FaCommentAlt className="mr-1" /> Chat
+                                </button>
+                                <button
+                                    className="px-3 py-1 bg-green-50 text-green-700 rounded hover:bg-green-100 transition-colors flex items-center text-sm"
+                                    onClick={() => handleStatusChange(selectedCompany._id, 'approved')}
+                                >
+                                    <FaCheck className="mr-1" /> Approve
+                                </button>
+                                <button
+                                    className="px-3 py-1 bg-red-50 text-red-700 rounded hover:bg-red-100 transition-colors flex items-center text-sm"
+                                    onClick={() => handleStatusChange(selectedCompany._id, 'rejected')}
+                                >
+                                    <FaTimes className="mr-1" /> Reject
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Content Area */}
+                        <div className="p-6 overflow-y-auto max-h-[70vh]">
                             {viewMode === 'details' && renderCompanyDetails()}
                             {viewMode === 'document' && renderDocumentView()}
-                        </div>
-
-                        <div className="mt-6 flex justify-end">
-                            {viewMode === 'details' && (
-                                <>
-                                    <button
-                                        className="mr-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
-                                        onClick={handleCloseModal}
-                                    >
-                                        Close
-                                    </button>
-                                    <button
-                                        className="mr-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
-                                        onClick={() => handleOpenChat(selectedCompany)}
-                                    >
-                                        <FaCommentAlt className="mr-1" /> Chat
-                                    </button>
-                                    <>
-                                        <button
-                                            className="mr-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-                                            onClick={() => handleStatusChange(selectedCompany._id, 'approved')}
-                                        >
-                                            <FaCheck className="inline mr-1" /> Approve
-                                        </button>
-                                        <button
-                                            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-                                            onClick={() => handleStatusChange(selectedCompany._id, 'rejected')}
-                                        >
-                                            <FaTimes className="inline mr-1" /> Reject
-                                        </button>
-                                    </>
-                                </>
-                            )}
                         </div>
                     </div>
                 </div>

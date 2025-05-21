@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaBuilding, FaCheckCircle, FaClock, FaChartLine, FaChartPie, FaUsers, FaUserPlus, FaSpinner } from 'react-icons/fa';
 import {
     LineChart,
@@ -23,6 +23,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 const AdminDashboard = () => {
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
     const [dashboardData, setDashboardData] = useState({
         userCounts: {
             total: 0,
@@ -59,6 +60,10 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleCardClick = (route) => {
+        navigate(route);
+    };
+
     // Show loading state
     if (loading) {
         return (
@@ -84,24 +89,28 @@ const AdminDashboard = () => {
                         title="Total Companies"
                         value={dashboardData.userCounts.company}
                         bgColor="bg-blue-50"
+                        onClick={() => handleCardClick('/admin/user-management?type=company')}
                     />
                     <DashboardCard
                         icon={<FaClock className="text-yellow-500" size={24} />}
                         title="Pending Approvals"
                         value={dashboardData.pendingApprovals}
                         bgColor="bg-yellow-50"
+                        onClick={() => handleCardClick('/admin/company-info?status=pending')}
                     />
                     <DashboardCard
                         icon={<FaCheckCircle className="text-green-500" size={24} />}
                         title="Recent Submissions (Month)"
                         value={dashboardData.recentSubmissions}
                         bgColor="bg-green-50"
+                        onClick={() => handleCardClick('/admin/company-info?type=month')}
                     />
                     <DashboardCard
                         icon={<FaUsers className="text-purple-500" size={24} />}
                         title="Total Users"
                         value={dashboardData.userCounts.total}
                         bgColor="bg-purple-50"
+                        onClick={() => handleCardClick('/admin/user-management')}
                     />
                 </div>
 
@@ -184,8 +193,11 @@ const AdminDashboard = () => {
 };
 
 // Helper component for dashboard cards
-const DashboardCard = ({ icon, title, value, bgColor }) => (
-    <div className={`p-6 rounded-lg shadow-md flex items-center space-x-4 ${bgColor}`}>
+const DashboardCard = ({ icon, title, value, bgColor, onClick }) => (
+    <div
+        className={`p-6 rounded-lg shadow-md flex items-center space-x-4 ${bgColor} cursor-pointer hover:shadow-lg transition-all duration-200 transform hover:scale-105`}
+        onClick={onClick}
+    >
         <div className="p-3 rounded-full bg-white">
             {icon}
         </div>

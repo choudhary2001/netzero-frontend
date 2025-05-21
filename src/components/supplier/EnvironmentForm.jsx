@@ -1,42 +1,59 @@
 import React, { useState, useEffect } from 'react';
-import { FaCloudUploadAlt, FaArrowRight, FaArrowLeft, FaCheckCircle, FaSpinner } from 'react-icons/fa';
+import { FaCloudUploadAlt, FaArrowRight, FaArrowLeft, FaCheckCircle, FaSpinner, FaDownload } from 'react-icons/fa';
 import esgService from '../../services/esgService';
 import { toast } from 'react-toastify';
 import { useLocation } from 'react-router-dom';
+import { getMediaUrl } from '../../config';
 
 const EnvironmentForm = () => {
     const location = useLocation();
     const [view, setView] = useState(location.search.includes('view=true'));
     const [formData, setFormData] = useState({
         renewableEnergy: {
-            value: '',
+            value: '',  // kWh/month or percentage
             certificate: null,
+            points: 0,
             remarks: '',
-            points: 0
+            lastUpdated: new Date()
         },
         waterConsumption: {
-            value: '',
+            baseline: '',  // Baseline water consumption
+            targets: '',   // Water reduction targets
+            progress: '',  // Progress towards targets
             certificate: null,
+            points: 0,
             remarks: '',
-            points: 0
+            lastUpdated: new Date()
         },
         rainwaterHarvesting: {
-            value: '',
+            volume: '',  // Annual volume in kL/yr
+            rechargeCapacity: '',  // Recharge capacity
+            infrastructure: '',  // Infrastructure details
+            maintenance: '',  // Maintenance process
             certificate: null,
+            points: 0,
             remarks: '',
-            points: 0
+            lastUpdated: new Date()
         },
         emissionControl: {
-            value: '',
+            chemicalManagement: '',  // Chemical management and disposal methods
+            chemicalList: [],  // List of chemicals
+            disposalMethods: [],  // Disposal methods
+            eiaReports: '',  // Environmental Impact Assessment reports
+            lcaReports: '',  // Life Cycle Assessment reports
             certificate: null,
+            points: 0,
             remarks: '',
-            points: 0
+            lastUpdated: new Date()
         },
         resourceConservation: {
-            value: '',
+            wasteDiversion: '',  // Percentage of waste diverted
+            packagingMeasures: '',  // Packaging impact measures
+            certifications: [],  // Environmental certifications
             certificate: null,
+            points: 0,
             remarks: '',
-            points: 0
+            lastUpdated: new Date()
         }
     });
 
@@ -51,11 +68,11 @@ const EnvironmentForm = () => {
     });
 
     const steps = [
-        { id: 'energy', label: 'Renewable Energy' },
-        { id: 'water', label: 'Water Consumption' },
-        { id: 'rainwater', label: 'Rainwater Harvesting' },
-        { id: 'emission', label: 'Emission Control' },
-        { id: 'resource', label: 'Resource Conservation' }
+        { id: 'renewableEnergy', label: 'Renewable Energy' },
+        { id: 'waterConsumption', label: 'Water Consumption' },
+        { id: 'rainwaterHarvesting', label: 'Rainwater Harvesting' },
+        { id: 'emissionControl', label: 'Emission Control' },
+        { id: 'resourceConservation', label: 'Resource Conservation' }
     ];
 
     const [currentStep, setCurrentStep] = useState(0);
@@ -114,10 +131,8 @@ const EnvironmentForm = () => {
                     Object.keys(formData).forEach(key => {
                         if (envData[key]) {
                             updatedFormData[key] = {
-                                value: envData[key].value || '',
-                                certificate: envData[key].certificate || null,
-                                points: envData[key].points || 0,
-                                remarks: envData[key].remarks || ''
+                                ...envData[key],
+                                lastUpdated: new Date()
                             };
 
                             if (envData[key].certificate) {
@@ -147,21 +162,69 @@ const EnvironmentForm = () => {
         fetchESGData();
     }, [apiReady]);
 
-    const handleChange = (section, value) => {
-        setFormData({
-            ...formData,
+    const handleChange = (section, field, value) => {
+        setFormData(prev => ({
+            ...prev,
             [section]: {
-                ...formData[section],
-                value
+                ...prev[section],
+                [field]: value,
+                lastUpdated: new Date()
             }
+        }));
+
+        if (saved[section]) {
+            setSaved(prev => ({
+                ...prev,
+                [section]: false
+            }));
+        }
+    };
+
+    const handleArrayChange = (section, field, value, index) => {
+        setFormData(prev => {
+            const newArray = [...(prev[section][field] || [])];
+            if (index !== undefined) {
+                newArray[index] = value;
+            } else {
+                newArray.push(value);
+            }
+            return {
+                ...prev,
+                [section]: {
+                    ...prev[section],
+                    [field]: newArray,
+                    lastUpdated: new Date()
+                }
+            };
         });
 
-        // Reset saved status when field is modified
         if (saved[section]) {
-            setSaved({
-                ...saved,
+            setSaved(prev => ({
+                ...prev,
                 [section]: false
-            });
+            }));
+        }
+    };
+
+    const removeArrayItem = (section, field, index) => {
+        setFormData(prev => {
+            const newArray = [...prev[section][field]];
+            newArray.splice(index, 1);
+            return {
+                ...prev,
+                [section]: {
+                    ...prev[section],
+                    [field]: newArray,
+                    lastUpdated: new Date()
+                }
+            };
+        });
+
+        if (saved[section]) {
+            setSaved(prev => ({
+                ...prev,
+                [section]: false
+            }));
         }
     };
 
@@ -186,11 +249,13 @@ const EnvironmentForm = () => {
         }
     };
 
-    const nextStep = () => {
+    const nextStep = async () => {
         if (currentStep < steps.length - 1) {
-            // Save current section before proceeding
-            saveCurrentSection();
-            setCurrentStep(currentStep + 1);
+            if (validateCurrentSection()) {
+                // Save current data before proceeding
+                await saveCurrentSection();
+                setCurrentStep(currentStep + 1);
+            }
         }
     };
 
@@ -200,10 +265,77 @@ const EnvironmentForm = () => {
         }
     };
 
-    // Save the current section data
+    // Add validation function to check if the current section is complete
+    const validateCurrentSection = () => {
+        const currentSection = getCurrentSectionKey();
+        const sectionData = formData[currentSection];
+
+        switch (currentSection) {
+            case 'renewableEnergy':
+                if (!sectionData.value || sectionData.value.trim() === '') {
+                    toast.error('Please enter renewable energy consumption value');
+                    return false;
+                }
+                break;
+
+            case 'waterConsumption':
+                if (!sectionData.baseline || sectionData.baseline.trim() === '') {
+                    toast.error('Please enter baseline water consumption');
+                    return false;
+                }
+                if (!sectionData.targets || sectionData.targets.trim() === '') {
+                    toast.error('Please describe water reduction targets');
+                    return false;
+                }
+                break;
+
+            case 'rainwaterHarvesting':
+                if (!sectionData.volume || sectionData.volume.trim() === '') {
+                    toast.error('Please enter annual rainwater harvested volume');
+                    return false;
+                }
+                if (!sectionData.infrastructure || sectionData.infrastructure.trim() === '') {
+                    toast.error('Please describe harvesting infrastructure');
+                    return false;
+                }
+                break;
+
+            case 'emissionControl':
+                if (!sectionData.chemicalManagement || sectionData.chemicalManagement.trim() === '') {
+                    toast.error('Please describe chemical management');
+                    return false;
+                }
+                if (!Array.isArray(sectionData.chemicalList) || sectionData.chemicalList.length === 0) {
+                    toast.error('Please add at least one chemical to the list');
+                    return false;
+                }
+                break;
+
+            case 'resourceConservation':
+                if (!sectionData.wasteDiversion || sectionData.wasteDiversion.trim() === '') {
+                    toast.error('Please enter waste diversion percentage');
+                    return false;
+                }
+                if (!sectionData.packagingMeasures || sectionData.packagingMeasures.trim() === '') {
+                    toast.error('Please describe packaging impact measures');
+                    return false;
+                }
+                break;
+        }
+
+        return true;
+    };
+
+    // Update the saveCurrentSection function to validate before saving
     const saveCurrentSection = async () => {
         try {
             const currentSection = getCurrentSectionKey();
+
+            // Validate current section data
+            if (!validateCurrentSection()) {
+                return;
+            }
+
             setLoading(true);
 
             // First upload certificate if available
@@ -220,11 +352,83 @@ const EnvironmentForm = () => {
                 }
             }
 
-            // Prepare data for API
-            const sectionData = {
-                value: formData[currentSection].value,
-                certificate: certificateUrl || formData[currentSection].certificate
-            };
+            // Prepare data for API based on current section
+            let sectionData;
+
+            switch (currentSection) {
+                case 'renewableEnergy':
+                    sectionData = {
+                        value: formData[currentSection].value,
+                        certificate: certificateUrl || formData[currentSection].certificate,
+                        remarks: formData[currentSection].remarks || '',
+                        points: formData[currentSection].points || 0,
+                        lastUpdated: new Date()
+                    };
+                    break;
+
+                case 'waterConsumption':
+                    sectionData = {
+                        baseline: formData[currentSection].baseline,
+                        targets: formData[currentSection].targets,
+                        progress: formData[currentSection].progress,
+                        certificate: certificateUrl || formData[currentSection].certificate,
+                        remarks: formData[currentSection].remarks || '',
+                        points: formData[currentSection].points || 0,
+                        lastUpdated: new Date()
+                    };
+                    break;
+
+                case 'rainwaterHarvesting':
+                    sectionData = {
+                        volume: formData[currentSection].volume,
+                        rechargeCapacity: formData[currentSection].rechargeCapacity,
+                        infrastructure: formData[currentSection].infrastructure,
+                        maintenance: formData[currentSection].maintenance,
+                        certificate: certificateUrl || formData[currentSection].certificate,
+                        remarks: formData[currentSection].remarks || '',
+                        points: formData[currentSection].points || 0,
+                        lastUpdated: new Date()
+                    };
+                    break;
+
+                case 'emissionControl':
+                    sectionData = {
+                        chemicalManagement: formData[currentSection].chemicalManagement,
+                        chemicalList: formData[currentSection].chemicalList || [],
+                        disposalMethods: formData[currentSection].disposalMethods || [],
+                        eiaReports: formData[currentSection].eiaReports,
+                        lcaReports: formData[currentSection].lcaReports,
+                        certificate: certificateUrl || formData[currentSection].certificate,
+                        remarks: formData[currentSection].remarks || '',
+                        points: formData[currentSection].points || 0,
+                        lastUpdated: new Date()
+                    };
+                    break;
+
+                case 'resourceConservation':
+                    sectionData = {
+                        wasteDiversion: formData[currentSection].wasteDiversion,
+                        packagingMeasures: formData[currentSection].packagingMeasures,
+                        certifications: formData[currentSection].certifications || [],
+                        certificate: certificateUrl || formData[currentSection].certificate,
+                        remarks: formData[currentSection].remarks || '',
+                        points: formData[currentSection].points || 0,
+                        lastUpdated: new Date()
+                    };
+                    break;
+
+                default:
+                    // Fallback to basic structure if unknown section
+                    sectionData = {
+                        value: formData[currentSection].value,
+                        certificate: certificateUrl || formData[currentSection].certificate,
+                        remarks: formData[currentSection].remarks || '',
+                        points: formData[currentSection].points || 0,
+                        lastUpdated: new Date()
+                    };
+            }
+
+            console.log('Saving data for section:', currentSection, sectionData);
 
             // Update ESG data
             const response = await esgService.updateESGData(
@@ -234,6 +438,15 @@ const EnvironmentForm = () => {
             );
 
             if (response.success) {
+                // Update formData with any changes from server (like certificateUrl)
+                setFormData(prev => ({
+                    ...prev,
+                    [currentSection]: {
+                        ...prev[currentSection],
+                        certificate: certificateUrl || prev[currentSection].certificate
+                    }
+                }));
+
                 setSaved({
                     ...saved,
                     [currentSection]: true
@@ -255,11 +468,11 @@ const EnvironmentForm = () => {
         const currentSectionId = steps[currentStep].id;
 
         switch (currentSectionId) {
-            case 'energy': return 'renewableEnergy';
-            case 'water': return 'waterConsumption';
-            case 'rainwater': return 'rainwaterHarvesting';
-            case 'emission': return 'emissionControl';
-            case 'resource': return 'resourceConservation';
+            case 'renewableEnergy': return 'renewableEnergy';
+            case 'waterConsumption': return 'waterConsumption';
+            case 'rainwaterHarvesting': return 'rainwaterHarvesting';
+            case 'emissionControl': return 'emissionControl';
+            case 'resourceConservation': return 'resourceConservation';
             default: return 'renewableEnergy';
         }
     };
@@ -269,6 +482,12 @@ const EnvironmentForm = () => {
 
         try {
             setSubmitting(true);
+
+            // Validate current section first
+            if (!validateCurrentSection()) {
+                setSubmitting(false);
+                return;
+            }
 
             // Save current section first
             await saveCurrentSection();
@@ -289,6 +508,46 @@ const EnvironmentForm = () => {
         }
     };
 
+    // Update download handler to force download
+    const handleDownload = async (section) => {
+        if (formData[section].certificate && typeof formData[section].certificate === 'string') {
+            try {
+                setLoading(true);
+                const fileUrl = getMediaUrl(formData[section].certificate);
+                const filename = formData[section].certificate.split('/').pop();
+
+                // Fetch the file
+                const response = await fetch(fileUrl);
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                // Get the blob from the response
+                const blob = await response.blob();
+
+                // Create a blob URL
+                const blobUrl = window.URL.createObjectURL(blob);
+
+                // Create a temporary link and trigger download
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = filename; // Force download with filename
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+
+                // Clean up
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(blobUrl);
+
+                toast.success('Download started');
+            } catch (error) {
+                console.error('Error downloading file:', error);
+                toast.error('Error downloading file. Please try again.');
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
     // Helper function to render file upload section
     const renderFileUpload = (section, label, description, remarks, points) => (
         <div className="mt-2 mb-4">
@@ -304,20 +563,41 @@ const EnvironmentForm = () => {
                     accept="image/*,.pdf"
                     disabled={view}
                 />
-                <label
-                    htmlFor={`${section}Certificate`}
-                    className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 border border-green-500 text-green-500 rounded-md hover:bg-green-500 hover:text-white cursor-pointer mr-2 sm:mr-3 text-sm sm:text-base transition-colors duration-200"
-                >
-                    <FaCloudUploadAlt className="mr-2" />
-                    Upload File
-                </label>
-                <span className="text-gray-600 text-sm sm:text-base break-all">
-                    {fileLabels[section]}
-                    {saved[section] && <FaCheckCircle className="ml-2 text-green-500 inline" />}
-                </span>
-                <p className="text-xs text-gray-500 mt-1">
-                    {description}
-                </p>
+                <div className="flex items-center space-x-2">
+                    <label
+                        htmlFor={`${section}Certificate`}
+                        className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 border border-green-500 text-green-500 rounded-md hover:bg-green-500 hover:text-white cursor-pointer text-sm sm:text-base transition-colors duration-200"
+                    >
+                        <FaCloudUploadAlt className="mr-2" />
+                        Upload File
+                    </label>
+
+                    {formData[section].certificate && typeof formData[section].certificate === 'string' && (
+                        <button
+                            type="button"
+                            onClick={() => handleDownload(section)}
+                            disabled={loading}
+                            className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 border border-blue-500 text-blue-500 rounded-md hover:bg-blue-500 hover:text-white text-sm sm:text-base transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? (
+                                <FaSpinner className="animate-spin mr-2" />
+                            ) : (
+                                <FaDownload className="mr-2" />
+                            )}
+                            {loading ? 'Downloading...' : 'Download'}
+                        </button>
+                    )}
+                </div>
+
+                <div className="mt-2">
+                    <span className="text-gray-600 text-sm sm:text-base break-all">
+                        {fileLabels[section]}
+                        {saved[section] && <FaCheckCircle className="ml-2 text-green-500 inline" />}
+                    </span>
+                    <p className="text-xs text-gray-500 mt-1">
+                        {description}
+                    </p>
+                </div>
 
                 {/* Rating and Remarks Container */}
                 {points > 0 && (
@@ -359,139 +639,324 @@ const EnvironmentForm = () => {
 
     // Current section content based on step
     const renderStepContent = () => {
-        const currentSection = steps[currentStep].id;
-        console.log(formData);
+        const currentSection = getCurrentSectionKey();
+        const sectionData = formData[currentSection];
+
         switch (currentSection) {
-            case 'energy':
+            case 'renewableEnergy':
                 return (
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                                What portion of your energy consumption is from renewable sources (in kWh/month or as a percentage)?
+                            <label className="block text-sm font-medium text-gray-700">
+                                Renewable Energy Consumption
                             </label>
                             <input
-                                disabled={view}
                                 type="text"
-                                value={formData.renewableEnergy.value}
-                                onChange={(e) => handleChange('renewableEnergy', e.target.value)}
-                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                                placeholder="Enter value (e.g., 500 kWh/month or 30%)"
+                                value={sectionData.value}
+                                onChange={(e) => handleChange('renewableEnergy', 'value', e.target.value)}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
+                                placeholder="Enter renewable energy consumption (kWh/month or %)"
+                                disabled={view}
                             />
                         </div>
-
-                        {renderFileUpload(
-                            'renewableEnergy',
-                            'Upload Supporting Documents',
-                            'Renewable energy certificates, generation data (solar, wind), etc.',
-                            formData.renewableEnergy.remarks,
-                            formData.renewableEnergy.points
-                        )}
+                        {renderFileUpload('renewableEnergy', 'Renewable Energy Documents',
+                            'Upload renewable energy certificates', sectionData.remarks, sectionData.points)}
                     </div>
                 );
-            case 'water':
+
+            case 'waterConsumption':
                 return (
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                                What is your facility's total water consumption (in cubic meters/month or year)?
+                            <label className="block text-sm font-medium text-gray-700">
+                                Baseline Water Consumption
                             </label>
                             <input
-                                disabled={view}
                                 type="text"
-                                value={formData.waterConsumption.value}
-                                onChange={(e) => handleChange('waterConsumption', e.target.value)}
-                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                                placeholder="Enter value (e.g., 200 m³/month)"
+                                value={sectionData.baseline}
+                                onChange={(e) => handleChange('waterConsumption', 'baseline', e.target.value)}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
+                                placeholder="Enter baseline water consumption"
+                                disabled={view}
                             />
                         </div>
-
-                        {renderFileUpload(
-                            'waterConsumption',
-                            'Upload Supporting Documents',
-                            'Water bills, meter readings, water audit reports, etc.',
-                            formData.waterConsumption.remarks,
-                            formData.waterConsumption.points
-                        )}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">
+                                Water Reduction Targets
+                            </label>
+                            <textarea
+                                value={sectionData.targets}
+                                onChange={(e) => handleChange('waterConsumption', 'targets', e.target.value)}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
+                                rows="3"
+                                placeholder="Describe your water reduction targets"
+                                disabled={view}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">
+                                Progress Towards Targets
+                            </label>
+                            <textarea
+                                value={sectionData.progress}
+                                onChange={(e) => handleChange('waterConsumption', 'progress', e.target.value)}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
+                                rows="3"
+                                placeholder="Describe your progress towards water reduction targets"
+                                disabled={view}
+                            />
+                        </div>
+                        {renderFileUpload('waterConsumption', 'Water Consumption Documents',
+                            'Upload water-use policy or monitoring data', sectionData.remarks, sectionData.points)}
                     </div>
                 );
-            case 'rainwater':
+
+            case 'rainwaterHarvesting':
                 return (
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                                Are you practicing rainwater harvesting? If yes, what is the total volume collected (in cubic meters)?
+                            <label className="block text-sm font-medium text-gray-700">
+                                Annual Rainwater Harvested Volume
                             </label>
                             <input
-                                disabled={view}
                                 type="text"
-                                value={formData.rainwaterHarvesting.value}
-                                onChange={(e) => handleChange('rainwaterHarvesting', e.target.value)}
-                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                                placeholder="Enter value (e.g., Yes, 50 m³/year or No)"
+                                value={sectionData.volume}
+                                onChange={(e) => handleChange('rainwaterHarvesting', 'volume', e.target.value)}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
+                                placeholder="Enter annual volume in kL/yr"
+                                disabled={view}
                             />
                         </div>
-
-                        {renderFileUpload(
-                            'rainwaterHarvesting',
-                            'Upload Supporting Documents',
-                            'System design documents, collection logs, maintenance records, etc.',
-                            formData.rainwaterHarvesting.remarks,
-                            formData.rainwaterHarvesting.points
-                        )}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">
+                                Recharge Capacity
+                            </label>
+                            <input
+                                type="text"
+                                value={sectionData.rechargeCapacity}
+                                onChange={(e) => handleChange('rainwaterHarvesting', 'rechargeCapacity', e.target.value)}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
+                                placeholder="Enter recharge capacity"
+                                disabled={view}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">
+                                Infrastructure Details
+                            </label>
+                            <textarea
+                                value={sectionData.infrastructure}
+                                onChange={(e) => handleChange('rainwaterHarvesting', 'infrastructure', e.target.value)}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
+                                rows="3"
+                                placeholder="Describe your harvesting infrastructure"
+                                disabled={view}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">
+                                Maintenance Process
+                            </label>
+                            <textarea
+                                value={sectionData.maintenance}
+                                onChange={(e) => handleChange('rainwaterHarvesting', 'maintenance', e.target.value)}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
+                                rows="3"
+                                placeholder="Describe your maintenance process"
+                                disabled={view}
+                            />
+                        </div>
+                        {renderFileUpload('rainwaterHarvesting', 'Rainwater Harvesting Documents',
+                            'Upload rainwater-harvesting design docs, monitoring reports', sectionData.remarks, sectionData.points)}
                     </div>
                 );
-            case 'emission':
+
+            case 'emissionControl':
                 return (
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                                Are systems in place to manage emissions, effluent discharges, and waste per local norms?
+                            <label className="block text-sm font-medium text-gray-700">
+                                Chemical Management
                             </label>
-                            <input
+                            <textarea
+                                value={sectionData.chemicalManagement}
+                                onChange={(e) => handleChange('emissionControl', 'chemicalManagement', e.target.value)}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
+                                rows="3"
+                                placeholder="Describe your chemical management and disposal methods"
                                 disabled={view}
-                                type="text"
-                                value={formData.emissionControl.value}
-                                onChange={(e) => handleChange('emissionControl', e.target.value)}
-                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                                placeholder="Enter details of your systems"
                             />
                         </div>
-
-                        {renderFileUpload(
-                            'emissionControl',
-                            'Upload Supporting Documents',
-                            'Compliance certificates, environmental audit reports, training records, etc.',
-                            formData.emissionControl.remarks,
-                            formData.emissionControl.points
-                        )}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">
+                                Chemical List
+                            </label>
+                            <div className="space-y-2">
+                                {sectionData.chemicalList.map((chemical, index) => (
+                                    <div key={index} className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={chemical}
+                                            onChange={(e) => handleArrayChange('emissionControl', 'chemicalList', e.target.value, index)}
+                                            className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
+                                            placeholder="Enter chemical name"
+                                            disabled={view}
+                                        />
+                                        {!view && (
+                                            <button
+                                                onClick={() => removeArrayItem('emissionControl', 'chemicalList', index)}
+                                                className="text-red-600 hover:text-red-800"
+                                            >
+                                                Remove
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                                {!view && (
+                                    <button
+                                        onClick={() => handleArrayChange('emissionControl', 'chemicalList', '')}
+                                        className="text-green-600 hover:text-green-800"
+                                    >
+                                        Add Chemical
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">
+                                Disposal Methods
+                            </label>
+                            <div className="space-y-2">
+                                {sectionData.disposalMethods.map((method, index) => (
+                                    <div key={index} className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={method}
+                                            onChange={(e) => handleArrayChange('emissionControl', 'disposalMethods', e.target.value, index)}
+                                            className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
+                                            placeholder="Enter disposal method"
+                                            disabled={view}
+                                        />
+                                        {!view && (
+                                            <button
+                                                onClick={() => removeArrayItem('emissionControl', 'disposalMethods', index)}
+                                                className="text-red-600 hover:text-red-800"
+                                            >
+                                                Remove
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                                {!view && (
+                                    <button
+                                        onClick={() => handleArrayChange('emissionControl', 'disposalMethods', '')}
+                                        className="text-green-600 hover:text-green-800"
+                                    >
+                                        Add Method
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">
+                                Environmental Impact Assessment Reports
+                            </label>
+                            <textarea
+                                value={sectionData.eiaReports}
+                                onChange={(e) => handleChange('emissionControl', 'eiaReports', e.target.value)}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
+                                rows="3"
+                                placeholder="Describe your EIA reports"
+                                disabled={view}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">
+                                Life Cycle Assessment Reports
+                            </label>
+                            <textarea
+                                value={sectionData.lcaReports}
+                                onChange={(e) => handleChange('emissionControl', 'lcaReports', e.target.value)}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
+                                rows="3"
+                                placeholder="Describe your LCA reports"
+                                disabled={view}
+                            />
+                        </div>
+                        {renderFileUpload('emissionControl', 'Emission Control Documents',
+                            'Upload chemical inventories, EIA/LCA reports', sectionData.remarks, sectionData.points)}
                     </div>
                 );
-            case 'resource':
+
+            case 'resourceConservation':
                 return (
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                                Are targets set to reduce non-renewable resource use and maximize renewable?
+                            <label className="block text-sm font-medium text-gray-700">
+                                Waste Diversion Percentage
                             </label>
                             <input
-                                disabled={view}
                                 type="text"
-                                value={formData.resourceConservation.value}
-                                onChange={(e) => handleChange('resourceConservation', e.target.value)}
-                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                                placeholder="Describe your conservation targets and methods"
+                                value={sectionData.wasteDiversion}
+                                onChange={(e) => handleChange('resourceConservation', 'wasteDiversion', e.target.value)}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
+                                placeholder="Enter percentage of waste diverted"
+                                disabled={view}
                             />
                         </div>
-
-                        {renderFileUpload(
-                            'resourceConservation',
-                            'Upload Supporting Documents',
-                            'Resource consumption logs, conservation targets, training records, etc.',
-                            formData.resourceConservation.remarks,
-                            formData.resourceConservation.points
-                        )}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">
+                                Packaging Impact Measures
+                            </label>
+                            <textarea
+                                value={sectionData.packagingMeasures}
+                                onChange={(e) => handleChange('resourceConservation', 'packagingMeasures', e.target.value)}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
+                                rows="3"
+                                placeholder="Describe your packaging impact measures"
+                                disabled={view}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">
+                                Environmental Certifications
+                            </label>
+                            <div className="space-y-2">
+                                {sectionData.certifications.map((cert, index) => (
+                                    <div key={index} className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={cert}
+                                            onChange={(e) => handleArrayChange('resourceConservation', 'certifications', e.target.value, index)}
+                                            className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
+                                            placeholder="Enter certification name"
+                                            disabled={view}
+                                        />
+                                        {!view && (
+                                            <button
+                                                onClick={() => removeArrayItem('resourceConservation', 'certifications', index)}
+                                                className="text-red-600 hover:text-red-800"
+                                            >
+                                                Remove
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                                {!view && (
+                                    <button
+                                        onClick={() => handleArrayChange('resourceConservation', 'certifications', '')}
+                                        className="text-green-600 hover:text-green-800"
+                                    >
+                                        Add Certification
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                        {renderFileUpload('resourceConservation', 'Resource Conservation Documents',
+                            'Upload waste-management report, packaging policy, certification documents', sectionData.remarks, sectionData.points)}
                     </div>
                 );
+
             default:
                 return null;
         }

@@ -178,9 +178,9 @@ const ESGReview = () => {
                                             <div>
                                                 <span
                                                     className={`px-2 py-1 text-xs rounded-full ${submission.status === 'submitted' ? 'bg-blue-100 text-blue-800' :
-                                                            submission.status === 'reviewed' ? 'bg-purple-100 text-purple-800' :
-                                                                submission.status === 'approved' ? 'bg-green-100 text-green-800' :
-                                                                    'bg-red-100 text-red-800'
+                                                        submission.status === 'reviewed' ? 'bg-purple-100 text-purple-800' :
+                                                            submission.status === 'approved' ? 'bg-green-100 text-green-800' :
+                                                                'bg-red-100 text-red-800'
                                                         }`}
                                                 >
                                                     {submission.status.charAt(0).toUpperCase() + submission.status.slice(1)}
@@ -229,18 +229,22 @@ const ESGReview = () => {
 
                                 <div className="mb-6">
                                     <h3 className="font-medium mb-2">Category Scores</h3>
-                                    <div className="grid grid-cols-3 gap-3">
+                                    <div className="grid grid-cols-4 gap-3">
                                         <div className={`p-3 rounded-md ${getCategoryStatusColor('environment')}`}>
                                             <p className="font-medium">Environment</p>
-                                            <p className="text-2xl font-bold">{selectedSubmission.overallScore?.environment.toFixed(1) || 0}<span className="text-sm">/10</span></p>
+                                            <p className="text-2xl font-bold">{selectedSubmission.overallScore?.environment.toFixed(1) || 0}<span className="text-sm">/1</span></p>
                                         </div>
                                         <div className={`p-3 rounded-md ${getCategoryStatusColor('social')}`}>
                                             <p className="font-medium">Social</p>
-                                            <p className="text-2xl font-bold">{selectedSubmission.overallScore?.social.toFixed(1) || 0}<span className="text-sm">/10</span></p>
+                                            <p className="text-2xl font-bold">{selectedSubmission.overallScore?.social.toFixed(1) || 0}<span className="text-sm">/1</span></p>
+                                        </div>
+                                        <div className={`p-3 rounded-md ${getCategoryStatusColor('quality')}`}>
+                                            <p className="font-medium">Quality</p>
+                                            <p className="text-2xl font-bold">{selectedSubmission.overallScore?.quality.toFixed(1) || 0}<span className="text-sm">/1</span></p>
                                         </div>
                                         <div className={`p-3 rounded-md ${getCategoryStatusColor('governance')}`}>
                                             <p className="font-medium">Governance</p>
-                                            <p className="text-2xl font-bold">{selectedSubmission.overallScore?.governance.toFixed(1) || 0}<span className="text-sm">/10</span></p>
+                                            <p className="text-2xl font-bold">{selectedSubmission.overallScore?.governance.toFixed(1) || 0}<span className="text-sm">/1</span></p>
                                         </div>
                                     </div>
                                 </div>
@@ -308,6 +312,41 @@ const ESGReview = () => {
                                                     </td>
                                                     <td className="p-2">
                                                         {renderPointsInput('social', key, data.points || 0)}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Quality Section */}
+                                <div className="mb-6">
+                                    <h3 className="font-medium mb-2">Quality</h3>
+                                    <table className="w-full border-collapse">
+                                        <thead>
+                                            <tr className="bg-gray-50">
+                                                <th className="text-left p-2">Metric</th>
+                                                <th className="text-left p-2">Value</th>
+                                                <th className="text-left p-2">Certificate</th>
+                                                <th className="text-left p-2">Points</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {selectedSubmission.quality && Object.entries(selectedSubmission.quality).map(([key, data]) => (
+                                                <tr key={key} className="border-t">
+                                                    <td className="p-2 font-medium">
+                                                        {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                                                    </td>
+                                                    <td className="p-2">{data.value || 'Not provided'}</td>
+                                                    <td className="p-2">
+                                                        {data.certificate ? (
+                                                            <a href={data.certificate} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                                                <FaDownload className="inline mr-1" /> View
+                                                            </a>
+                                                        ) : 'No certificate'}
+                                                    </td>
+                                                    <td className="p-2">
+                                                        {renderPointsInput('quality', key, data.points || 0)}
                                                     </td>
                                                 </tr>
                                             ))}

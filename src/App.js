@@ -17,7 +17,8 @@ import Profile from './components/profile/Profile';
 import CompanyInfo from './components/supplier/CompanyInfoForm';
 import Environment from './components/supplier/EnvironmentForm';
 import Social from './components/supplier/SocialForm';
-import Governance from './components/supplier/Governance';
+import Quality from './components/supplier/Quality';
+import Governance from './components/supplier/GovernanceForm';
 import HelpSupport from './components/supplier/HelpSupport';
 import AccountSettings from './components/supplier/AccountSettings';
 import KPIDashboard from './components/supplier/KPIDashboard';
@@ -163,6 +164,13 @@ const App = () => {
               </Layout>
             </RoleBasedRoute>
           } />
+          <Route path="/supplier/quality" element={
+            <RoleBasedRoute allowedRoles={['supplier', 'company']}>
+              <Layout>
+                <Quality />
+              </Layout>
+            </RoleBasedRoute>
+          } />
           <Route path="/supplier/governance" element={
             <RoleBasedRoute allowedRoles={['supplier', 'company']}>
               <Layout>
@@ -170,7 +178,7 @@ const App = () => {
               </Layout>
             </RoleBasedRoute>
           } />
-          <Route path="/supplier/kpi" element={
+          <Route path="/supplier/carbon-emission" element={
             <RoleBasedRoute allowedRoles={['supplier', 'company']}>
               <Layout>
                 <KPIDashboard />

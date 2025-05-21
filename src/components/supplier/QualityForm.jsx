@@ -5,35 +5,39 @@ import { toast } from 'react-toastify';
 import { useState, useEffect } from 'react';
 import { getMediaUrl } from '../../config';
 
-const GovernanceForm = () => {
+const QualityForm = () => {
     const location = useLocation();
     const [view, setView] = useState(location.search.includes('view=true'));
     const [formData, setFormData] = useState({
-        governanceStructure: {
+        deliveryPerformance: {
+            value: '',
+            certificate: null
+        },
+        qualityManagement: {
             value: '',
             certificate: null,
             points: 0,
             remarks: ''
         },
-        policiesCompliance: {
+        processControl: {
             value: '',
             certificate: null,
             points: 0,
             remarks: ''
         },
-        reportingTargets: {
+        materialManagement: {
             value: '',
             certificate: null,
             points: 0,
             remarks: ''
         },
-        supplierDueDiligence: {
+        maintenanceCalibration: {
             value: '',
             certificate: null,
             points: 0,
             remarks: ''
         },
-        incidentsRemediation: {
+        technologyUpgradation: {
             value: '',
             certificate: null,
             points: 0,
@@ -42,30 +46,33 @@ const GovernanceForm = () => {
     });
 
     const steps = [
-        { id: 'structure', label: 'Governance Structure' },
-        { id: 'policies', label: 'Policies & Compliance' },
-        { id: 'reporting', label: 'Reporting & Targets' },
-        { id: 'supplier', label: 'Supplier Due Diligence' },
-        { id: 'incidents', label: 'Incidents & Remediation' }
+        { id: 'delivery', label: 'Delivery Performance' },
+        { id: 'quality', label: 'Quality Management' },
+        { id: 'process', label: 'Process Control' },
+        { id: 'material', label: 'Material Management' },
+        { id: 'maintenance', label: 'Maintenance & Calibration' },
+        { id: 'technology', label: 'Technology Upgradation' }
     ];
 
     const [currentStep, setCurrentStep] = useState(0);
     const [fileLabels, setFileLabels] = useState({
-        governanceStructure: 'No file chosen',
-        policiesCompliance: 'No file chosen',
-        reportingTargets: 'No file chosen',
-        supplierDueDiligence: 'No file chosen',
-        incidentsRemediation: 'No file chosen'
+        deliveryPerformance: 'No file chosen',
+        qualityManagement: 'No file chosen',
+        processControl: 'No file chosen',
+        materialManagement: 'No file chosen',
+        maintenanceCalibration: 'No file chosen',
+        technologyUpgradation: 'No file chosen'
     });
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [apiReady, setApiReady] = useState(false);
     const [saved, setSaved] = useState({
-        governanceStructure: false,
-        policiesCompliance: false,
-        reportingTargets: false,
-        supplierDueDiligence: false,
-        incidentsRemediation: false
+        deliveryPerformance: false,
+        qualityManagement: false,
+        processControl: false,
+        materialManagement: false,
+        maintenanceCalibration: false,
+        technologyUpgradation: false
     });
 
     // Test API connection when component mounts
@@ -93,32 +100,36 @@ const GovernanceForm = () => {
         testApiConnection();
     }, []);
 
-    // Fetch existing governance data when API is ready
+    // Fetch existing quality data when API is ready
     useEffect(() => {
         if (!apiReady) return;
 
-        const fetchGovernanceData = async () => {
+        const fetchQualityData = async () => {
             try {
                 setLoading(true);
                 const response = await esgService.getESGData();
-                console.log('response', response.data);
-                if (response.success && response.data && response.data.governance) {
-                    const governanceData = response.data.governance;
+
+                if (response.success && response.data && response.data.quality) {
+                    // Update form data with existing values
+                    const qualityData = response.data.quality;
+
+                    // Create a new state object to update
                     const newFormData = { ...formData };
                     const newFileLabels = { ...fileLabels };
                     const newSaved = { ...saved };
 
+                    // Update each section if it exists
                     Object.keys(newFormData).forEach(key => {
-                        if (governanceData[key]) {
+                        if (qualityData[key]) {
                             newFormData[key] = {
-                                value: governanceData[key].value || '',
-                                certificate: governanceData[key].certificate || null,
-                                points: governanceData[key].points || 0,
-                                remarks: governanceData[key].remarks || ''
+                                value: qualityData[key].value || '',
+                                certificate: qualityData[key].certificate || null,
+                                points: qualityData[key].points || 0,
+                                remarks: qualityData[key].remarks || ''
                             };
 
-                            if (governanceData[key].certificate) {
-                                newFileLabels[key] = governanceData[key].certificate.split('/').pop();
+                            if (qualityData[key].certificate) {
+                                newFileLabels[key] = qualityData[key].certificate.split('/').pop();
                                 newSaved[key] = true;
                             }
                         }
@@ -127,17 +138,18 @@ const GovernanceForm = () => {
                     setFormData(newFormData);
                     setFileLabels(newFileLabels);
                     setSaved(newSaved);
-                    toast.success('Governance data loaded successfully');
+
+                    toast.success('Quality data loaded successfully');
                 }
             } catch (error) {
-                console.error('Error fetching governance data:', error);
-                toast.error('Failed to load your governance data. Please try again later.');
+                console.error('Error fetching quality data:', error);
+                toast.error('Failed to load your quality data. Please try again later.');
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchGovernanceData();
+        fetchQualityData();
     }, [apiReady]);
 
     const handleChange = (section, value) => {
@@ -175,41 +187,9 @@ const GovernanceForm = () => {
         }
     };
 
-    const handleDownload = async (section) => {
-        if (formData[section].certificate && typeof formData[section].certificate === 'string') {
-            try {
-                setLoading(true);
-                const fileUrl = getMediaUrl(formData[section].certificate);
-                const filename = formData[section].certificate.split('/').pop();
-
-                const response = await fetch(fileUrl);
-                if (!response.ok) throw new Error('Network response was not ok');
-
-                const blob = await response.blob();
-                const blobUrl = window.URL.createObjectURL(blob);
-
-                const link = document.createElement('a');
-                link.href = blobUrl;
-                link.download = filename;
-                link.style.display = 'none';
-                document.body.appendChild(link);
-                link.click();
-
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(blobUrl);
-
-                toast.success('Download started');
-            } catch (error) {
-                console.error('Error downloading file:', error);
-                toast.error('Error downloading file. Please try again.');
-            } finally {
-                setLoading(false);
-            }
-        }
-    };
-
     const nextStep = async () => {
         if (currentStep < steps.length - 1) {
+            // Save current data before proceeding
             await saveCurrentStep();
             setCurrentStep(currentStep + 1);
         }
@@ -227,31 +207,36 @@ const GovernanceForm = () => {
             const currentSection = steps[currentStep].id;
             let sectionKey;
 
+            // Map the step ID to the corresponding formData key
             switch (currentSection) {
-                case 'structure':
-                    sectionKey = 'governanceStructure';
+                case 'delivery':
+                    sectionKey = 'deliveryPerformance';
                     break;
-                case 'policies':
-                    sectionKey = 'policiesCompliance';
+                case 'quality':
+                    sectionKey = 'qualityManagement';
                     break;
-                case 'reporting':
-                    sectionKey = 'reportingTargets';
+                case 'process':
+                    sectionKey = 'processControl';
                     break;
-                case 'supplier':
-                    sectionKey = 'supplierDueDiligence';
+                case 'material':
+                    sectionKey = 'materialManagement';
                     break;
-                case 'incidents':
-                    sectionKey = 'incidentsRemediation';
+                case 'maintenance':
+                    sectionKey = 'maintenanceCalibration';
+                    break;
+                case 'technology':
+                    sectionKey = 'technologyUpgradation';
                     break;
                 default:
                     throw new Error('Unknown section');
             }
 
+            // First upload certificate if available and it's a File object
             let certificateUrl = null;
             if (formData[sectionKey].certificate instanceof File) {
                 const uploadResponse = await esgService.uploadCertificate(
                     formData[sectionKey].certificate,
-                    'governance',
+                    'quality',
                     sectionKey
                 );
 
@@ -260,13 +245,15 @@ const GovernanceForm = () => {
                 }
             }
 
+            // Prepare data for API
             const sectionData = {
                 value: formData[sectionKey].value,
                 certificate: certificateUrl || formData[sectionKey].certificate
             };
 
+            // Update ESG data for this section
             const response = await esgService.updateESGData(
-                'governance',
+                'quality',
                 sectionKey,
                 sectionData
             );
@@ -281,7 +268,7 @@ const GovernanceForm = () => {
                 toast.error(`Failed to save ${steps[currentStep].label} data`);
             }
         } catch (error) {
-            console.error('Error saving governance data:', error);
+            console.error('Error saving quality data:', error);
             toast.error('Error saving data. Please try again.');
         } finally {
             setLoading(false);
@@ -290,12 +277,18 @@ const GovernanceForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         try {
             setSubmitting(true);
+
+            // First save the current step
             await saveCurrentStep();
+
+            // Then submit the entire ESG data for review
             const response = await esgService.submitESGData();
+
             if (response.success) {
-                toast.success('Your governance information has been submitted for review!');
+                toast.success('Your quality information has been submitted for review!');
             } else {
                 toast.error('Failed to submit data for review');
             }
@@ -307,6 +300,47 @@ const GovernanceForm = () => {
         }
     };
 
+    // Add download handler
+    const handleDownload = async (section) => {
+        if (formData[section].certificate && typeof formData[section].certificate === 'string') {
+            try {
+                setLoading(true);
+                const fileUrl = getMediaUrl(formData[section].certificate);
+                const filename = formData[section].certificate.split('/').pop();
+
+                // Fetch the file
+                const response = await fetch(fileUrl);
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                // Get the blob from the response
+                const blob = await response.blob();
+
+                // Create a blob URL
+                const blobUrl = window.URL.createObjectURL(blob);
+
+                // Create a temporary link and trigger download
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = filename; // Force download with filename
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+
+                // Clean up
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(blobUrl);
+
+                toast.success('Download started');
+            } catch (error) {
+                console.error('Error downloading file:', error);
+                toast.error('Error downloading file. Please try again.');
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
+    // Helper function to render file upload section
     const renderFileUpload = (section, label, description) => (
         <div className="mt-2 mb-4">
             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
@@ -357,6 +391,7 @@ const GovernanceForm = () => {
                     </p>
                 </div>
 
+                {/* Rating and Remarks Container */}
                 {formData[section].points > 0 && (
                     <div className="mt-4 space-y-3 bg-gray-50 rounded-lg p-4 border border-gray-100">
                         {formData[section].points > 0 && (
@@ -394,122 +429,152 @@ const GovernanceForm = () => {
         </div>
     );
 
+    // Current section content based on step
     const renderStepContent = () => {
         const currentSection = steps[currentStep].id;
 
         switch (currentSection) {
-            case 'structure':
+            case 'delivery':
                 return (
                     <div className="space-y-4">
                         <div>
                             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                                Do you have a board-level ESG committee or equivalent oversight body? Who is accountable for ESG performance?
+                                Is delivery performance monitored and periodically reviewed by management?
                             </label>
-                            <textarea
+                            <input
                                 disabled={view}
-                                value={formData.governanceStructure.value}
-                                onChange={(e) => handleChange('governanceStructure', e.target.value)}
-                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 min-h-[100px]"
-                                placeholder="Describe your governance structure and accountability"
+                                type="text"
+                                value={formData.deliveryPerformance.value}
+                                onChange={(e) => handleChange('deliveryPerformance', e.target.value)}
+                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                placeholder="Describe your delivery performance monitoring"
                             />
                         </div>
 
                         {renderFileUpload(
-                            'governanceStructure',
+                            'deliveryPerformance',
                             'Upload Supporting Documents',
-                            'Committee charter, terms of reference, organizational structure'
+                            'Delivery metrics, review meeting notes, corrective action logs, etc.'
                         )}
                     </div>
                 );
-            case 'policies':
+            case 'quality':
                 return (
                     <div className="space-y-4">
                         <div>
                             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                                Describe your anti-corruption and anti-bribery policies. Have you conducted any third-party audits or risk assessments? What key compliance policies and procedures do you have in place?
+                                Are quality standards defined and are testing/certification processes in place?
                             </label>
-                            <textarea
+                            <input
                                 disabled={view}
-                                value={formData.policiesCompliance.value}
-                                onChange={(e) => handleChange('policiesCompliance', e.target.value)}
-                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 min-h-[100px]"
-                                placeholder="Describe your policies, compliance framework, and audit processes"
+                                type="text"
+                                value={formData.qualityManagement.value}
+                                onChange={(e) => handleChange('qualityManagement', e.target.value)}
+                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                placeholder="Describe your quality management standards"
                             />
                         </div>
 
                         {renderFileUpload(
-                            'policiesCompliance',
+                            'qualityManagement',
                             'Upload Supporting Documents',
-                            'Policy documents, audit reports, risk assessments, compliance framework'
+                            'Quality manuals, audit reports, testing certificates, CAPA logs etc.'
                         )}
                     </div>
                 );
-            case 'reporting':
+            case 'process':
                 return (
                     <div className="space-y-4">
                         <div>
                             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                                How often do you report ESG performance to your board and external stakeholders? Which key metrics are included? Have you set any science-based targets (SBTi) or committed to GRI, TCFD, CDP, etc.?
+                                Are SOPs established for critical processes with continuous monitoring and periodic reviews?
                             </label>
-                            <textarea
+                            <input
                                 disabled={view}
-                                value={formData.reportingTargets.value}
-                                onChange={(e) => handleChange('reportingTargets', e.target.value)}
-                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 min-h-[100px]"
-                                placeholder="Describe your reporting practices and target commitments"
+                                type="text"
+                                value={formData.processControl.value}
+                                onChange={(e) => handleChange('processControl', e.target.value)}
+                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                placeholder="Describe your process control procedures"
                             />
                         </div>
 
                         {renderFileUpload(
-                            'reportingTargets',
+                            'processControl',
                             'Upload Supporting Documents',
-                            'ESG reports, target-setting documentation, framework commitments'
+                            'Process documents, monitoring logs, review reports, etc.'
                         )}
                     </div>
                 );
-            case 'supplier':
+            case 'material':
                 return (
                     <div className="space-y-4">
                         <div>
                             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                                Do you screen your suppliers for ESG risks? Summarize your upstream due-diligence process and corrective-action rates. What IT systems or tools do you use to track and verify ESG data?
+                                Is there a plan for optimal inventory control and proper material handling?
                             </label>
-                            <textarea
+                            <input
                                 disabled={view}
-                                value={formData.supplierDueDiligence.value}
-                                onChange={(e) => handleChange('supplierDueDiligence', e.target.value)}
-                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 min-h-[100px]"
-                                placeholder="Describe your supplier due diligence process and data systems"
+                                type="text"
+                                value={formData.materialManagement.value}
+                                onChange={(e) => handleChange('materialManagement', e.target.value)}
+                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                placeholder="Describe your material management practices"
                             />
                         </div>
 
                         {renderFileUpload(
-                            'supplierDueDiligence',
+                            'materialManagement',
                             'Upload Supporting Documents',
-                            'Supplier due diligence reports, system documentation, data tracking tools'
+                            'Inventory records, handling SOPs, storage audit reports, etc.'
                         )}
                     </div>
                 );
-            case 'incidents':
+            case 'maintenance':
                 return (
                     <div className="space-y-4">
                         <div>
                             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                                Have you faced any material ESG non-compliance or controversies in the last 3 years? Describe the issue and your remediation plan.
+                                Are preventive maintenance and calibration plans implemented with MTTR/MTBF tracking?
                             </label>
-                            <textarea
+                            <input
                                 disabled={view}
-                                value={formData.incidentsRemediation.value}
-                                onChange={(e) => handleChange('incidentsRemediation', e.target.value)}
-                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 min-h-[100px]"
-                                placeholder="Describe any incidents and your remediation approach"
+                                type="text"
+                                value={formData.maintenanceCalibration.value}
+                                onChange={(e) => handleChange('maintenanceCalibration', e.target.value)}
+                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                placeholder="Describe your maintenance and calibration processes"
                             />
                         </div>
 
                         {renderFileUpload(
-                            'incidentsRemediation',
+                            'maintenanceCalibration',
                             'Upload Supporting Documents',
-                            'Incident reports, corrective action plans, remediation documentation'
+                            'Maintenance schedules, calibration records, audit logs, etc.'
+                        )}
+                    </div>
+                );
+            case 'technology':
+                return (
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
+                                Is there a proactive plan for technology upgrades, including digital tools (IoT, sensors, smart machines)?
+                            </label>
+                            <input
+                                disabled={view}
+                                type="text"
+                                value={formData.technologyUpgradation.value}
+                                onChange={(e) => handleChange('technologyUpgradation', e.target.value)}
+                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                placeholder="Describe your technology upgradation plans"
+                            />
+                        </div>
+
+                        {renderFileUpload(
+                            'technologyUpgradation',
+                            'Upload Supporting Documents',
+                            'Technology roadmaps, upgrade plans, digital transformation initiatives, etc.'
                         )}
                     </div>
                 );
@@ -549,14 +614,14 @@ const GovernanceForm = () => {
     return (
         <div className="w-full container mx-auto">
             <div className="bg-white shadow-lg rounded-lg p-4 sm:p-6 md:p-8 my-4 sm:my-6">
-                <h1 className="text-2xl sm:text-3xl font-bold text-center text-green-600 mb-2">Governance</h1>
-                <p className="text-center text-gray-600 mb-4 sm:mb-6">Fill out your governance practices</p>
+                <h1 className="text-2xl sm:text-3xl font-bold text-center text-green-600 mb-2">Quality Management</h1>
+                <p className="text-center text-gray-600 mb-4 sm:mb-6">Please fill out information about your quality management practices</p>
 
                 {/* Stepper */}
                 <div className="mb-6 sm:mb-8">
                     <div className="flex items-center justify-between mb-4 overflow-x-auto pb-2">
                         {steps.map((step, index) => (
-                            <div key={step.id} className="flex-1 flex flex-col items-center min-w-[120px]">
+                            <div key={step.id} className="flex-1 flex flex-col items-center min-w-[100px]">
                                 <div
                                     className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${index < currentStep
                                         ? 'bg-green-600 text-white'
@@ -589,8 +654,7 @@ const GovernanceForm = () => {
                         <button
                             type="button"
                             onClick={prevStep}
-                            className={`px-4 py-2 text-sm sm:text-base rounded-md ${currentStep === 0 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                }`}
+                            className={`px-4 py-2 text-sm sm:text-base rounded-md ${currentStep === 0 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
                             disabled={currentStep === 0 || loading}
                         >
                             <FaArrowLeft className="inline mr-2" /> Previous
@@ -634,4 +698,4 @@ const GovernanceForm = () => {
     );
 };
 
-export default GovernanceForm; 
+export default QualityForm; 

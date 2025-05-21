@@ -3,14 +3,14 @@ import React from 'react';
 import { FaEye, FaCheck, FaTimes } from 'react-icons/fa';
 
 // Dummy Data
-const dummyGovSubmissions = [
-    { id: 1, companyName: 'Eco Corp', policyName: 'Code of Conduct', submitted: '2024-07-15', status: 'Approved' },
-    { id: 2, companyName: 'Green Solutions Ltd.', policyName: 'Anti-Bribery Policy', submitted: '2024-07-14', status: 'Approved' },
-    { id: 3, companyName: 'Sustainable Inc.', policyName: 'Whistleblower Policy', submitted: '2024-07-11', status: 'Pending' },
-    { id: 4, companyName: 'Planet Protectors', policyName: 'Data Privacy Policy', submitted: '2024-07-10', status: 'Pending' },
+const dummyQualitySubmissions = [
+    { id: 1, companyName: 'Eco Corp', metricName: 'Delivery Performance', submitted: '2024-07-15', status: 'Approved' },
+    { id: 2, companyName: 'Green Solutions Ltd.', metricName: 'Quality Management', submitted: '2024-07-14', status: 'Approved' },
+    { id: 3, companyName: 'Sustainable Inc.', metricName: 'Process Control', submitted: '2024-07-11', status: 'Pending' },
+    { id: 4, companyName: 'Planet Protectors', metricName: 'Material Management', submitted: '2024-07-10', status: 'Pending' },
 ];
 
-const GovernanceManagement = () => {
+const QualityManagement = () => {
     const getStatusClass = (status) => {
         switch (status) {
             case 'Approved': return 'bg-green-100 text-green-700';
@@ -21,24 +21,24 @@ const GovernanceManagement = () => {
     };
     return (
         <div className='container'>
-            <h1 className="text-3xl font-semibold text-gray-800 mb-6">Governance Data Management</h1>
+            <h1 className="text-3xl font-semibold text-gray-800 mb-6">Quality Data Management</h1>
             <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
-                <p className="text-gray-600 mb-4">Review and manage submitted governance policies and documents.</p>
+                <p className="text-gray-600 mb-4">Review and manage submitted quality metrics and documents.</p>
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company Name</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Policy/Document Name</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quality Metric</th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted Date</th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {dummyGovSubmissions.map((submission) => (
+                        {dummyQualitySubmissions.map((submission) => (
                             <tr key={submission.id}>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{submission.companyName}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{submission.policyName}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{submission.metricName}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{submission.submitted}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClass(submission.status)}`}>
@@ -63,4 +63,4 @@ const GovernanceManagement = () => {
     );
 };
 
-export default GovernanceManagement; 
+export default QualityManagement; 

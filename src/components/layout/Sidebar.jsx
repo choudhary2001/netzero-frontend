@@ -247,13 +247,18 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             icon: <FiUsers className="h-5 w-5" />
           },
           {
+            name: 'Quality',
+            path: '/supplier/quality',
+            icon: <FiCheckSquare className="h-5 w-5" />
+          },
+          {
             name: 'Governance',
             path: '/supplier/governance',
             icon: <FiBell className="h-5 w-5" />
           },
           {
-            name: 'KPI',
-            path: '/supplier/kpi',
+            name: 'Carbon Emission',
+            path: '/supplier/carbon-emission',
             icon: <FiClock className="h-5 w-5" />
           },
           {

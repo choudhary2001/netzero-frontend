@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { FaPlus, FaTrash, FaArrowRight, FaArrowLeft, FaCheckCircle, FaCloudUploadAlt, FaSpinner } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaArrowRight, FaArrowLeft, FaCheckCircle, FaCloudUploadAlt, FaSpinner, FaDownload } from 'react-icons/fa';
 import esgService from '../../services/esgService';
 import { toast } from 'react-toastify';
-
+import { getMediaUrl } from './../../config';
 const CompanyInfoForm = () => {
     const [formData, setFormData] = useState({
         companyName: '',
@@ -73,6 +73,7 @@ const CompanyInfoForm = () => {
                 if (response.success && response.data && response.data.companyInfo) {
                     // Update form data with existing values
                     const companyData = response.data.companyInfo;
+                    console.log(companyData);
                     setFormData({
                         ...formData,
                         ...companyData
@@ -80,7 +81,7 @@ const CompanyInfoForm = () => {
 
                     // Update file label if certificate exists
                     if (companyData.registrationCertificate) {
-                        setFileLabel(companyData.registrationCertificate.split('\\').pop());
+                        setFileLabel(companyData.registrationCertificate.split('/').pop());
                     }
 
                     setSaved(true);
@@ -265,6 +266,45 @@ const CompanyInfoForm = () => {
         }
     };
 
+    const handleDownload = async () => {
+        if (formData.registrationCertificate && typeof formData.registrationCertificate === 'string') {
+            try {
+                setLoading(true);
+                const fileUrl = getMediaUrl(formData.registrationCertificate);
+                const filename = formData.registrationCertificate.split('/').pop();
+
+                // Fetch the file
+                const response = await fetch(fileUrl);
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                // Get the blob from the response
+                const blob = await response.blob();
+
+                // Create a blob URL
+                const blobUrl = window.URL.createObjectURL(blob);
+
+                // Create a temporary link and trigger download
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = filename; // Force download with filename
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+
+                // Clean up
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(blobUrl);
+
+                toast.success('Download started');
+            } catch (error) {
+                console.error('Error downloading certificate:', error);
+                toast.error('Error downloading certificate. Please try again.');
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
     // Helper function to render step content
     const renderStepContent = () => {
         const currentSection = steps[currentStep].id;
@@ -346,20 +386,42 @@ const CompanyInfoForm = () => {
                                     className="hidden"
                                     accept="image/*,.pdf"
                                 />
-                                <label
-                                    htmlFor="registrationCertificate"
-                                    className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 border border-green-500 text-green-500 rounded-md hover:bg-green-500 hover:text-white cursor-pointer mr-2 sm:mr-3 text-sm sm:text-base"
-                                >
-                                    <FaCloudUploadAlt className="mr-2" />
-                                    Upload File
-                                </label>
-                                <span className="text-gray-600 text-sm sm:text-base break-all">
-                                    {fileLabel}
-                                    {saved && <FaCheckCircle className="ml-2 text-green-500 inline" />}
-                                </span>
-                                <p className="text-xs text-gray-500 mt-1">
-                                    Registration certificate, company profile, business license, etc.
-                                </p>
+                                <div className="flex items-center space-x-2">
+                                    <label
+                                        htmlFor="registrationCertificate"
+                                        className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 border border-green-500 text-green-500 rounded-md hover:bg-green-500 hover:text-white cursor-pointer text-sm sm:text-base"
+                                    >
+                                        <FaCloudUploadAlt className="mr-2" />
+                                        Upload File
+                                    </label>
+
+                                    {formData.registrationCertificate && typeof formData.registrationCertificate === 'string' && (
+                                        <button
+                                            type="button"
+                                            onClick={handleDownload}
+                                            disabled={loading}
+                                            className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 border border-blue-500 text-blue-500 rounded-md hover:bg-blue-500 hover:text-white text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {loading ? (
+                                                <FaSpinner className="animate-spin mr-2" />
+                                            ) : (
+                                                <FaDownload className="mr-2" />
+                                            )}
+                                            {loading ? 'Downloading...' : 'Download'}
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div className="mt-2">
+                                    <span className="text-gray-600 text-sm sm:text-base break-all">
+                                        {fileLabel}
+                                        {saved && <FaCheckCircle className="ml-2 text-green-500 inline" />}
+                                    </span>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Registration certificate, company profile, business license, etc.
+                                    </p>
+                                </div>
+
                                 {
                                     formData.points > 0 && (
                                         <div className="mt-4 space-y-3 bg-gray-50 rounded-lg p-4 border border-gray-100">

@@ -32,14 +32,14 @@ const esgService = {
                     esgScores: {
                         environmental: 0,
                         social: 0,
-                        governance: 0,
+                        quality: 0,
                         overall: 0
                     },
                     formCompletion: {
                         company: 0,
                         environmental: 0,
                         social: 0,
-                        governance: 0
+                        quality: 0
                     },
                     recentUpdates: []
                 }
@@ -109,7 +109,7 @@ const esgService = {
     updateESGData: async (category, section, data) => {
         try {
             const response = await api.post('/esg/update', {
-                category, // 'environment', 'social', or 'governance'
+                category, // 'environment', 'social', or 'quality'
                 section,  // The specific section within the category
                 data      // The data to update
             });

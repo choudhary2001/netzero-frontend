@@ -48,14 +48,11 @@ const Login = () => {
         try {
             const data = await authService.login(credentials);
             dispatch(login(data));
-
-            // Redirect based on user role
+            window.location.reload();
             if (data.user.role === 'admin') {
                 navigate('/admin/dashboard');
-            } else if (data.user.role === 'teacher') {
-                navigate('/teacher/dashboard');
-            } else if (data.user.role === 'student') {
-                navigate('/student/dashboard');
+            } else if (data.user.role === 'supplier') {
+                navigate('/supplier/dashboard');
             } else {
                 navigate('/');
             }
