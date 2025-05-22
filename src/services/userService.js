@@ -136,6 +136,16 @@ const userService = {
             console.error('Error changing password:', error);
             throw error;
         }
+    },
+
+    submitContactForm: async (data) => {
+        try {
+            const response = await api.post('/contact/', data);
+            return response;
+        } catch (error) {
+            console.error('Error submitting contact form:', error);
+            throw error;
+        }
     }
 };
 

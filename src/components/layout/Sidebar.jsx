@@ -159,6 +159,11 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             icon: <FiMessageSquare className="h-5 w-5" />,
             badge: unreadCount > 0 ? unreadCount : null
           },
+          {
+            name: 'Contact Management',
+            path: '/admin/contact-management',
+            icon: <FiMessageSquare className="h-5 w-5" />,
+          },
 
         ];
       case 'company':

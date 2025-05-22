@@ -307,7 +307,7 @@ const Register = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 to-indigo-100 flex items-center justify-center p-4">
             <div className="w-full max-w-md">
-                <div className="text-center mb-8">
+                <a href="/" className="text-center mb-8">
                     <motion.h2
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
@@ -316,7 +316,8 @@ const Register = () => {
                     >
                         NETZERO
                     </motion.h2>
-                </div>
+                </a>
+                <div className="text-center mb-8"></div>
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}

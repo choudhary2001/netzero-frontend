@@ -201,6 +201,66 @@ const adminService = {
             console.error('Error marking messages as read:', error);
             throw error;
         }
+    },
+
+    submitContactForm: async (data) => {
+        try {
+            const response = await api.post('/contact/', data);
+            return response;
+        } catch (error) {
+            console.error('Error submitting contact form:', error);
+            throw error;
+        }
+    },
+
+    getAllContacts: async (params) => {
+        try {
+            const response = await api.get('/admin/contacts', { params });
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching contacts:', error);
+            throw error;
+        }
+    },
+
+    getContactById: async (id) => {
+        try {
+            const response = await api.get(`/admin/contacts/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching contact:', error);
+            throw error;
+        }
+    },
+
+    updateContact: async (id, data) => {
+        try {
+            const response = await api.put(`/admin/contacts/${id}`, data);
+            return response.data;
+        } catch (error) {
+            console.error('Error updating contact:', error);
+            throw error;
+        }
+    },
+
+    deleteContact: async (id) => {
+        try {
+            const response = await api.delete(`/admin/contacts/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error deleting contact:', error);
+            throw error;
+        }
+    },
+
+    getContactStats: async () => {
+        try {
+            const response = await api.get('/admin/contacts/stats');
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching contact stats:', error);
+            throw error;
+        }
     }
 };
 

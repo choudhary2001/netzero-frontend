@@ -5,6 +5,11 @@ import Layout from './components/layout/Layout';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import SupplierDashboard from './components/supplier/Dashboard';
+import LandingPage from './components/landing/LandingPage';
+import AboutUs from './components/landing/AboutUs';
+import ContactUs from './components/landing/ContactUs';
+import PrivacyPolicy from './components/landing/PrivacyPolicy';
+import Terms from './components/landing/Terms';
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -30,7 +35,7 @@ import GovernanceManagement from './components/admin/GovernanceManagement';
 import SocialManagement from './components/admin/SocialManagement';
 import UserManagement from './components/admin/UserManagement';
 import ChatPage from './components/admin/AdminChat';
-
+import ContactManagement from './components/admin/ContactManagement';
 
 const App = () => {
   const { token, user } = useSelector((state) => state.auth);
@@ -48,8 +53,15 @@ const App = () => {
     <AuthProvider>
       <Router>
         <Routes>
+          {/* Public Routes */}
+          <Route path="/landing" element={<LandingPage />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/contact" element={<ContactUs />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<Terms />} />
+
           <Route path="/login" element={
-            token ? <Navigate to="/" /> : <Login />
+            token ? <Navigate to="/dashboard" /> : <Login />
           } />
 
           {/* Admin Routes */}
@@ -109,6 +121,13 @@ const App = () => {
             <RoleBasedRoute allowedRoles={['admin']}>
               <Layout>
                 <ChatPage />
+              </Layout>
+            </RoleBasedRoute>
+          } />
+          <Route path="/admin/contact-management" element={
+            <RoleBasedRoute allowedRoles={['admin']}>
+              <Layout>
+                <ContactManagement />
               </Layout>
             </RoleBasedRoute>
           } />
@@ -212,8 +231,8 @@ const App = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Default Route */}
-          <Route path="/" element={
+          {/* Dashboard Route */}
+          <Route path="/dashboard" element={
             <PrivateRoute>
               <Layout>
                 {user?.role === 'admin' && <Navigate to="/admin/dashboard" />}
@@ -221,6 +240,15 @@ const App = () => {
                 {user?.role === 'supplier' && <Navigate to="/supplier/dashboard" />}
               </Layout>
             </PrivateRoute>
+          } />
+
+          {/* Default Route */}
+          <Route path="/" element={
+            token ? (
+              <Navigate to="/dashboard" />
+            ) : (
+              <LandingPage />
+            )
           } />
         </Routes>
       </Router>
