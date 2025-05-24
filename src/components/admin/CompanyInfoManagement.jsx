@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { FaEye, FaCheck, FaTimes, FaSpinner, FaPaperclip, FaCommentAlt, FaSave, FaSearch, FaFilter, FaCalendarAlt, FaBuilding, FaChartLine, FaUsers } from 'react-icons/fa';
+import { FaEye, FaCheck, FaTimes, FaSpinner, FaPaperclip, FaCommentAlt, FaSave, FaSearch, FaFilter, FaCalendarAlt, FaBuilding, FaChartLine, FaUsers, FaDownload } from 'react-icons/fa';
 import { useLocation } from 'react-router-dom';
 import adminService from '../../services/adminService';
 import { toast } from 'react-toastify';
 import { getMediaUrl } from './../../config';
 import { useNavigate } from 'react-router-dom';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 
 const CompanyInfoManagement = () => {
     const navigate = useNavigate();
@@ -261,6 +263,257 @@ const CompanyInfoManagement = () => {
                 companyId: company.userId._id
             }
         });
+    };
+
+    const handleDownloadPdf = (company) => {
+        const doc = new jsPDF();
+        const { companyInfo, overallScore, environment, social, quality, governance } = company;
+        let y = 20; // Initialize y at the start
+
+        // Helper function to add a new page and reset y
+        const addNewPage = () => {
+            doc.addPage();
+            y = 20;
+        };
+
+        // Helper function to add a section header
+        const addSectionHeader = (title, color = [66, 139, 202]) => {
+            if (y > 250) addNewPage();
+            doc.setFontSize(16);
+            doc.setTextColor(...color);
+            doc.text(title, 14, y);
+            y += 10;
+            doc.setDrawColor(...color);
+            doc.line(14, y, 196, y);
+            y += 15;
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(12);
+        };
+
+        // Helper function to add a subsection
+        const addSubsection = (title, color = [100, 100, 100]) => {
+            if (y > 270) addNewPage();
+            doc.setFontSize(14);
+            doc.setTextColor(...color);
+            doc.text(title, 20, y);
+            y += 10;
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+        };
+
+        // Helper function to add a question and answer
+        const addQA = (question, answer, indent = 0) => {
+            if (y > 270) addNewPage();
+            const maxWidth = 170 - indent;
+
+            // Add question
+            doc.setFont(undefined, 'bold');
+            const questionLines = doc.splitTextToSize(question, maxWidth);
+            doc.text(questionLines, 20 + indent, y);
+            y += (questionLines.length * 7);
+
+            // Add answer
+            doc.setFont(undefined, 'normal');
+            const answerLines = doc.splitTextToSize(answer || 'N/A', maxWidth);
+            doc.text(answerLines, 25 + indent, y);
+            y += (answerLines.length * 7) + 5;
+        };
+
+        // Cover Page
+        doc.setFillColor(66, 139, 202);
+        doc.rect(0, 0, 210, 297, 'F');
+
+        // Company Logo/Name
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(24);
+        const companyName = companyInfo?.companyName || "Company Report";
+        const companyNameLines = doc.splitTextToSize(companyName, 180);
+        doc.text(companyNameLines, 105, 100, { align: 'center' });
+
+        // Report Title
+        doc.setFontSize(20);
+        doc.text("ESG Assessment Report", 105, 120, { align: 'center' });
+
+        // Generation Date
+        doc.setFontSize(12);
+        doc.text("Generated on: " + new Date().toLocaleDateString(), 105, 140, { align: 'center' });
+
+        // ESG Score Summary
+        doc.setFontSize(16);
+        doc.text("Overall ESG Score: " + (overallScore?.total ? (overallScore.total * 100).toFixed(0) + "%" : "N/A"), 105, 160, { align: 'center' });
+
+        // Add new page for detailed content
+        addNewPage();
+
+        // Executive Summary
+        addSectionHeader("Executive Summary", [66, 139, 202]);
+        doc.setFontSize(12);
+        const summaryText = `This report presents the Environmental, Social, and Governance (ESG) assessment for ${companyName}. 
+The company has achieved an overall ESG score of ${overallScore?.total ? (overallScore.total * 100).toFixed(0) + "%" : "N/A"}, 
+demonstrating its commitment to sustainable business practices.`;
+        const summaryLines = doc.splitTextToSize(summaryText, 180);
+        doc.text(summaryLines, 14, y);
+        y += (summaryLines.length * 7) + 15;
+
+        // Score Breakdown
+        addSubsection("ESG Score Breakdown");
+        const scores = [
+            { label: "Environment", score: overallScore?.environment, color: [46, 204, 113] },
+            { label: "Social", score: overallScore?.social, color: [155, 89, 182] },
+            { label: "Quality", score: overallScore?.quality, color: [52, 152, 219] },
+            { label: "Governance", score: overallScore?.governance, color: [230, 126, 34] }
+        ];
+
+        scores.forEach(({ label, score, color }) => {
+            if (y > 270) addNewPage();
+            doc.setTextColor(...color);
+            doc.text(`${label}: ${score ? (score * 100).toFixed(0) + "%" : "N/A"}`, 20, y);
+            y += 10;
+        });
+        doc.setTextColor(0, 0, 0);
+        y += 10;
+
+        // Company Information
+        addSectionHeader("Company Information", [46, 204, 113]);
+        const companyDetails = [
+            { label: "Company Name", value: companyInfo?.companyName },
+            { label: "Registration Number", value: companyInfo?.registrationNumber },
+            { label: "Business Type", value: companyInfo?.businessType },
+            { label: "Establishment Year", value: companyInfo?.establishmentYear },
+            { label: "Company Address", value: companyInfo?.companyAddress }
+        ];
+
+        companyDetails.forEach(({ label, value }) => {
+            addQA(label, value);
+        });
+
+        // Environment Section
+        if (environment) {
+            addSectionHeader("Environmental Assessment", [46, 204, 113]);
+            Object.entries(environment).forEach(([section, data]) => {
+                if (!data) return;
+
+                addSubsection(section.replace(/([A-Z])/g, ' $1').trim());
+
+                // Add all questions and answers from the section
+                Object.entries(data).forEach(([key, value]) => {
+                    if (key === 'certificate' || key === 'points' || key === 'remarks') return;
+
+                    let displayValue = value;
+                    if (typeof value === 'boolean') {
+                        displayValue = value ? 'Yes' : 'No';
+                    } else if (typeof value === 'object' && value !== null) {
+                        if (Array.isArray(value)) {
+                            displayValue = value.join(', ');
+                        } else {
+                            displayValue = Object.entries(value)
+                                .map(([k, v]) => `${k}: ${v}`)
+                                .join(', ');
+                        }
+                    }
+
+                    addQA(key.replace(/([A-Z])/g, ' $1').trim(), displayValue, 10);
+                });
+            });
+        }
+
+        // Social Section
+        if (social) {
+            addSectionHeader("Social Responsibility Assessment", [155, 89, 182]);
+            Object.entries(social).forEach(([section, data]) => {
+                if (!data) return;
+
+                addSubsection(section.replace(/([A-Z])/g, ' $1').trim());
+
+                Object.entries(data).forEach(([key, value]) => {
+                    if (key === 'certificate' || key === 'points' || key === 'remarks') return;
+
+                    let displayValue = value;
+                    if (typeof value === 'boolean') {
+                        displayValue = value ? 'Yes' : 'No';
+                    } else if (typeof value === 'object' && value !== null) {
+                        if (Array.isArray(value)) {
+                            displayValue = value.join(', ');
+                        } else {
+                            displayValue = Object.entries(value)
+                                .map(([k, v]) => `${k}: ${v}`)
+                                .join(', ');
+                        }
+                    }
+
+                    addQA(key.replace(/([A-Z])/g, ' $1').trim(), displayValue, 10);
+                });
+            });
+        }
+
+        // Quality Section
+        if (quality) {
+            addSectionHeader("Quality Management Assessment", [52, 152, 219]);
+            Object.entries(quality).forEach(([section, data]) => {
+                if (!data) return;
+
+                addSubsection(section.replace(/([A-Z])/g, ' $1').trim());
+
+                Object.entries(data).forEach(([key, value]) => {
+                    if (key === 'certificate' || key === 'points' || key === 'remarks') return;
+
+                    let displayValue = value;
+                    if (typeof value === 'boolean') {
+                        displayValue = value ? 'Yes' : 'No';
+                    } else if (typeof value === 'object' && value !== null) {
+                        if (Array.isArray(value)) {
+                            displayValue = value.join(', ');
+                        } else {
+                            displayValue = Object.entries(value)
+                                .map(([k, v]) => `${k}: ${v}`)
+                                .join(', ');
+                        }
+                    }
+
+                    addQA(key.replace(/([A-Z])/g, ' $1').trim(), displayValue, 10);
+                });
+            });
+        }
+
+        // Governance Section
+        if (governance) {
+            addSectionHeader("Governance Assessment", [230, 126, 34]);
+            Object.entries(governance).forEach(([section, data]) => {
+                if (!data) return;
+
+                addSubsection(section.replace(/([A-Z])/g, ' $1').trim());
+
+                Object.entries(data).forEach(([key, value]) => {
+                    if (key === 'certificate' || key === 'points' || key === 'remarks') return;
+
+                    let displayValue = value;
+                    if (typeof value === 'boolean') {
+                        displayValue = value ? 'Yes' : 'No';
+                    } else if (typeof value === 'object' && value !== null) {
+                        if (Array.isArray(value)) {
+                            displayValue = value.join(', ');
+                        } else {
+                            displayValue = Object.entries(value)
+                                .map(([k, v]) => `${k}: ${v}`)
+                                .join(', ');
+                        }
+                    }
+
+                    addQA(key.replace(/([A-Z])/g, ' $1').trim(), displayValue, 10);
+                });
+            });
+        }
+
+        // Organization Roles
+        if (companyInfo?.organizationRoles?.length > 0) {
+            addSectionHeader("Organization Structure", [149, 165, 166]);
+            companyInfo.organizationRoles.forEach((role, index) => {
+                addQA(`Role ${index + 1}`, `${role.role}: ${role.responsibility}`);
+            });
+        }
+
+        // Save the PDF
+        doc.save(`${companyName.replace(/[^a-z0-9]/gi, '_')}_ESG_Assessment_Report.pdf`);
     };
 
     const renderCompanyDetails = () => {
@@ -1019,7 +1272,10 @@ const CompanyInfoManagement = () => {
                                             <button
                                                 className="text-blue-600 hover:text-blue-900"
                                                 title="Chat"
-                                                onClick={() => handleOpenChat(company)}
+                                                onClick={() => {
+                                                    handleOpenChat(company);
+                                                    handleDownloadPdf(company);
+                                                }}
                                             >
                                                 <FaCommentAlt />
                                             </button>
@@ -1107,6 +1363,12 @@ const CompanyInfoManagement = () => {
                                     onClick={() => handleStatusChange(selectedCompany._id, 'rejected')}
                                 >
                                     <FaTimes className="mr-1" /> Reject
+                                </button>
+                                <button
+                                    className="px-3 py-1 bg-amber-50 text-amber-700 rounded hover:bg-amber-100 transition-colors flex items-center text-sm"
+                                    onClick={() => handleDownloadPdf(selectedCompany)}
+                                >
+                                    <FaDownload className="mr-1" /> Download PDF
                                 </button>
                             </div>
                         </div>

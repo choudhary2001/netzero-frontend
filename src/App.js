@@ -17,7 +17,7 @@ import ForgotPassword from './components/auth/ForgotPassword';
 
 import { AuthProvider } from './contexts/AuthContext';
 import Profile from './components/profile/Profile';
-
+import ScrollToTop from './components/ScrollToTop';
 
 import CompanyInfo from './components/supplier/CompanyInfoForm';
 import Environment from './components/supplier/EnvironmentForm';
@@ -52,6 +52,7 @@ const App = () => {
   return (
     <AuthProvider>
       <Router>
+        <ScrollToTop />
         <Routes>
           {/* Public Routes */}
           <Route path="/landing" element={<LandingPage />} />
