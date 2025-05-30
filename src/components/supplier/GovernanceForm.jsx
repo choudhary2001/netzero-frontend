@@ -208,8 +208,73 @@ const GovernanceForm = () => {
         }
     };
 
+    const validateCurrentStep = () => {
+        const currentSection = steps[currentStep].id;
+        let sectionKey;
+
+        switch (currentSection) {
+            case 'structure':
+                sectionKey = 'governanceStructure';
+                break;
+            case 'policies':
+                sectionKey = 'policiesCompliance';
+                break;
+            case 'reporting':
+                sectionKey = 'reportingTargets';
+                break;
+            case 'supplier':
+                sectionKey = 'supplierDueDiligence';
+                break;
+            case 'incidents':
+                sectionKey = 'incidentsRemediation';
+                break;
+            default:
+                return true;
+        }
+
+        // Check if the value field is empty
+        if (!formData[sectionKey].value || formData[sectionKey].value.trim() === '') {
+            toast.error(`Please provide details for ${steps[currentStep].label}`);
+            return false;
+        }
+
+        // Check if certificate is uploaded
+        if (!formData[sectionKey].certificate) {
+            toast.error(`Please upload supporting documents for ${steps[currentStep].label}`);
+            return false;
+        }
+
+        return true;
+    };
+
+    const validateAllSteps = () => {
+        const sections = [
+            { key: 'governanceStructure', label: 'Governance Structure' },
+            { key: 'policiesCompliance', label: 'Policies & Compliance' },
+            { key: 'reportingTargets', label: 'Reporting & Targets' },
+            { key: 'supplierDueDiligence', label: 'Supplier Due Diligence' },
+            { key: 'incidentsRemediation', label: 'Incidents & Remediation' }
+        ];
+
+        for (const section of sections) {
+            if (!formData[section.key].value || formData[section.key].value.trim() === '') {
+                toast.error(`Please provide details for ${section.label}`);
+                return false;
+            }
+            if (!formData[section.key].certificate) {
+                toast.error(`Please upload supporting documents for ${section.label}`);
+                return false;
+            }
+        }
+
+        return true;
+    };
+
     const nextStep = async () => {
         if (currentStep < steps.length - 1) {
+            if (!validateCurrentStep()) {
+                return;
+            }
             await saveCurrentStep();
             setCurrentStep(currentStep + 1);
         }
@@ -222,6 +287,10 @@ const GovernanceForm = () => {
     };
 
     const saveCurrentStep = async () => {
+        if (!validateCurrentStep()) {
+            return;
+        }
+
         try {
             setLoading(true);
             const currentSection = steps[currentStep].id;
@@ -290,6 +359,11 @@ const GovernanceForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!validateAllSteps()) {
+            return;
+        }
+
         try {
             setSubmitting(true);
             await saveCurrentStep();
@@ -310,7 +384,7 @@ const GovernanceForm = () => {
     const renderFileUpload = (section, label, description) => (
         <div className="mt-2 mb-4">
             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                {label}
+                {label} <span class="text-red-500">*</span>
             </label>
             <div className="mt-1">
                 <input
@@ -403,9 +477,10 @@ const GovernanceForm = () => {
                     <div className="space-y-4">
                         <div>
                             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                                Do you have a board-level ESG committee or equivalent oversight body? Who is accountable for ESG performance?
+                                Do you have a board-level ESG committee or equivalent oversight body? Who is accountable for ESG performance? <span className="text-red-500">*</span>
                             </label>
                             <textarea
+                                required
                                 disabled={view}
                                 value={formData.governanceStructure.value}
                                 onChange={(e) => handleChange('governanceStructure', e.target.value)}
@@ -426,9 +501,10 @@ const GovernanceForm = () => {
                     <div className="space-y-4">
                         <div>
                             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                                Describe your anti-corruption and anti-bribery policies. Have you conducted any third-party audits or risk assessments? What key compliance policies and procedures do you have in place?
+                                Describe your anti-corruption and anti-bribery policies. Have you conducted any third-party audits or risk assessments? What key compliance policies and procedures do you have in place? <span className="text-red-500">*</span>
                             </label>
                             <textarea
+                                required
                                 disabled={view}
                                 value={formData.policiesCompliance.value}
                                 onChange={(e) => handleChange('policiesCompliance', e.target.value)}
@@ -449,9 +525,10 @@ const GovernanceForm = () => {
                     <div className="space-y-4">
                         <div>
                             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                                How often do you report ESG performance to your board and external stakeholders? Which key metrics are included? Have you set any science-based targets (SBTi) or committed to GRI, TCFD, CDP, etc.?
+                                How often do you report ESG performance to your board and external stakeholders? Which key metrics are included? Have you set any science-based targets (SBTi) or committed to GRI, TCFD, CDP, etc.? <span className="text-red-500">*</span>
                             </label>
                             <textarea
+                                required
                                 disabled={view}
                                 value={formData.reportingTargets.value}
                                 onChange={(e) => handleChange('reportingTargets', e.target.value)}
@@ -472,9 +549,10 @@ const GovernanceForm = () => {
                     <div className="space-y-4">
                         <div>
                             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                                Do you screen your suppliers for ESG risks? Summarize your upstream due-diligence process and corrective-action rates. What IT systems or tools do you use to track and verify ESG data?
+                                Do you screen your suppliers for ESG risks? Summarize your upstream due-diligence process and corrective-action rates. What IT systems or tools do you use to track and verify ESG data? <span className="text-red-500">*</span>
                             </label>
                             <textarea
+                                required
                                 disabled={view}
                                 value={formData.supplierDueDiligence.value}
                                 onChange={(e) => handleChange('supplierDueDiligence', e.target.value)}
@@ -495,9 +573,10 @@ const GovernanceForm = () => {
                     <div className="space-y-4">
                         <div>
                             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                                Have you faced any material ESG non-compliance or controversies in the last 3 years? Describe the issue and your remediation plan.
+                                Have you faced any material ESG non-compliance or controversies in the last 3 years? Describe the issue and your remediation plan. <span className="text-red-500">*</span>
                             </label>
                             <textarea
+                                required
                                 disabled={view}
                                 value={formData.incidentsRemediation.value}
                                 onChange={(e) => handleChange('incidentsRemediation', e.target.value)}

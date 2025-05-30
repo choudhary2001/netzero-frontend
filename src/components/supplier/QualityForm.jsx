@@ -187,9 +187,77 @@ const QualityForm = () => {
         }
     };
 
+    const validateCurrentStep = () => {
+        const currentSection = steps[currentStep].id;
+        let sectionKey;
+
+        switch (currentSection) {
+            case 'delivery':
+                sectionKey = 'deliveryPerformance';
+                break;
+            case 'quality':
+                sectionKey = 'qualityManagement';
+                break;
+            case 'process':
+                sectionKey = 'processControl';
+                break;
+            case 'material':
+                sectionKey = 'materialManagement';
+                break;
+            case 'maintenance':
+                sectionKey = 'maintenanceCalibration';
+                break;
+            case 'technology':
+                sectionKey = 'technologyUpgradation';
+                break;
+            default:
+                return true;
+        }
+
+        // Check if the value field is empty
+        if (!formData[sectionKey].value || formData[sectionKey].value.trim() === '') {
+            toast.error(`Please provide details for ${steps[currentStep].label}`);
+            return false;
+        }
+
+        // Check if certificate is uploaded
+        if (!formData[sectionKey].certificate) {
+            toast.error(`Please upload supporting documents for ${steps[currentStep].label}`);
+            return false;
+        }
+
+        return true;
+    };
+
+    const validateAllSteps = () => {
+        const sections = [
+            { key: 'deliveryPerformance', label: 'Delivery Performance' },
+            { key: 'qualityManagement', label: 'Quality Management' },
+            { key: 'processControl', label: 'Process Control' },
+            { key: 'materialManagement', label: 'Material Management' },
+            { key: 'maintenanceCalibration', label: 'Maintenance & Calibration' },
+            { key: 'technologyUpgradation', label: 'Technology Upgradation' }
+        ];
+
+        for (const section of sections) {
+            if (!formData[section.key].value || formData[section.key].value.trim() === '') {
+                toast.error(`Please provide details for ${section.label}`);
+                return false;
+            }
+            if (!formData[section.key].certificate) {
+                toast.error(`Please upload supporting documents for ${section.label}`);
+                return false;
+            }
+        }
+
+        return true;
+    };
+
     const nextStep = async () => {
         if (currentStep < steps.length - 1) {
-            // Save current data before proceeding
+            if (!validateCurrentStep()) {
+                return;
+            }
             await saveCurrentStep();
             setCurrentStep(currentStep + 1);
         }
@@ -202,6 +270,10 @@ const QualityForm = () => {
     };
 
     const saveCurrentStep = async () => {
+        if (!validateCurrentStep()) {
+            return;
+        }
+
         try {
             setLoading(true);
             const currentSection = steps[currentStep].id;
@@ -278,6 +350,10 @@ const QualityForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (!validateAllSteps()) {
+            return;
+        }
+
         try {
             setSubmitting(true);
 
@@ -344,7 +420,7 @@ const QualityForm = () => {
     const renderFileUpload = (section, label, description) => (
         <div className="mt-2 mb-4">
             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                {label}
+                {label} <span className="text-red-500">*</span>
             </label>
             <div className="mt-1">
                 <input
@@ -354,6 +430,7 @@ const QualityForm = () => {
                     className="hidden"
                     accept="image/*,.pdf"
                     disabled={view}
+                    required
                 />
                 <div className="flex items-center space-x-2">
                     <label
@@ -439,9 +516,10 @@ const QualityForm = () => {
                     <div className="space-y-4">
                         <div>
                             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                                Is delivery performance monitored and periodically reviewed by management?
+                                Is delivery performance monitored and periodically reviewed by management? <span className="text-red-500">*</span>
                             </label>
                             <input
+                                required
                                 disabled={view}
                                 type="text"
                                 value={formData.deliveryPerformance.value}
@@ -463,9 +541,10 @@ const QualityForm = () => {
                     <div className="space-y-4">
                         <div>
                             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                                Are quality standards defined and are testing/certification processes in place?
+                                Are quality standards defined and are testing/certification processes in place? <span className="text-red-500">*</span>
                             </label>
                             <input
+                                required
                                 disabled={view}
                                 type="text"
                                 value={formData.qualityManagement.value}
@@ -487,9 +566,10 @@ const QualityForm = () => {
                     <div className="space-y-4">
                         <div>
                             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                                Are SOPs established for critical processes with continuous monitoring and periodic reviews?
+                                Are SOPs established for critical processes with continuous monitoring and periodic reviews? <span className="text-red-500">*</span>
                             </label>
                             <input
+                                required
                                 disabled={view}
                                 type="text"
                                 value={formData.processControl.value}
@@ -511,9 +591,10 @@ const QualityForm = () => {
                     <div className="space-y-4">
                         <div>
                             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                                Is there a plan for optimal inventory control and proper material handling?
+                                Is there a plan for optimal inventory control and proper material handling? <span className="text-red-500">*</span>
                             </label>
                             <input
+                                required
                                 disabled={view}
                                 type="text"
                                 value={formData.materialManagement.value}
@@ -535,9 +616,10 @@ const QualityForm = () => {
                     <div className="space-y-4">
                         <div>
                             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                                Are preventive maintenance and calibration plans implemented with MTTR/MTBF tracking?
+                                Are preventive maintenance and calibration plans implemented with MTTR/MTBF tracking? <span className="text-red-500">*</span>
                             </label>
                             <input
+                                required
                                 disabled={view}
                                 type="text"
                                 value={formData.maintenanceCalibration.value}
@@ -559,9 +641,10 @@ const QualityForm = () => {
                     <div className="space-y-4">
                         <div>
                             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                                Is there a proactive plan for technology upgrades, including digital tools (IoT, sensors, smart machines)?
+                                Is there a proactive plan for technology upgrades, including digital tools (IoT, sensors, smart machines)? <span className="text-red-500">*</span>
                             </label>
                             <input
+                                required
                                 disabled={view}
                                 type="text"
                                 value={formData.technologyUpgradation.value}

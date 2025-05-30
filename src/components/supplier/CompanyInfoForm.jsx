@@ -186,8 +186,80 @@ const CompanyInfoForm = () => {
         setSaved(false);
     };
 
+    const validateBasicInfo = () => {
+        const requiredFields = {
+            companyName: 'Company Name',
+            registrationNumber: 'Registration Number',
+            establishmentYear: 'Establishment Year',
+            businessType: 'Business Type',
+            companyAddress: 'Company Address'
+        };
+
+        for (const [field, label] of Object.entries(requiredFields)) {
+            if (!formData[field] || formData[field].trim() === '') {
+                toast.error(`${label} is required`);
+                return false;
+            }
+        }
+
+        if (!formData.registrationCertificate) {
+            toast.error('Registration Certificate is required');
+            return false;
+        }
+
+        return true;
+    };
+
+    const validateLeadershipInfo = () => {
+        if (!formData.rolesDefinedClearly) {
+            toast.error('Please specify if roles are clearly defined');
+            return false;
+        }
+
+        if (formData.rolesDefinedClearly === 'YES') {
+            for (let i = 0; i < formData.organizationRoles.length; i++) {
+                const role = formData.organizationRoles[i];
+                if (!role.role || !role.responsibility ||
+                    role.role.trim() === '' || role.responsibility.trim() === '') {
+                    toast.error(`Please fill in all role and responsibility fields for entry ${i + 1}`);
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    };
+
+    const validateSustainabilityInfo = () => {
+        for (let i = 0; i < formData.certificates.length; i++) {
+            const cert = formData.certificates[i];
+            if (!cert.type || !cert.level || !cert.validity ||
+                cert.type.trim() === '') {
+                toast.error(`Please fill in all certificate fields for entry ${i + 1}`);
+                return false;
+            }
+        }
+        return true;
+    };
+
+    const validateCurrentStep = () => {
+        switch (steps[currentStep].id) {
+            case 'basic':
+                return validateBasicInfo();
+            case 'leadership':
+                return validateLeadershipInfo();
+            case 'sustainability':
+                return validateSustainabilityInfo();
+            default:
+                return true;
+        }
+    };
+
     const nextStep = async () => {
         if (currentStep < steps.length - 1) {
+            if (!validateCurrentStep()) {
+                return;
+            }
             // Save current data before proceeding
             await saveCompanyData();
             setCurrentStep(currentStep + 1);
@@ -201,6 +273,10 @@ const CompanyInfoForm = () => {
     };
 
     const saveCompanyData = async () => {
+        if (!validateCurrentStep()) {
+            return;
+        }
+
         try {
             setLoading(true);
 
@@ -243,6 +319,12 @@ const CompanyInfoForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Validate all steps before submitting
+        if (!validateBasicInfo() || !validateLeadershipInfo() || !validateSustainabilityInfo()) {
+            toast.error('Please fill in all required fields before submitting');
+            return;
+        }
 
         try {
             setSubmitting(true);
@@ -314,7 +396,9 @@ const CompanyInfoForm = () => {
                 return (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                         <div>
-                            <label className="block text-gray-700 font-medium mb-1 sm:mb-2">Company Name</label>
+                            <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
+                                Company Name <span className="text-red-500">*</span>
+                            </label>
                             <input
                                 type="text"
                                 name="companyName"
@@ -327,7 +411,9 @@ const CompanyInfoForm = () => {
                         </div>
 
                         <div>
-                            <label className="block text-gray-700 font-medium mb-1 sm:mb-2">Registration Number</label>
+                            <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
+                                Registration Number <span className="text-red-500">*</span>
+                            </label>
                             <input
                                 type="text"
                                 name="registrationNumber"
@@ -340,18 +426,23 @@ const CompanyInfoForm = () => {
                         </div>
 
                         <div>
-                            <label className="block text-gray-700 font-medium mb-1 sm:mb-2">Establishment Year</label>
+                            <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
+                                Establishment Year <span className="text-red-500">*</span>
+                            </label>
                             <input
                                 type="date"
                                 name="establishmentYear"
                                 value={formData.establishmentYear}
                                 onChange={handleChange}
+                                required
                                 className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-gray-700 font-medium mb-1 sm:mb-2">Business Type</label>
+                            <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
+                                Business Type <span className="text-red-500">*</span>
+                            </label>
                             <input
                                 type="text"
                                 name="businessType"
@@ -364,7 +455,9 @@ const CompanyInfoForm = () => {
                         </div>
 
                         <div className="md:col-span-2">
-                            <label className="block text-gray-700 font-medium mb-1 sm:mb-2">Company Address</label>
+                            <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
+                                Company Address <span className="text-red-500">*</span>
+                            </label>
                             <textarea
                                 name="companyAddress"
                                 value={formData.companyAddress}
@@ -377,7 +470,9 @@ const CompanyInfoForm = () => {
                         </div>
 
                         <div className="md:col-span-2">
-                            <label className="block text-gray-700 font-medium mb-1 sm:mb-2">Registration Certificate</label>
+                            <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
+                                Registration Certificate <span className="text-red-500">*</span>
+                            </label>
                             <div className="mt-1">
                                 <input
                                     type="file"
@@ -468,7 +563,7 @@ const CompanyInfoForm = () => {
                 return (
                     <div>
                         <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
-                            Are roles and responsibilities clearly defined with an established organogram and regular reviews?
+                            Are roles and responsibilities clearly defined with an established organogram and regular reviews? <span className="text-red-500">*</span>
                         </label>
                         <div className="mt-2 flex flex-wrap items-center space-x-4">
                             <label className="flex items-center mb-2">
@@ -557,7 +652,7 @@ const CompanyInfoForm = () => {
                 return (
                     <div>
                         <p className="text-gray-600 mb-4 text-sm sm:text-base">
-                            What sustainability certifications does your facility hold (e.g., ZED, Green Rating)?
+                            What sustainability certifications does your facility hold (e.g., ZED, Green Rating)? <span className="text-red-500">*</span>
                             Specify the level (Bronze/Silver/Gold) and validity.
                         </p>
 
