@@ -314,7 +314,7 @@ const Register = () => {
                         transition={{ delay: 0.2, duration: 0.5 }}
                         className="text-2xl font-bold text-gray-800"
                     >
-                        NETZERO
+                        Net Zero Journey
                     </motion.h2>
                 </a>
                 <div className="text-center mb-8"></div>
@@ -373,7 +373,7 @@ const Register = () => {
                                         }`}
                                 >
                                     <FaTruck className="mr-2" />
-                                    <span className="font-medium">Supplier</span>
+                                    <span className="font-medium">Value Chain</span>
                                 </button>
                             </div>
                         )}

@@ -6,7 +6,6 @@ import { toast } from 'react-toastify';
 import { getMediaUrl } from './../../config';
 import { useNavigate } from 'react-router-dom';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
 
 const CompanyInfoManagement = () => {
     const navigate = useNavigate();
@@ -268,248 +267,368 @@ const CompanyInfoManagement = () => {
     const handleDownloadPdf = (company) => {
         const doc = new jsPDF();
         const { companyInfo, overallScore, environment, social, quality, governance } = company;
-        let y = 20; // Initialize y at the start
+        let y = 20;
+        const pageHeight = doc.internal.pageSize.height;
+        const pageWidth = doc.internal.pageSize.width;
 
-        // Helper function to add a new page and reset y
-        const addNewPage = () => {
-            doc.addPage();
-            y = 20;
+        // Colors
+        const colors = {
+            primary: [41, 128, 185],
+            secondary: [44, 62, 80],
+            environment: [46, 204, 113],
+            social: [155, 89, 182],
+            quality: [52, 152, 219],
+            governance: [230, 126, 34]
         };
 
-        // Helper function to add a section header
-        const addSectionHeader = (title, color = [66, 139, 202]) => {
-            if (y > 250) addNewPage();
-            doc.setFontSize(16);
-            doc.setTextColor(...color);
-            doc.text(title, 14, y);
-            y += 10;
-            doc.setDrawColor(...color);
-            doc.line(14, y, 196, y);
-            y += 15;
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(12);
+        // Helper function to check and add new page if needed
+        const checkAndAddPage = (requiredHeight) => {
+            if (y + requiredHeight > pageHeight - 20) {
+                doc.addPage();
+                y = 20;
+                return true;
+            }
+            return false;
         };
 
-        // Helper function to add a subsection
-        const addSubsection = (title, color = [100, 100, 100]) => {
-            if (y > 270) addNewPage();
-            doc.setFontSize(14);
-            doc.setTextColor(...color);
-            doc.text(title, 20, y);
-            y += 10;
-            doc.setFontSize(12);
-            doc.setTextColor(0, 0, 0);
+        // Helper function to format date
+        const formatDate = (dateString) => {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
         };
 
-        // Helper function to add a question and answer
-        const addQA = (question, answer, indent = 0) => {
-            if (y > 270) addNewPage();
-            const maxWidth = 170 - indent;
+        // Helper function to draw a table
+        const drawTable = (startX, startY, headers, data, colWidths, rowHeight = 8) => {
+            const cellPadding = 3;
+            let currentY = startY;
 
-            // Add question
+            // Check for new page
+            const totalHeight = (data.length + 1) * rowHeight;
+            if (checkAndAddPage(totalHeight)) {
+                currentY = y;
+            }
+
+            // Draw headers
+            doc.setFillColor(41, 128, 185);
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(10);
             doc.setFont(undefined, 'bold');
-            const questionLines = doc.splitTextToSize(question, maxWidth);
-            doc.text(questionLines, 20 + indent, y);
-            y += (questionLines.length * 7);
+            let currentX = startX;
 
-            // Add answer
+            // Draw header background
+            doc.rect(startX, currentY, colWidths.reduce((a, b) => a + b, 0), rowHeight + 4, 'F');
+
+            // Draw header text
+            headers.forEach((header, i) => {
+                doc.text(header, currentX + cellPadding, currentY + rowHeight + 2);
+                currentX += colWidths[i];
+            });
+            currentY += rowHeight + 4;
+
+            // Draw data rows
+            doc.setTextColor(60, 60, 60);
+            doc.setFontSize(9);
             doc.setFont(undefined, 'normal');
-            const answerLines = doc.splitTextToSize(answer || 'N/A', maxWidth);
-            doc.text(answerLines, 25 + indent, y);
-            y += (answerLines.length * 7) + 5;
+
+            data.forEach((row, rowIndex) => {
+                // Check for page break
+                if (currentY + rowHeight > pageHeight - 20) {
+                    doc.addPage();
+                    currentY = 20;
+                    // Redraw headers on new page
+                    doc.setFillColor(41, 128, 185);
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(10);
+                    doc.setFont(undefined, 'bold');
+                    currentX = startX;
+                    doc.rect(startX, currentY, colWidths.reduce((a, b) => a + b, 0), rowHeight + 4, 'F');
+                    headers.forEach((header, i) => {
+                        doc.text(header, currentX + cellPadding, currentY + rowHeight + 2);
+                        currentX += colWidths[i];
+                    });
+                    currentY += rowHeight + 4;
+                    doc.setTextColor(60, 60, 60);
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'normal');
+                }
+
+                // Draw row background
+                doc.setFillColor(rowIndex % 2 === 0 ? 245 : 255, rowIndex % 2 === 0 ? 245 : 255, rowIndex % 2 === 0 ? 245 : 255);
+                const rowContent = row[1].split('\n');
+                const rowTotalHeight = Math.max(rowHeight, rowContent.length * 5 + 4);
+                doc.rect(startX, currentY, colWidths.reduce((a, b) => a + b, 0), rowTotalHeight, 'F');
+
+                // Draw cell content
+                currentX = startX;
+                row.forEach((cell, colIndex) => {
+                    if (colIndex === 1 && cell.includes('\n')) {
+                        // Handle multiline content
+                        const lines = cell.split('\n');
+                        lines.forEach((line, lineIndex) => {
+                            doc.text(line, currentX + cellPadding, currentY + 5 + (lineIndex * 5));
+                        });
+                    } else {
+                        doc.text(cell, currentX + cellPadding, currentY + 5);
+                    }
+                    currentX += colWidths[colIndex];
+                });
+                currentY += rowTotalHeight;
+            });
+
+            return currentY;
         };
 
-        // Cover Page
-        doc.setFillColor(66, 139, 202);
-        doc.rect(0, 0, 210, 297, 'F');
+        // Helper function to draw a beautiful score card
+        const drawScoreCard = (startY) => {
+            const cardWidth = 180;
+            const cardX = (pageWidth - cardWidth) / 2;
+            const rowHeight = 12;
+            let currentY = startY;
 
-        // Company Logo/Name
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(24);
-        const companyName = companyInfo?.companyName || "Company Report";
-        const companyNameLines = doc.splitTextToSize(companyName, 180);
-        doc.text(companyNameLines, 105, 100, { align: 'center' });
+            // Draw title
+            doc.setFillColor(41, 128, 185);
+            doc.rect(cardX, currentY, cardWidth, rowHeight, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text("ESG PERFORMANCE SCORECARD", pageWidth / 2, currentY + 8, { align: 'center' });
+            currentY += rowHeight;
 
-        // Report Title
-        doc.setFontSize(20);
-        doc.text("ESG Assessment Report", 105, 120, { align: 'center' });
+            // Draw score rows
+            const scores = [
+                ["Overall", (overallScore?.total * 100 || 0).toFixed(0) + "%"],
+                ["Environment", (overallScore?.environment * 100 || 0).toFixed(0) + "%"],
+                ["Social", (overallScore?.social * 100 || 0).toFixed(0) + "%"],
+                ["Quality", (overallScore?.quality * 100 || 0).toFixed(0) + "%"],
+                ["Governance", (overallScore?.governance * 100 || 0).toFixed(0) + "%"]
+            ];
 
-        // Generation Date
-        doc.setFontSize(12);
-        doc.text("Generated on: " + new Date().toLocaleDateString(), 105, 140, { align: 'center' });
+            scores.forEach((score, index) => {
+                // Alternate row colors
+                doc.setFillColor(index % 2 === 0 ? 245 : 255, index % 2 === 0 ? 245 : 255, index % 2 === 0 ? 245 : 255);
+                doc.rect(cardX, currentY, cardWidth, rowHeight, 'F');
 
-        // ESG Score Summary
+                // Category name
+                doc.setTextColor(60, 60, 60);
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                doc.text(score[0], cardX + 10, currentY + 8);
+
+                // Score with color-coded background
+                const scoreValue = parseInt(score[1]);
+                const scoreWidth = 40;
+                const scoreX = cardX + cardWidth - scoreWidth - 10;
+
+                // Score background
+                let scoreColor;
+                if (scoreValue >= 70) scoreColor = [46, 204, 113]; // Green
+                else if (scoreValue >= 40) scoreColor = [241, 196, 15]; // Yellow
+                else scoreColor = [231, 76, 60]; // Red
+
+                doc.setFillColor(...scoreColor);
+                doc.roundedRect(scoreX, currentY + 2, scoreWidth, rowHeight - 4, 2, 2, 'F');
+
+                // Score text
+                doc.setTextColor(255, 255, 255);
+                doc.setFont(undefined, 'bold');
+                doc.text(score[1], scoreX + scoreWidth / 2, currentY + 8, { align: 'center' });
+
+                currentY += rowHeight;
+            });
+
+            return currentY + 10;
+        };
+
+        // Helper function to format object values with better structure
+        const formatObjectValue = (value) => {
+            if (!value || typeof value !== 'object') return String(value || 'N/A');
+
+            if (Array.isArray(value)) {
+                return value.map(item => formatObjectValue(item)).join('\n');
+            }
+
+            const formattedParts = [];
+
+            // Format CSR Projects specially
+            if (value._id && value.name) {
+                return `Project: ${value.name}\nYear: ${value.year}\nDescription: ${value.description}\n`;
+            }
+
+            // Format common fields
+            const fieldMappings = {
+                fairWages: 'Fair Wages',
+                benefits: 'Benefits',
+                wageAudits: 'Wage Audits',
+                leadershipPercentage: 'Leadership %',
+                boardPercentage: 'Board %',
+                details: 'Details',
+                casesRaised: 'Cases Raised',
+                resolutionOutcomes: 'Resolution Outcomes',
+                hoursPerEmployee: 'Hours/Employee',
+                keyPrograms: 'Key Programs',
+                initiatives: 'Initiatives',
+                localHiring: 'Local Hiring',
+                programs: 'Programs',
+                participation: 'Participation',
+                spend: 'Spend',
+                measurement: 'Measurement',
+                reporting: 'Reporting',
+                feedback: 'Feedback'
+            };
+
+            Object.entries(value).forEach(([key, val]) => {
+                if (val && !['_id', 'certificate', 'points', 'remarks'].includes(key)) {
+                    const label = fieldMappings[key] || key.replace(/([A-Z])/g, ' $1').trim();
+                    if (typeof val === 'object') {
+                        formattedParts.push(`${label}:\n${formatObjectValue(val)}`);
+                    } else {
+                        formattedParts.push(`${label}: ${val}`);
+                    }
+                }
+            });
+
+            return formattedParts.join('\n');
+        };
+
+        // Title and Company Info
         doc.setFontSize(16);
-        doc.text("Overall ESG Score: " + (overallScore?.total ? (overallScore.total * 100).toFixed(0) + "%" : "N/A"), 105, 160, { align: 'center' });
-
-        // Add new page for detailed content
-        addNewPage();
-
-        // Executive Summary
-        addSectionHeader("Executive Summary", [66, 139, 202]);
-        doc.setFontSize(12);
-        const summaryText = `This report presents the Environmental, Social, and Governance (ESG) assessment for ${companyName}. 
-The company has achieved an overall ESG score of ${overallScore?.total ? (overallScore.total * 100).toFixed(0) + "%" : "N/A"}, 
-demonstrating its commitment to sustainable business practices.`;
-        const summaryLines = doc.splitTextToSize(summaryText, 180);
-        doc.text(summaryLines, 14, y);
-        y += (summaryLines.length * 7) + 15;
-
-        // Score Breakdown
-        addSubsection("ESG Score Breakdown");
-        const scores = [
-            { label: "Environment", score: overallScore?.environment, color: [46, 204, 113] },
-            { label: "Social", score: overallScore?.social, color: [155, 89, 182] },
-            { label: "Quality", score: overallScore?.quality, color: [52, 152, 219] },
-            { label: "Governance", score: overallScore?.governance, color: [230, 126, 34] }
-        ];
-
-        scores.forEach(({ label, score, color }) => {
-            if (y > 270) addNewPage();
-            doc.setTextColor(...color);
-            doc.text(`${label}: ${score ? (score * 100).toFixed(0) + "%" : "N/A"}`, 20, y);
-            y += 10;
-        });
-        doc.setTextColor(0, 0, 0);
+        doc.setTextColor(...colors.primary);
+        const companyName = companyInfo?.companyName || "Company Report";
+        doc.text(companyName, pageWidth / 2, y, { align: 'center' });
         y += 10;
 
-        // Company Information
-        addSectionHeader("Company Information", [46, 204, 113]);
+        // doc.setFontSize(12);
+        // doc.text("ESG Assessment Report", pageWidth / 2, y, { align: 'center' });
+        // y += 10;
+
+        // doc.setFontSize(10);
+        // doc.text("Generated: " + new Date().toLocaleDateString(), pageWidth / 2, y, { align: 'center' });
+        // y += 15;
+
+        // // Draw Score Card
+        // y = drawScoreCard(y) + 10;
+
+        // Company Details
         const companyDetails = [
-            { label: "Company Name", value: companyInfo?.companyName },
-            { label: "Registration Number", value: companyInfo?.registrationNumber },
-            { label: "Business Type", value: companyInfo?.businessType },
-            { label: "Establishment Year", value: companyInfo?.establishmentYear },
-            { label: "Company Address", value: companyInfo?.companyAddress }
+            ["Registration Number", companyInfo?.registrationNumber || "N/A"],
+            ["Business Type", companyInfo?.businessType || "N/A"],
+            ["Establishment Year", companyInfo?.establishmentYear || "N/A"],
+            ["Company Address", companyInfo?.companyAddress || "N/A"]
         ];
 
-        companyDetails.forEach(({ label, value }) => {
-            addQA(label, value);
-        });
+        y = drawTable(14, y, ["Field", "Details"], companyDetails, [60, 120]) + 10;
 
-        // Environment Section
+        // Function to format section data with improved object handling
+        const formatSectionData = (data, sectionName) => {
+            if (!data) return [];
+            const result = [];
+
+            // Add main value if exists
+            if (data.value) {
+                result.push([
+                    sectionName,
+                    formatObjectValue(data.value),
+                    formatDate(data.lastUpdated)
+                ]);
+            }
+
+            // Add other fields
+            Object.entries(data).forEach(([key, value]) => {
+                if (!['certificate', 'points', 'remarks', 'lastUpdated', 'value'].includes(key)) {
+                    result.push([
+                        key.replace(/([A-Z])/g, ' $1').trim(),
+                        formatObjectValue(value),
+                        formatDate(data.lastUpdated)
+                    ]);
+                }
+            });
+
+            return result;
+        };
+
+        // Environment Data
         if (environment) {
-            addSectionHeader("Environmental Assessment", [46, 204, 113]);
+            checkAndAddPage(20);
+            doc.setFontSize(12);
+            doc.setTextColor(...colors.environment);
+            doc.text("Environmental Assessment", 14, y);
+            y += 10;
+
+            const envHeaders = ["PARAMETER", "VALUE", "LAST UPDATED"];
+            const envData = [];
+
             Object.entries(environment).forEach(([section, data]) => {
-                if (!data) return;
-
-                addSubsection(section.replace(/([A-Z])/g, ' $1').trim());
-
-                // Add all questions and answers from the section
-                Object.entries(data).forEach(([key, value]) => {
-                    if (key === 'certificate' || key === 'points' || key === 'remarks') return;
-
-                    let displayValue = value;
-                    if (typeof value === 'boolean') {
-                        displayValue = value ? 'Yes' : 'No';
-                    } else if (typeof value === 'object' && value !== null) {
-                        if (Array.isArray(value)) {
-                            displayValue = value.join(', ');
-                        } else {
-                            displayValue = Object.entries(value)
-                                .map(([k, v]) => `${k}: ${v}`)
-                                .join(', ');
-                        }
-                    }
-
-                    addQA(key.replace(/([A-Z])/g, ' $1').trim(), displayValue, 10);
-                });
+                const sectionData = formatSectionData(data, section.replace(/([A-Z])/g, ' $1').trim());
+                envData.push(...sectionData);
             });
+
+            if (envData.length > 0) {
+                y = drawTable(14, y, envHeaders, envData, [50, 90, 50]) + 10;
+            }
         }
 
-        // Social Section
+        // Social Data
         if (social) {
-            addSectionHeader("Social Responsibility Assessment", [155, 89, 182]);
+            checkAndAddPage(20);
+            doc.setFontSize(12);
+            doc.setTextColor(...colors.social);
+            doc.text("Social Assessment", 14, y);
+            y += 10;
+
+            const socialHeaders = ["PARAMETER", "VALUE", "LAST UPDATED"];
+            const socialData = [];
+
             Object.entries(social).forEach(([section, data]) => {
-                if (!data) return;
-
-                addSubsection(section.replace(/([A-Z])/g, ' $1').trim());
-
-                Object.entries(data).forEach(([key, value]) => {
-                    if (key === 'certificate' || key === 'points' || key === 'remarks') return;
-
-                    let displayValue = value;
-                    if (typeof value === 'boolean') {
-                        displayValue = value ? 'Yes' : 'No';
-                    } else if (typeof value === 'object' && value !== null) {
-                        if (Array.isArray(value)) {
-                            displayValue = value.join(', ');
-                        } else {
-                            displayValue = Object.entries(value)
-                                .map(([k, v]) => `${k}: ${v}`)
-                                .join(', ');
-                        }
-                    }
-
-                    addQA(key.replace(/([A-Z])/g, ' $1').trim(), displayValue, 10);
-                });
+                const sectionData = formatSectionData(data, section.replace(/([A-Z])/g, ' $1').trim());
+                socialData.push(...sectionData);
             });
+
+            if (socialData.length > 0) {
+                y = drawTable(14, y, socialHeaders, socialData, [50, 90, 50]) + 10;
+            }
         }
 
-        // Quality Section
+        // Quality Data
         if (quality) {
-            addSectionHeader("Quality Management Assessment", [52, 152, 219]);
+            checkAndAddPage(20);
+            doc.setFontSize(12);
+            doc.setTextColor(...colors.quality);
+            doc.text("Quality Assessment", 14, y);
+            y += 10;
+
+            const qualityHeaders = ["PARAMETER", "VALUE", "LAST UPDATED"];
+            const qualityData = [];
+
             Object.entries(quality).forEach(([section, data]) => {
-                if (!data) return;
-
-                addSubsection(section.replace(/([A-Z])/g, ' $1').trim());
-
-                Object.entries(data).forEach(([key, value]) => {
-                    if (key === 'certificate' || key === 'points' || key === 'remarks') return;
-
-                    let displayValue = value;
-                    if (typeof value === 'boolean') {
-                        displayValue = value ? 'Yes' : 'No';
-                    } else if (typeof value === 'object' && value !== null) {
-                        if (Array.isArray(value)) {
-                            displayValue = value.join(', ');
-                        } else {
-                            displayValue = Object.entries(value)
-                                .map(([k, v]) => `${k}: ${v}`)
-                                .join(', ');
-                        }
-                    }
-
-                    addQA(key.replace(/([A-Z])/g, ' $1').trim(), displayValue, 10);
-                });
+                const sectionData = formatSectionData(data, section.replace(/([A-Z])/g, ' $1').trim());
+                qualityData.push(...sectionData);
             });
+
+            if (qualityData.length > 0) {
+                y = drawTable(14, y, qualityHeaders, qualityData, [60, 80, 50]) + 10;
+            }
         }
 
-        // Governance Section
+        // Governance Data
         if (governance) {
-            addSectionHeader("Governance Assessment", [230, 126, 34]);
+            checkAndAddPage(20);
+            doc.setFontSize(12);
+            doc.setTextColor(...colors.governance);
+            doc.text("Governance Assessment", 14, y);
+            y += 10;
+
+            const governanceHeaders = ["PARAMETER", "VALUE", "LAST UPDATED"];
+            const governanceData = [];
+
             Object.entries(governance).forEach(([section, data]) => {
-                if (!data) return;
-
-                addSubsection(section.replace(/([A-Z])/g, ' $1').trim());
-
-                Object.entries(data).forEach(([key, value]) => {
-                    if (key === 'certificate' || key === 'points' || key === 'remarks') return;
-
-                    let displayValue = value;
-                    if (typeof value === 'boolean') {
-                        displayValue = value ? 'Yes' : 'No';
-                    } else if (typeof value === 'object' && value !== null) {
-                        if (Array.isArray(value)) {
-                            displayValue = value.join(', ');
-                        } else {
-                            displayValue = Object.entries(value)
-                                .map(([k, v]) => `${k}: ${v}`)
-                                .join(', ');
-                        }
-                    }
-
-                    addQA(key.replace(/([A-Z])/g, ' $1').trim(), displayValue, 10);
-                });
+                const sectionData = formatSectionData(data, section.replace(/([A-Z])/g, ' $1').trim());
+                governanceData.push(...sectionData);
             });
-        }
 
-        // Organization Roles
-        if (companyInfo?.organizationRoles?.length > 0) {
-            addSectionHeader("Organization Structure", [149, 165, 166]);
-            companyInfo.organizationRoles.forEach((role, index) => {
-                addQA(`Role ${index + 1}`, `${role.role}: ${role.responsibility}`);
-            });
+            if (governanceData.length > 0) {
+                y = drawTable(14, y, governanceHeaders, governanceData, [60, 80, 50]) + 10;
+            }
         }
 
         // Save the PDF
@@ -801,13 +920,11 @@ demonstrating its commitment to sustainable business practices.`;
     };
 
     const renderDocumentView = () => {
-        if (!currentDocKey || !companyDocuments[currentDocKey]) {
-            return <p>Document not found</p>;
-        }
-
-        const documentPath = companyDocuments[currentDocKey].path;
+        const isValidDocument = currentDocKey && companyDocuments[currentDocKey];
+        const documentPath = isValidDocument ? companyDocuments[currentDocKey]?.path || '' : '';
         const fullDocumentUrl = getMediaUrl(documentPath);
-        const documentData = companyDocuments[currentDocKey];
+        const documentData = isValidDocument ? companyDocuments[currentDocKey] : {};
+
         const documentName = currentDocKey === 'registrationCertificate'
             ? 'Registration Certificate'
             : currentDocKey.split('_').map((word, idx) =>

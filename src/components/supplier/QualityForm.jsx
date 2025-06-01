@@ -518,15 +518,23 @@ const QualityForm = () => {
                             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
                                 Is delivery performance monitored and periodically reviewed by management? <span className="text-red-500">*</span>
                             </label>
-                            <input
-                                required
-                                disabled={view}
-                                type="text"
-                                value={formData.deliveryPerformance.value}
-                                onChange={(e) => handleChange('deliveryPerformance', e.target.value)}
-                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                                placeholder="Describe your delivery performance monitoring"
-                            />
+                            <div className="relative">
+                                <input
+                                    required
+                                    disabled={view}
+                                    type="number"
+                                    value={formData.deliveryPerformance.value}
+                                    onChange={(e) => handleChange('deliveryPerformance', e.target.value)}
+                                    className="w-full  border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 p-2 pr-12"
+                                    placeholder="Enter on-time delivery rate"
+                                    min="0"
+                                    max="100"
+                                    step="0.01"
+                                />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm">%</span>
+                                </div>
+                            </div>
                         </div>
 
                         {renderFileUpload(
@@ -543,15 +551,23 @@ const QualityForm = () => {
                             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
                                 Are quality standards defined and are testing/certification processes in place? <span className="text-red-500">*</span>
                             </label>
-                            <input
-                                required
-                                disabled={view}
-                                type="text"
-                                value={formData.qualityManagement.value}
-                                onChange={(e) => handleChange('qualityManagement', e.target.value)}
-                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                                placeholder="Describe your quality management standards"
-                            />
+                            <div className="relative">
+                                <input
+                                    required
+                                    disabled={view}
+                                    type="number"
+                                    value={formData.qualityManagement.value}
+                                    onChange={(e) => handleChange('qualityManagement', e.target.value)}
+                                    className="w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 p-2 pr-12"
+                                    placeholder="Enter defect rate"
+                                    min="0"
+                                    max="100"
+                                    step="0.01"
+                                />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm">%</span>
+                                </div>
+                            </div>
                         </div>
 
                         {renderFileUpload(
@@ -568,15 +584,23 @@ const QualityForm = () => {
                             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
                                 Are SOPs established for critical processes with continuous monitoring and periodic reviews? <span className="text-red-500">*</span>
                             </label>
-                            <input
-                                required
-                                disabled={view}
-                                type="text"
-                                value={formData.processControl.value}
-                                onChange={(e) => handleChange('processControl', e.target.value)}
-                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                                placeholder="Describe your process control procedures"
-                            />
+                            <div className="relative">
+                                <input
+                                    required
+                                    disabled={view}
+                                    type="number"
+                                    value={formData.processControl.value}
+                                    onChange={(e) => handleChange('processControl', e.target.value)}
+                                    className="w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 p-2 pr-12"
+                                    placeholder="Enter process efficiency rate"
+                                    min="0"
+                                    max="100"
+                                    step="0.01"
+                                />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm">%</span>
+                                </div>
+                            </div>
                         </div>
 
                         {renderFileUpload(
@@ -593,15 +617,22 @@ const QualityForm = () => {
                             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
                                 Is there a plan for optimal inventory control and proper material handling? <span className="text-red-500">*</span>
                             </label>
-                            <input
-                                required
-                                disabled={view}
-                                type="text"
-                                value={formData.materialManagement.value}
-                                onChange={(e) => handleChange('materialManagement', e.target.value)}
-                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                                placeholder="Describe your material management practices"
-                            />
+                            <div className="relative">
+                                <input
+                                    required
+                                    disabled={view}
+                                    type="number"
+                                    value={formData.materialManagement.value}
+                                    onChange={(e) => handleChange('materialManagement', e.target.value)}
+                                    className="w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 p-2 pr-24"
+                                    placeholder="Enter inventory turnover rate"
+                                    min="0"
+                                    step="0.01"
+                                />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm">times/year</span>
+                                </div>
+                            </div>
                         </div>
 
                         {renderFileUpload(
@@ -618,15 +649,23 @@ const QualityForm = () => {
                             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
                                 Are preventive maintenance and calibration plans implemented with MTTR/MTBF tracking? <span className="text-red-500">*</span>
                             </label>
-                            <input
-                                required
-                                disabled={view}
-                                type="text"
-                                value={formData.maintenanceCalibration.value}
-                                onChange={(e) => handleChange('maintenanceCalibration', e.target.value)}
-                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                                placeholder="Describe your maintenance and calibration processes"
-                            />
+                            <div className="relative">
+                                <input
+                                    required
+                                    disabled={view}
+                                    type="number"
+                                    value={formData.maintenanceCalibration.value}
+                                    onChange={(e) => handleChange('maintenanceCalibration', e.target.value)}
+                                    className="w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 p-2 pr-12"
+                                    placeholder="Enter equipment uptime rate"
+                                    min="0"
+                                    max="100"
+                                    step="0.01"
+                                />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm">%</span>
+                                </div>
+                            </div>
                         </div>
 
                         {renderFileUpload(
@@ -643,15 +682,23 @@ const QualityForm = () => {
                             <label className="block text-gray-700 font-medium mb-1 sm:mb-2">
                                 Is there a proactive plan for technology upgrades, including digital tools (IoT, sensors, smart machines)? <span className="text-red-500">*</span>
                             </label>
-                            <input
-                                required
-                                disabled={view}
-                                type="text"
-                                value={formData.technologyUpgradation.value}
-                                onChange={(e) => handleChange('technologyUpgradation', e.target.value)}
-                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                                placeholder="Describe your technology upgradation plans"
-                            />
+                            <div className="relative">
+                                <input
+                                    required
+                                    disabled={view}
+                                    type="number"
+                                    value={formData.technologyUpgradation.value}
+                                    onChange={(e) => handleChange('technologyUpgradation', e.target.value)}
+                                    className="w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 p-2 pr-12"
+                                    placeholder="Enter digital adoption rate"
+                                    min="0"
+                                    max="100"
+                                    step="0.01"
+                                />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm">%</span>
+                                </div>
+                            </div>
                         </div>
 
                         {renderFileUpload(
@@ -758,6 +805,7 @@ const QualityForm = () => {
                                 <button
                                     type="submit"
                                     disabled={submitting}
+                                    onClick={handleSubmit}
                                     className="px-4 py-2 text-sm sm:text-base bg-green-600 text-white rounded-md hover:bg-green-700"
                                 >
                                     {submitting ? <FaSpinner className="inline animate-spin mr-2" /> : null}

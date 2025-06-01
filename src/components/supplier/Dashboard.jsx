@@ -422,7 +422,7 @@ const Dashboard = () => {
             </div>
 
             {/* Main Content Area */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6">
                 {/* Recent Updates */}
                 <div className="bg-white rounded-lg shadow lg:col-span-2">
                     <div className="p-6">
@@ -479,32 +479,6 @@ const Dashboard = () => {
                                 <p className="text-sm mt-2">Start filling out your ESG forms to see updates here</p>
                             </div>
                         )}
-                    </div>
-                </div>
-
-                {/* Upcoming Deadlines */}
-                <div className="bg-white rounded-lg shadow">
-                    <div className="p-6">
-                        <h2 className="text-lg font-bold text-gray-800 mb-4">Upcoming Deadlines</h2>
-                        <div className="space-y-4">
-                            {upcomingDeadlines.map((deadline) => (
-                                <div key={deadline.id} className="flex items-start">
-                                    <div className="flex-shrink-0 w-4 h-4 rounded-full bg-green-400 mt-1"></div>
-                                    <div className="ml-3">
-                                        <div className="flex items-center">
-                                            <h3 className="text-sm font-medium text-gray-900">{deadline.title}</h3>
-                                            <span className={`ml-2 px-2 py-0.5 text-xs rounded-full ${getPriorityColor(deadline.priority)}`}>
-                                                {deadline.priority}
-                                            </span>
-                                        </div>
-                                        <div className="mt-1 flex items-center text-sm text-gray-500">
-                                            <FiCalendar className="mr-1" />
-                                            <span>{deadline.date}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
                     </div>
                 </div>
             </div>

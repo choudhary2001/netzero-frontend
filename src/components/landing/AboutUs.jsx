@@ -127,58 +127,6 @@ const AboutUs = () => {
                     </div>
                 </section>
 
-                {/* Our Team */}
-                <section className="py-16">
-                    <div className="container mx-auto px-6">
-                        <div className="max-w-5xl mx-auto">
-                            <h2 className="text-3xl font-bold mb-6 text-gray-800 text-center">Meet Our Team</h2>
-                            <p className="text-xl text-gray-600 text-center mb-12 max-w-3xl mx-auto">
-                                Our diverse team of experts is united by a shared commitment to sustainable business practices
-                            </p>
-
-                            <div className="grid md:grid-cols-3 gap-8">
-                                {/* Team Member 1 */}
-                                <div className="bg-white rounded-xl shadow-md overflow-hidden">
-                                    <div className="h-48 bg-gray-300"></div>
-                                    <div className="p-6">
-                                        <h3 className="font-bold text-xl mb-1">Sarah Johnson</h3>
-                                        <p className="text-green-600 font-medium text-sm mb-3">CEO & Co-Founder</p>
-                                        <p className="text-gray-600 text-sm">
-                                            Former sustainability executive with 15+ years of experience working with global corporations
-                                            to implement environmental initiatives.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Team Member 2 */}
-                                <div className="bg-white rounded-xl shadow-md overflow-hidden">
-                                    <div className="h-48 bg-gray-300"></div>
-                                    <div className="p-6">
-                                        <h3 className="font-bold text-xl mb-1">Michael Chen</h3>
-                                        <p className="text-green-600 font-medium text-sm mb-3">CTO & Co-Founder</p>
-                                        <p className="text-gray-600 text-sm">
-                                            Tech innovator with a background in data science and a passion for applying technology
-                                            to solve environmental challenges.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Team Member 3 */}
-                                <div className="bg-white rounded-xl shadow-md overflow-hidden">
-                                    <div className="h-48 bg-gray-300"></div>
-                                    <div className="p-6">
-                                        <h3 className="font-bold text-xl mb-1">Elena Rodriguez</h3>
-                                        <p className="text-green-600 font-medium text-sm mb-3">Head of ESG Research</p>
-                                        <p className="text-gray-600 text-sm">
-                                            ESG policy expert who previously advised government agencies on environmental
-                                            regulation and corporate compliance.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
 
                 {/* Impact Section */}
                 <section className="py-16 bg-gray-900 text-white">

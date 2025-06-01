@@ -1094,14 +1094,21 @@ const SocialForm = () => {
                                 Lost-Time Injury Frequency Rate (LTIFR)
                             </label>
                             {renderHelpText('occupationalSafety', 'ltifr')}
-                            <input
-                                type="text"
-                                value={sectionData.ltifr}
-                                onChange={(e) => handleChange('occupationalSafety', 'ltifr', e.target.value)}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
-                                placeholder="Enter your latest LTIFR"
-                                disabled={view}
-                            />
+                            <div className="relative mt-1">
+                                <input
+                                    type="number"
+                                    value={sectionData.ltifr}
+                                    onChange={(e) => handleChange('occupationalSafety', 'ltifr', e.target.value)}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2 pr-32"
+                                    placeholder="Enter your latest LTIFR"
+                                    min="0"
+                                    step="0.01"
+                                    disabled={view}
+                                />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm">per million hours</span>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
@@ -1192,14 +1199,21 @@ const SocialForm = () => {
                                 Employee Coverage Percentage
                             </label>
                             {renderHelpText('occupationalSafety', 'safetyTraining', 'coverage')}
-                            <input
-                                type="text"
-                                value={sectionData.safetyTraining.coverage}
-                                onChange={(e) => handleChange('occupationalSafety', 'safetyTraining', e.target.value, 'coverage')}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
-                                placeholder="Enter employee coverage percentage"
-                                disabled={view}
-                            />
+                            <div className="relative mt-1">
+                                <input
+                                    type="number"
+                                    value={sectionData.safetyTraining.coverage}
+                                    onChange={(e) => handleChange('occupationalSafety', 'safetyTraining', e.target.value, 'coverage')}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2 pr-16"
+                                    placeholder="Enter employee coverage"
+                                    min="0"
+                                    max="100"
+                                    disabled={view}
+                                />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm">%</span>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
@@ -1220,14 +1234,20 @@ const SocialForm = () => {
                                 Drill Frequency
                             </label>
                             {renderHelpText('occupationalSafety', 'emergencyResponse', 'drillFrequency')}
-                            <input
-                                type="text"
-                                value={sectionData.emergencyResponse.drillFrequency}
-                                onChange={(e) => handleChange('occupationalSafety', 'emergencyResponse', e.target.value, 'drillFrequency')}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
-                                placeholder="Enter drill frequency"
-                                disabled={view}
-                            />
+                            <div className="relative mt-1">
+                                <input
+                                    type="number"
+                                    value={sectionData.emergencyResponse.drillFrequency}
+                                    onChange={(e) => handleChange('occupationalSafety', 'emergencyResponse', e.target.value, 'drillFrequency')}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2 pr-24"
+                                    placeholder="Enter drill frequency"
+                                    min="0"
+                                    disabled={view}
+                                />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm">times/year</span>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
@@ -1262,14 +1282,20 @@ const SocialForm = () => {
                                 Health Check-up Frequency
                             </label>
                             {renderHelpText('occupationalSafety', 'healthServices', 'checkupFrequency')}
-                            <input
-                                type="text"
-                                value={sectionData.healthServices.checkupFrequency}
-                                onChange={(e) => handleChange('occupationalSafety', 'healthServices', e.target.value, 'checkupFrequency')}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
-                                placeholder="Enter health check-up frequency"
-                                disabled={view}
-                            />
+                            <div className="relative mt-1">
+                                <input
+                                    type="number"
+                                    value={sectionData.healthServices.checkupFrequency}
+                                    onChange={(e) => handleChange('occupationalSafety', 'healthServices', e.target.value, 'checkupFrequency')}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2 pr-24"
+                                    placeholder="Enter health check-up frequency"
+                                    min="0"
+                                    disabled={view}
+                                />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm">times/year</span>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
@@ -1368,28 +1394,42 @@ const SocialForm = () => {
                                 Leadership Diversity Percentage
                             </label>
                             {renderHelpText('hrManagement', 'diversity', 'leadershipPercentage')}
-                            <input
-                                type="text"
-                                value={sectionData.diversity.leadershipPercentage}
-                                onChange={(e) => handleChange('hrManagement', 'diversity', e.target.value, 'leadershipPercentage')}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
-                                placeholder="Enter percentage of women/underrepresented groups in leadership"
-                                disabled={view}
-                            />
+                            <div className="relative mt-1">
+                                <input
+                                    type="number"
+                                    value={sectionData.diversity.leadershipPercentage}
+                                    onChange={(e) => handleChange('hrManagement', 'diversity', e.target.value, 'leadershipPercentage')}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2 pr-16"
+                                    placeholder="Enter percentage of women/underrepresented groups in leadership"
+                                    min="0"
+                                    max="100"
+                                    disabled={view}
+                                />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm">%</span>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
                                 Board Diversity Percentage
                             </label>
                             {renderHelpText('hrManagement', 'diversity', 'boardPercentage')}
-                            <input
-                                type="text"
-                                value={sectionData.diversity.boardPercentage}
-                                onChange={(e) => handleChange('hrManagement', 'diversity', e.target.value, 'boardPercentage')}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
-                                placeholder="Enter percentage of women/underrepresented groups on board"
-                                disabled={view}
-                            />
+                            <div className="relative mt-1">
+                                <input
+                                    type="number"
+                                    value={sectionData.diversity.boardPercentage}
+                                    onChange={(e) => handleChange('hrManagement', 'diversity', e.target.value, 'boardPercentage')}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2 pr-16"
+                                    placeholder="Enter percentage of women/underrepresented groups on board"
+                                    min="0"
+                                    max="100"
+                                    disabled={view}
+                                />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm">%</span>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
@@ -1438,14 +1478,20 @@ const SocialForm = () => {
                                 Training Hours per Employee
                             </label>
                             {renderHelpText('hrManagement', 'trainingDevelopment', 'hoursPerEmployee')}
-                            <input
-                                type="text"
-                                value={sectionData.trainingDevelopment.hoursPerEmployee}
-                                onChange={(e) => handleChange('hrManagement', 'trainingDevelopment', e.target.value, 'hoursPerEmployee')}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
-                                placeholder="Enter training hours per employee"
-                                disabled={view}
-                            />
+                            <div className="relative mt-1">
+                                <input
+                                    type="number"
+                                    value={sectionData.trainingDevelopment.hoursPerEmployee}
+                                    onChange={(e) => handleChange('hrManagement', 'trainingDevelopment', e.target.value, 'hoursPerEmployee')}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2 pr-24"
+                                    placeholder="Enter training hours per employee"
+                                    min="0"
+                                    disabled={view}
+                                />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm">hours/year</span>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
@@ -1692,7 +1738,7 @@ const SocialForm = () => {
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700">Year</label>
                                                 <input
-                                                    type="text"
+                                                    type="number"
                                                     value={safeProject.year}
                                                     onChange={(e) => {
                                                         const updatedProject = {
@@ -1866,14 +1912,20 @@ const SocialForm = () => {
                                 Program Spend
                             </label>
                             {renderHelpText('csrSocialResponsibilities', 'employeeOutreach', 'spend')}
-                            <input
-                                type="text"
-                                value={sectionData.employeeOutreach.spend}
-                                onChange={(e) => handleChange('csrSocialResponsibilities', 'employeeOutreach', e.target.value, 'spend')}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
-                                placeholder="Enter program spend"
-                                disabled={view}
-                            />
+                            <div className="relative mt-1">
+                                <input
+                                    type="number"
+                                    value={sectionData.employeeOutreach.spend}
+                                    onChange={(e) => handleChange('csrSocialResponsibilities', 'employeeOutreach', e.target.value, 'spend')}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2 pr-24"
+                                    placeholder="Enter program spend"
+                                    min="0"
+                                    disabled={view}
+                                />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm">USD/year</span>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">

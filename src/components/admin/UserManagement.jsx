@@ -208,7 +208,7 @@ const UserManagement = () => {
                             <p className="mt-1 text-2xl font-semibold text-purple-800">{adminCount}</p>
                         </div>
                         <div className="bg-blue-50 p-4 rounded-lg shadow">
-                            <h3 className="text-sm font-medium text-blue-600">Supplier Users</h3>
+                            <h3 className="text-sm font-medium text-blue-600">Value Chain Users</h3>
                             <p className="mt-1 text-2xl font-semibold text-blue-800">{supplierCount}</p>
                         </div>
                         <div className="bg-orange-50 p-4 rounded-lg shadow">
@@ -293,7 +293,7 @@ const UserManagement = () => {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.email}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.role === 'admin' ? 'bg-purple-100 text-purple-700' : user.role === 'supplier' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
-                                                    {user.role?.charAt(0).toUpperCase() + user.role?.slice(1) || 'Unknown'} {/* Capitalize role */}
+                                                    {user.role === 'supplier' ? 'Value Chain' : user.role?.charAt(0).toUpperCase() + user.role?.slice(1) || 'Unknown'} {/* Capitalize role */}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

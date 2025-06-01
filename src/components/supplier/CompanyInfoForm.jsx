@@ -415,7 +415,7 @@ const CompanyInfoForm = () => {
                                 Registration Number <span className="text-red-500">*</span>
                             </label>
                             <input
-                                type="text"
+                                type="number"
                                 name="registrationNumber"
                                 value={formData.registrationNumber}
                                 onChange={handleChange}
@@ -763,7 +763,7 @@ const CompanyInfoForm = () => {
                         {steps.map((step, index) => (
                             <li key={step.id} className={`flex items-center space-x-1 sm:space-x-2 ${index < steps.length - 1 ? 'flex-1' : ''}`}>
                                 <span className={`flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full shrink-0 ${index <= currentStep ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-600'}`}>
-                                    {index + 1}
+                                    {index < currentStep ? <FaCheckCircle /> : index + 1}
                                 </span>
                                 <span className="hidden sm:inline text-xs sm:text-sm font-medium text-gray-500">
                                     {step.label}

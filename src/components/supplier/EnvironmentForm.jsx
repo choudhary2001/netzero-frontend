@@ -650,14 +650,19 @@ const EnvironmentForm = () => {
                             <label className="block text-sm font-medium text-gray-700">
                                 Renewable Energy Consumption
                             </label>
-                            <input
-                                type="text"
-                                value={sectionData.value}
-                                onChange={(e) => handleChange('renewableEnergy', 'value', e.target.value)}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
-                                placeholder="Enter renewable energy consumption (kWh/month or %)"
-                                disabled={view}
-                            />
+                            <div className="relative mt-1">
+                                <input
+                                    type="number"
+                                    value={sectionData.value}
+                                    onChange={(e) => handleChange('renewableEnergy', 'value', e.target.value)}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2 pr-24"
+                                    placeholder="Enter renewable energy consumption"
+                                    disabled={view}
+                                />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm">kWh/month</span>
+                                </div>
+                            </div>
                         </div>
                         {renderFileUpload('renewableEnergy', 'Renewable Energy Documents',
                             'Upload renewable energy certificates', sectionData.remarks, sectionData.points)}
@@ -671,14 +676,19 @@ const EnvironmentForm = () => {
                             <label className="block text-sm font-medium text-gray-700">
                                 Baseline Water Consumption
                             </label>
-                            <input
-                                type="text"
-                                value={sectionData.baseline}
-                                onChange={(e) => handleChange('waterConsumption', 'baseline', e.target.value)}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
-                                placeholder="Enter baseline water consumption"
-                                disabled={view}
-                            />
+                            <div className="relative mt-1">
+                                <input
+                                    type="number"
+                                    value={sectionData.baseline}
+                                    onChange={(e) => handleChange('waterConsumption', 'baseline', e.target.value)}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2 pr-24"
+                                    placeholder="Enter baseline water consumption"
+                                    disabled={view}
+                                />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm">kL/month</span>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
@@ -718,27 +728,37 @@ const EnvironmentForm = () => {
                             <label className="block text-sm font-medium text-gray-700">
                                 Annual Rainwater Harvested Volume
                             </label>
-                            <input
-                                type="text"
-                                value={sectionData.volume}
-                                onChange={(e) => handleChange('rainwaterHarvesting', 'volume', e.target.value)}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
-                                placeholder="Enter annual volume in kL/yr"
-                                disabled={view}
-                            />
+                            <div className="relative mt-1">
+                                <input
+                                    type="number"
+                                    value={sectionData.volume}
+                                    onChange={(e) => handleChange('rainwaterHarvesting', 'volume', e.target.value)}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2 pr-16"
+                                    placeholder="Enter annual volume"
+                                    disabled={view}
+                                />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm">kL/yr</span>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
                                 Recharge Capacity
                             </label>
-                            <input
-                                type="text"
-                                value={sectionData.rechargeCapacity}
-                                onChange={(e) => handleChange('rainwaterHarvesting', 'rechargeCapacity', e.target.value)}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
-                                placeholder="Enter recharge capacity"
-                                disabled={view}
-                            />
+                            <div className="relative mt-1">
+                                <input
+                                    type="number"
+                                    value={sectionData.rechargeCapacity}
+                                    onChange={(e) => handleChange('rainwaterHarvesting', 'rechargeCapacity', e.target.value)}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2 pr-16"
+                                    placeholder="Enter recharge capacity"
+                                    disabled={view}
+                                />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm">kL/day</span>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
@@ -895,14 +915,21 @@ const EnvironmentForm = () => {
                             <label className="block text-sm font-medium text-gray-700">
                                 Waste Diversion Percentage
                             </label>
-                            <input
-                                type="text"
-                                value={sectionData.wasteDiversion}
-                                onChange={(e) => handleChange('resourceConservation', 'wasteDiversion', e.target.value)}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
-                                placeholder="Enter percentage of waste diverted"
-                                disabled={view}
-                            />
+                            <div className="relative mt-1">
+                                <input
+                                    type="number"
+                                    value={sectionData.wasteDiversion}
+                                    onChange={(e) => handleChange('resourceConservation', 'wasteDiversion', e.target.value)}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2 pr-16"
+                                    placeholder="Enter percentage of waste diverted"
+                                    min="0"
+                                    max="100"
+                                    disabled={view}
+                                />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm">%</span>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
@@ -1000,7 +1027,7 @@ const EnvironmentForm = () => {
                         {steps.map((step, index) => (
                             <li key={step.id} className={`flex items-center space-x-1 sm:space-x-2 ${index < steps.length - 1 ? 'flex-1' : ''}`}>
                                 <span className={`flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full shrink-0 ${index <= currentStep ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-600'}`}>
-                                    {index + 1}
+                                    {index < currentStep ? <FaCheckCircle /> : index + 1}
                                 </span>
                                 <span className="hidden sm:inline text-xs sm:text-sm font-medium text-gray-500">
                                     {step.label}

@@ -315,7 +315,7 @@ const AdminChat = () => {
                                                             : 'bg-green-500'
                                                             }`}
                                                     >
-                                                        {conv.participants?.supplier?.role}
+                                                        {conv.participants?.supplier?.role === 'supplier' ? 'Value Chain' : conv.participants?.supplier?.role}
                                                     </p>
 
                                                 </h3>
@@ -348,7 +348,7 @@ const AdminChat = () => {
                             {/* Chat header */}
                             <div className="p-4 border-b bg-white">
                                 <h2 className="font-semibold">
-                                    {selectedConversation.participants?.supplier?.name || 'Supplier'}
+                                    {selectedConversation.participants?.supplier?.name || ''}
                                 </h2>
                                 <p className="text-sm text-gray-500">
                                     {selectedConversation.participants?.supplier?.email}

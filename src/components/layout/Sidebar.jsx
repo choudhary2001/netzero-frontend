@@ -371,7 +371,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                   {user?.name}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {user?.role?.charAt(0).toUpperCase() + user?.role?.slice(1)}
+                  {user?.role === 'supplier' ? 'Value Chain' : user?.role === 'company' ? 'Company' : user?.role?.charAt(0).toUpperCase() + user?.role?.slice(1)}
                 </p>
               </div>
               <button
