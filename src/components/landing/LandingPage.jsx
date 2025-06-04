@@ -58,7 +58,7 @@ const LandingPage = () => {
                             </div>
                             <div className="md:w-1/2">
                                 <div className="bg-white p-1 rounded-lg shadow-2xl">
-                                    <img src="/dashboard.png" alt="ESG Dashboard Preview" className="rounded w-full" />
+                                    <img src="/ESGValuechain.png" alt="ESG Dashboard Preview" className="rounded w-full" />
                                 </div>
                             </div>
                         </div>
