@@ -379,6 +379,9 @@ const LandingPage = () => {
                             <div className="w-32 h-24 rounded">
                                 <img src="/mindful_souls_home_logo.png" alt="ESG Dashboard Preview" className="rounded w-full h-24" />
                             </div>
+                            <div className="w-32 h-24 rounded">
+                                <img src="/vgl_logo_1.png" alt="ESG Dashboard Preview" className="rounded w-full h-24" />
+                            </div>
                         </div>
                     </div>
                 </section>

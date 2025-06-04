@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { logout } from '../../store/slices/authSlice';
 import { FiMenu, FiBell, FiUser } from 'react-icons/fi';
+import { FaLeaf } from 'react-icons/fa';
 
 const Header = ({ toggleSidebar }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -86,7 +87,8 @@ const Header = ({ toggleSidebar }) => {
             {/* Logo */}
             <div className="flex-shrink-0 flex items-center ml-4 lg:ml-0">
               <Link to="/" className="flex items-center">
-                <div className="bg-green-600 text-white p-2 rounded-lg mr-2">
+                <div className="bg-green-600 text-white p-2 rounded-lg mr-2 flex items-center">
+                  <FaLeaf className={`text-2xl mr-2 text-white`} />
                   <span className="font-bold">NETZERO</span>
                 </div>
               </Link>

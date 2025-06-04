@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { FaBuilding, FaTruck, FaGoogle } from 'react-icons/fa';
 import { FiUser, FiLock, FiAlertCircle, FiMail } from 'react-icons/fi';
 import authService from '../../services/authService';
+import { FaLeaf } from 'react-icons/fa';
 
 const Register = () => {
     const [step, setStep] = useState('register'); // 'register' or 'verify'
@@ -314,7 +315,10 @@ const Register = () => {
                         transition={{ delay: 0.2, duration: 0.5 }}
                         className="text-2xl font-bold text-gray-800"
                     >
-                        Net Zero Journey
+                        <Link to="/" className="flex items-center justify-center">
+                            <FaLeaf className={`text-2xl mr-2 text-green-600`} />
+                            <span className={`font-bold text-xl text-gray-800`}>Net Zero Journey</span>
+                        </Link>
                     </motion.h2>
                 </a>
                 <div className="text-center mb-8"></div>

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiMail, FiArrowLeft, FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
 import authService from '../../services/authService';
+import { FaLeaf } from 'react-icons/fa';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
@@ -271,7 +272,10 @@ const ForgotPassword = () => {
                         transition={{ delay: 0.2, duration: 0.5 }}
                         className="text-2xl font-bold text-gray-800"
                     >
-                        Net Zero Journey
+                        <Link to="/" className="flex items-center justify-center">
+                            <FaLeaf className={`text-2xl mr-2 text-green-600`} />
+                            <span className={`font-bold text-xl text-gray-800`}>Net Zero Journey</span>
+                        </Link>
                     </motion.h2>
                 </div>
                 <motion.div
