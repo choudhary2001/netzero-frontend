@@ -96,7 +96,7 @@ const CompanyInfoManagement = () => {
             }
 
             // Add environment, social, quality documents if they exist
-            ['environment', 'social', 'quality'].forEach(category => {
+            ['environment', 'social', 'governance', 'quality'].forEach(category => {
                 if (company[category]) {
                     Object.keys(company[category]).forEach(section => {
                         if (company[category][section] && company[category][section].certificate) {
@@ -921,6 +921,7 @@ const CompanyInfoManagement = () => {
 
     const renderDocumentView = () => {
         const isValidDocument = currentDocKey && companyDocuments[currentDocKey];
+        console.log('isValidDocument', isValidDocument);
         const documentPath = isValidDocument ? companyDocuments[currentDocKey]?.path || '' : '';
         const fullDocumentUrl = getMediaUrl(documentPath);
         const documentData = isValidDocument ? companyDocuments[currentDocKey] : {};

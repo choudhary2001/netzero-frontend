@@ -202,10 +202,10 @@ const CompanyInfoForm = () => {
             }
         }
 
-        if (!formData.registrationCertificate) {
-            toast.error('Registration Certificate is required');
-            return false;
-        }
+        // if (!formData.registrationCertificate) {
+        //     toast.error('Registration Certificate is required');
+        //     return false;
+        // }
 
         return true;
     };

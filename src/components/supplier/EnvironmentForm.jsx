@@ -312,10 +312,10 @@ const EnvironmentForm = () => {
                     toast.error('Please enter renewable energy consumption value');
                     return false;
                 }
-                if (!sectionData.certificate) {
-                    toast.error('Please upload renewable energy certificates');
-                    return false;
-                }
+                // if (!sectionData.certificate) {
+                //     toast.error('Please upload renewable energy certificates');
+                //     return false;
+                // }
                 break;
 
             case 'waterConsumption':
@@ -327,10 +327,10 @@ const EnvironmentForm = () => {
                     toast.error('Please describe water reduction targets');
                     return false;
                 }
-                if (!sectionData.certificate) {
-                    toast.error('Please upload water consumption documents');
-                    return false;
-                }
+                // if (!sectionData.certificate) {
+                //     toast.error('Please upload water consumption documents');
+                //     return false;
+                // }
                 break;
 
             case 'rainwaterHarvesting':
@@ -342,10 +342,10 @@ const EnvironmentForm = () => {
                     toast.error('Please describe harvesting infrastructure');
                     return false;
                 }
-                if (!sectionData.certificate) {
-                    toast.error('Please upload rainwater harvesting documents');
-                    return false;
-                }
+                // if (!sectionData.certificate) {
+                //     toast.error('Please upload rainwater harvesting documents');
+                //     return false;
+                // }
                 break;
 
             case 'emissionControl':
@@ -369,10 +369,10 @@ const EnvironmentForm = () => {
                     toast.error('Please enter Scope 3 emissions');
                     return false;
                 }
-                if (!sectionData.certificate) {
-                    toast.error('Please upload emission control documents');
-                    return false;
-                }
+                // if (!sectionData.certificate) {
+                //     toast.error('Please upload emission control documents');
+                //     return false;
+                // }
                 break;
 
             case 'resourceConservation':
@@ -384,10 +384,10 @@ const EnvironmentForm = () => {
                     toast.error('Please describe packaging impact measures');
                     return false;
                 }
-                if (!sectionData.certificate) {
-                    toast.error('Please upload resource conservation documents');
-                    return false;
-                }
+                // if (!sectionData.certificate) {
+                //     toast.error('Please upload resource conservation documents');
+                //     return false;
+                // }
                 break;
         }
 

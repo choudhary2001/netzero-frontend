@@ -176,10 +176,12 @@ const GovernanceForm = () => {
     };
 
     const handleDownload = async (section) => {
-        if (formData[section].certificate && typeof formData[section].certificate === 'string') {
+        console.log('formData[section].certificate', formData[section].certificate);
+        if (formData[section].certificate) {
             try {
                 setLoading(true);
                 const fileUrl = getMediaUrl(formData[section].certificate);
+                console.log('fileUrl', fileUrl);
                 const filename = formData[section].certificate.split('/').pop();
 
                 const response = await fetch(fileUrl);
