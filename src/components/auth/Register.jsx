@@ -12,7 +12,7 @@ const Register = () => {
         email: '',
         password: '',
         confirmPassword: '',
-        role: 'company'
+        role: 'supplier'
     });
     const [otp, setOtp] = useState('');
     const [errors, setErrors] = useState({});
@@ -353,7 +353,7 @@ const Register = () => {
                         {/* Role Selection */}
                         {step === 'register' && (
                             <div className="mb-6 flex space-x-4">
-                                <button
+                                {/* <button
                                     type="button"
                                     onClick={() => setFormData({ ...formData, role: 'company' })}
                                     className={`flex-1 flex items-center justify-center px-4 py-3 rounded-xl border-2 transition-all duration-200 ${formData.role === 'company'
@@ -363,7 +363,7 @@ const Register = () => {
                                 >
                                     <FaBuilding className="mr-2" />
                                     <span className="font-medium">Company</span>
-                                </button>
+                                </button> */}
                                 <button
                                     type="button"
                                     onClick={() => setFormData({ ...formData, role: 'supplier' })}

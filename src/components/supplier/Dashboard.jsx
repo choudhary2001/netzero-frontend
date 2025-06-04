@@ -17,12 +17,15 @@ import {
     FiUmbrella,
     FiInfo,
     FiLoader,
-    FiAlertTriangle
+    FiAlertTriangle,
+    FiX,
+    FiPlus
 } from 'react-icons/fi';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { useAuth } from '../../contexts/AuthContext';
 import esgService from '../../services/esgService';
+import { toast } from 'react-toastify';
 
 const StatCard = ({ title, value, icon: Icon, color, trend, description }) => (
     <motion.div
@@ -53,6 +56,7 @@ const StatCard = ({ title, value, icon: Icon, color, trend, description }) => (
 const Dashboard = () => {
     const { user } = useAuth();
     const [loading, setLoading] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
     const [dashboardData, setDashboardData] = useState({
         esgScores: {
@@ -71,6 +75,16 @@ const Dashboard = () => {
         },
         recentUpdates: [],
         status: 'draft'
+    });
+    const [showImproveModal, setShowImproveModal] = useState(false);
+    const [partnerForm, setPartnerForm] = useState({
+        email: '',
+        companyName: '',
+        contactName: '',
+        phone: '',
+        address: '',
+        industry: '',
+        website: ''
     });
 
     // Upcoming deadlines - this could also come from the backend in future
@@ -192,6 +206,42 @@ const Dashboard = () => {
         );
     };
 
+    const handlePartnerFormChange = (e) => {
+        const { name, value } = e.target;
+        setPartnerForm(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handlePartnerFormSubmit = async (e) => {
+        e.preventDefault();
+        setSubmitting(true);
+        try {
+            const response = await esgService.submitPartnerDetails(partnerForm);
+            if (response.success) {
+                toast.success('Partner details submitted successfully! Our team will contact you soon.');
+                setShowImproveModal(false);
+                setPartnerForm({
+                    email: '',
+                    companyName: '',
+                    contactName: '',
+                    phone: '',
+                    address: '',
+                    industry: '',
+                    website: ''
+                });
+            } else {
+                toast.error(response.message || 'Failed to submit partner details');
+            }
+        } catch (error) {
+            console.error('Error submitting partner details:', error);
+            toast.error(error.message || 'Error submitting partner details. Please try again.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     // Show loading state
     if (loading) {
         return (
@@ -227,16 +277,165 @@ const Dashboard = () => {
 
     return (
         <div className="container mx-auto px-4 py-6">
-            {/* Welcome Section */}
-            <div className="mb-8">
-                <h1 className="text-2xl font-bold text-gray-800 mb-2">
-                    {/* Welcome back, {user?.name || user?.role || 'Supplier'}! ({user?.role}) */}
-                    Welcome back, Value Chain Partner!
-                </h1>
-                <p className="text-gray-600">
-                    Here's an overview of your ESG performance and upcoming deadlines.
-                </p>
+            {/* Welcome Section with Improve ESG Button */}
+            <div className="mb-8 flex justify-between items-center">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-800 mb-2">
+                        Welcome back, Value Chain Partner!
+                    </h1>
+                    <p className="text-gray-600">
+                        Here's an overview of your ESG performance and upcoming deadlines.
+                    </p>
+                </div>
+                <button
+                    onClick={() => setShowImproveModal(true)}
+                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors duration-200 shadow-md"
+                >
+                    <FiPlus className="w-5 h-5" />
+                    <span>Improve Your ESG</span>
+                </button>
             </div>
+
+            {/* Improve ESG Modal */}
+            {showImproveModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg w-full max-w-2xl mx-4">
+                        <div className="flex justify-between items-center p-6 border-b">
+                            <h2 className="text-xl font-semibold text-gray-800">Add Value Chain Partner</h2>
+                            <button
+                                onClick={() => setShowImproveModal(false)}
+                                className="text-gray-500 hover:text-gray-700"
+                            >
+                                <FiX className="w-6 h-6" />
+                            </button>
+                        </div>
+                        <form onSubmit={handlePartnerFormSubmit} className="p-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Company Name *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="companyName"
+                                        value={partnerForm.companyName}
+                                        onChange={handlePartnerFormChange}
+                                        required
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        placeholder="Enter company name"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Email Address *
+                                    </label>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={partnerForm.email}
+                                        onChange={handlePartnerFormChange}
+                                        required
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        placeholder="Enter email address"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Contact Name *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="contactName"
+                                        value={partnerForm.contactName}
+                                        onChange={handlePartnerFormChange}
+                                        required
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        placeholder="Enter contact person's name"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Phone Number *
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        name="phone"
+                                        value={partnerForm.phone}
+                                        onChange={handlePartnerFormChange}
+                                        required
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        placeholder="Enter phone number"
+                                    />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Address *
+                                    </label>
+                                    <textarea
+                                        name="address"
+                                        value={partnerForm.address}
+                                        onChange={handlePartnerFormChange}
+                                        required
+                                        rows="2"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        placeholder="Enter company address"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Industry
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="industry"
+                                        value={partnerForm.industry}
+                                        onChange={handlePartnerFormChange}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        placeholder="Enter industry type"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Website
+                                    </label>
+                                    <input
+                                        type="url"
+                                        name="website"
+                                        value={partnerForm.website}
+                                        onChange={handlePartnerFormChange}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        placeholder="Enter website URL"
+                                    />
+                                </div>
+                            </div>
+                            <div className="mt-6 flex justify-end space-x-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowImproveModal(false)}
+                                    disabled={submitting}
+                                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={submitting}
+                                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[100px]"
+                                >
+                                    {submitting ? (
+                                        <>
+                                            <FiLoader className="animate-spin mr-2" />
+                                            Submitting...
+                                        </>
+                                    ) : (
+                                        'Submit'
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             {/* Status bar if submission is in progress */}
             {status && status !== 'draft' && (

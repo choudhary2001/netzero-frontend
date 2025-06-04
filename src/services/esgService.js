@@ -1,5 +1,6 @@
 import api from './api';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const esgService = {
     // Test API connection
@@ -235,6 +236,15 @@ const esgService = {
                 message: error.response?.data?.message || 'Failed to fetch supplier ESG data',
                 data: null
             };
+        }
+    },
+
+    submitPartnerDetails: async (partnerData) => {
+        try {
+            const response = await api.post('/submit-partner', partnerData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { success: false, message: 'Error submitting partner details' };
         }
     }
 };

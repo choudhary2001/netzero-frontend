@@ -198,7 +198,7 @@ const UserManagement = () => {
                     </div>
 
                     {/* Summary Statistics */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 mb-6">
                         <div className="bg-gray-100 p-4 rounded-lg shadow">
                             <h3 className="text-sm font-medium text-gray-500">Total Users</h3>
                             <p className="mt-1 text-2xl font-semibold text-gray-900">{totalUsers}</p>
@@ -211,10 +211,10 @@ const UserManagement = () => {
                             <h3 className="text-sm font-medium text-blue-600">Value Chain Users</h3>
                             <p className="mt-1 text-2xl font-semibold text-blue-800">{supplierCount}</p>
                         </div>
-                        <div className="bg-orange-50 p-4 rounded-lg shadow">
+                        {/* <div className="bg-orange-50 p-4 rounded-lg shadow">
                             <h3 className="text-sm font-medium text-orange-600">Company Users</h3>
                             <p className="mt-1 text-2xl font-semibold text-orange-800">{companyCount}</p>
-                        </div>
+                        </div> */}
                     </div>
 
                     {/* Filter Controls */}
@@ -240,8 +240,8 @@ const UserManagement = () => {
                             >
                                 <option value="all">All Roles</option>
                                 <option value="admin">Admin</option>
-                                <option value="supplier">Supplier</option>
-                                <option value="company">Company</option>
+                                <option value="supplier">Value Chain Partner</option>
+                                {/* <option value="company">Company</option> */}
                             </select>
                         </div>
                         <div>
@@ -405,7 +405,7 @@ const UserManagement = () => {
                                 >
                                     <option value="admin">Admin</option>
                                     <option value="supplier">Value Chain Partner</option>
-                                    <option value="company">Company</option>
+                                    {/* <option value="company">Company</option> */}
                                 </select>
                             </div>
 
