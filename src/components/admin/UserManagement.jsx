@@ -293,7 +293,7 @@ const UserManagement = () => {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.email}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.role === 'admin' ? 'bg-purple-100 text-purple-700' : user.role === 'supplier' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
-                                                    {user.role === 'supplier' ? 'Value Chain' : user.role?.charAt(0).toUpperCase() + user.role?.slice(1) || 'Unknown'} {/* Capitalize role */}
+                                                    {user.role === 'supplier' ? 'Value Chain Partner' : user.role?.charAt(0).toUpperCase() + user.role?.slice(1) || 'Unknown'} {/* Capitalize role */}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -404,7 +404,7 @@ const UserManagement = () => {
                                     required
                                 >
                                     <option value="admin">Admin</option>
-                                    <option value="supplier">Supplier</option>
+                                    <option value="supplier">Value Chain Partner</option>
                                     <option value="company">Company</option>
                                 </select>
                             </div>

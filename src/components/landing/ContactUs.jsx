@@ -87,9 +87,9 @@ const ContactUs = () => {
                                                 <div>
                                                     <h3 className="font-semibold text-gray-800">Our Location</h3>
                                                     <p className="text-gray-600 mt-1">
-                                                        123 Sustainability Street<br />
-                                                        Green City, 12345<br />
-                                                        United States
+                                                        C-scheme<br />
+                                                        Jaipur<br />
+                                                        India
                                                     </p>
                                                 </div>
                                             </div>
@@ -101,8 +101,8 @@ const ContactUs = () => {
                                                 <div>
                                                     <h3 className="font-semibold text-gray-800">Phone</h3>
                                                     <p className="text-gray-600 mt-1">
-                                                        <a href="tel:+1234567890">+1 (234) 567-890</a><br />
-                                                        Mon-Fri, 9am-6pm EST
+                                                        <a href="tel:+918209181530">+91 8209181530</a><br />
+                                                        Mon-Fri, 9am-6pm IST
                                                     </p>
                                                 </div>
                                             </div>
@@ -114,8 +114,7 @@ const ContactUs = () => {
                                                 <div>
                                                     <h3 className="font-semibold text-gray-800">Email</h3>
                                                     <p className="text-gray-600 mt-1">
-                                                        <a href="mailto:info@netzerojourney.com">info@netzerojourney.com</a><br />
-                                                        <a href="mailto:support@netzerojourney.com">support@netzerojourney.com</a>
+                                                        <a href="mailto:info@netzerojourney.org">info@netzerojourney.org</a>
                                                     </p>
                                                 </div>
                                             </div>
@@ -126,8 +125,8 @@ const ContactUs = () => {
                                             <p className="text-gray-600 mb-4">
                                                 For partnerships, press, or speaking engagements, please email:
                                             </p>
-                                            <a href="mailto:partnerships@netzerojourney.com" className="text-green-600 hover:underline">
-                                                partnerships@netzerojourney.com
+                                            <a href="mailto:partnerships@netzerojourney.org" className="text-green-600 hover:underline">
+                                                partnerships@netzerojourney.org
                                             </a>
                                         </div>
                                     </div>
@@ -270,12 +269,21 @@ const ContactUs = () => {
                     </div>
                 </section>
 
-                {/* Map Section (Optional) */}
+                {/* Map Section */}
                 <section className="py-8">
                     <div className="container mx-auto px-6">
                         <div className="max-w-5xl mx-auto">
-                            <div className="bg-gray-200 rounded-xl overflow-hidden h-96 flex items-center justify-center">
-                                <p className="text-gray-600">Interactive Map Would Be Embedded Here</p>
+                            <div className="bg-white rounded-xl shadow-md overflow-hidden h-96">
+                                <iframe
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3557.9044283801417!2d75.7877!3d26.9124!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x396db6b0c2e3c001%3A0x860e5d8e8c3e3b4c!2sC%20Scheme%2C%20Jaipur%2C%20Rajasthan!5e0!3m2!1sen!2sin!4v1647881234567!5m2!1sen!2sin"
+                                    width="100%"
+                                    height="100%"
+                                    style={{ border: 0 }}
+                                    allowFullScreen=""
+                                    loading="lazy"
+                                    referrerPolicy="no-referrer-when-downgrade"
+                                    title="Net Zero Journey Office Location"
+                                ></iframe>
                             </div>
                         </div>
                     </div>

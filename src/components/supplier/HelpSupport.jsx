@@ -79,8 +79,8 @@ const HelpSupport = () => {
                         <p className="text-gray-600 mb-3">
                             Send us an email and we'll respond within 24 hours.
                         </p>
-                        <a href="mailto:support@netzero.com" className="text-blue-600 hover:text-blue-700 font-medium">
-                            support@netzero.com
+                        <a href="mailto:info@netzerojourney.org" className="text-blue-600 hover:text-blue-700 font-medium">
+                            info@netzerojourney.org
                         </a>
                     </div>
                 </div>
@@ -92,10 +92,10 @@ const HelpSupport = () => {
                     </div>
                     <div className="ml-8">
                         <p className="text-gray-600 mb-3">
-                            Available Monday to Friday, 9am to 5pm EST.
+                            Available Monday to Friday, 9am to 6pm IST.
                         </p>
-                        <a href="tel:+1234567890" className="text-purple-600 hover:text-purple-700 font-medium">
-                            +1 (234) 567-890
+                        <a href="tel:+918209181530" className="text-purple-600 hover:text-purple-700 font-medium">
+                            +91 8209181530
                         </a>
                     </div>
                 </div>
@@ -152,22 +152,22 @@ const HelpSupport = () => {
                     <div>
                         <p className="text-gray-600">
                             <span className="font-medium">Address:</span><br />
-                            NetZero Headquarters<br />
-                            123 Green Street<br />
-                            Sustainability City, SC 12345
+                            Net Zero Journey<br />
+                            C-scheme<br />
+                            Jaipur, India
                         </p>
                     </div>
                     <div>
                         <p className="text-gray-600 mb-2">
                             <span className="font-medium">Email:</span><br />
-                            <a href="mailto:info@netzero.com" className="text-blue-600 hover:underline">
-                                info@netzero.com
+                            <a href="mailto:info@netzerojourney.org" className="text-blue-600 hover:underline">
+                                info@netzerojourney.org
                             </a>
                         </p>
                         <p className="text-gray-600">
                             <span className="font-medium">Phone:</span><br />
-                            <a href="tel:+1234567890" className="text-blue-600 hover:underline">
-                                +1 (234) 567-890
+                            <a href="tel:+918209181530" className="text-blue-600 hover:underline">
+                                +91 8209181530
                             </a>
                         </p>
                     </div>

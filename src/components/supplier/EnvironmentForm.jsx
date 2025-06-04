@@ -41,6 +41,11 @@ const EnvironmentForm = () => {
             disposalMethods: [],  // Disposal methods
             eiaReports: '',  // Environmental Impact Assessment reports
             lcaReports: '',  // Life Cycle Assessment reports
+            scopeEmissions: {
+                scope1: '',  // Direct emissions
+                scope2: '',  // Indirect emissions from purchased energy
+                scope3: ''   // Other indirect emissions
+            },
             certificate: null,
             points: 0,
             remarks: '',
@@ -130,10 +135,23 @@ const EnvironmentForm = () => {
                     // Populate each section if it exists
                     Object.keys(formData).forEach(key => {
                         if (envData[key]) {
-                            updatedFormData[key] = {
-                                ...envData[key],
-                                lastUpdated: new Date()
-                            };
+                            // For emissionControl, ensure scopeEmissions is properly initialized
+                            if (key === 'emissionControl') {
+                                updatedFormData[key] = {
+                                    ...envData[key],
+                                    scopeEmissions: envData[key].scopeEmissions || {
+                                        scope1: '',
+                                        scope2: '',
+                                        scope3: ''
+                                    },
+                                    lastUpdated: new Date()
+                                };
+                            } else {
+                                updatedFormData[key] = {
+                                    ...envData[key],
+                                    lastUpdated: new Date()
+                                };
+                            }
 
                             if (envData[key].certificate) {
                                 updatedFileLabels[key] = envData[key].certificate.split('/').pop();
@@ -163,14 +181,32 @@ const EnvironmentForm = () => {
     }, [apiReady]);
 
     const handleChange = (section, field, value) => {
-        setFormData(prev => ({
-            ...prev,
-            [section]: {
-                ...prev[section],
-                [field]: value,
-                lastUpdated: new Date()
+        setFormData(prev => {
+            if (field === 'scopeEmissions') {
+                // Special handling for scopeEmissions updates
+                return {
+                    ...prev,
+                    [section]: {
+                        ...prev[section],
+                        scopeEmissions: {
+                            ...prev[section].scopeEmissions,
+                            ...value
+                        },
+                        lastUpdated: new Date()
+                    }
+                };
+            } else {
+                // Normal field updates
+                return {
+                    ...prev,
+                    [section]: {
+                        ...prev[section],
+                        [field]: value,
+                        lastUpdated: new Date()
+                    }
+                };
             }
-        }));
+        });
 
         if (saved[section]) {
             setSaved(prev => ({
@@ -276,6 +312,10 @@ const EnvironmentForm = () => {
                     toast.error('Please enter renewable energy consumption value');
                     return false;
                 }
+                if (!sectionData.certificate) {
+                    toast.error('Please upload renewable energy certificates');
+                    return false;
+                }
                 break;
 
             case 'waterConsumption':
@@ -285,6 +325,10 @@ const EnvironmentForm = () => {
                 }
                 if (!sectionData.targets || sectionData.targets.trim() === '') {
                     toast.error('Please describe water reduction targets');
+                    return false;
+                }
+                if (!sectionData.certificate) {
+                    toast.error('Please upload water consumption documents');
                     return false;
                 }
                 break;
@@ -298,6 +342,10 @@ const EnvironmentForm = () => {
                     toast.error('Please describe harvesting infrastructure');
                     return false;
                 }
+                if (!sectionData.certificate) {
+                    toast.error('Please upload rainwater harvesting documents');
+                    return false;
+                }
                 break;
 
             case 'emissionControl':
@@ -309,6 +357,22 @@ const EnvironmentForm = () => {
                     toast.error('Please add at least one chemical to the list');
                     return false;
                 }
+                if (!sectionData.scopeEmissions.scope1 || sectionData.scopeEmissions.scope1.trim() === '') {
+                    toast.error('Please enter Scope 1 emissions');
+                    return false;
+                }
+                if (!sectionData.scopeEmissions.scope2 || sectionData.scopeEmissions.scope2.trim() === '') {
+                    toast.error('Please enter Scope 2 emissions');
+                    return false;
+                }
+                if (!sectionData.scopeEmissions.scope3 || sectionData.scopeEmissions.scope3.trim() === '') {
+                    toast.error('Please enter Scope 3 emissions');
+                    return false;
+                }
+                if (!sectionData.certificate) {
+                    toast.error('Please upload emission control documents');
+                    return false;
+                }
                 break;
 
             case 'resourceConservation':
@@ -318,6 +382,10 @@ const EnvironmentForm = () => {
                 }
                 if (!sectionData.packagingMeasures || sectionData.packagingMeasures.trim() === '') {
                     toast.error('Please describe packaging impact measures');
+                    return false;
+                }
+                if (!sectionData.certificate) {
+                    toast.error('Please upload resource conservation documents');
                     return false;
                 }
                 break;
@@ -392,17 +460,24 @@ const EnvironmentForm = () => {
                     break;
 
                 case 'emissionControl':
-                    sectionData = {
+                    // Ensure scopeEmissions is included in the data
+                    const emissionData = {
                         chemicalManagement: formData[currentSection].chemicalManagement,
                         chemicalList: formData[currentSection].chemicalList || [],
                         disposalMethods: formData[currentSection].disposalMethods || [],
                         eiaReports: formData[currentSection].eiaReports,
                         lcaReports: formData[currentSection].lcaReports,
+                        scopeEmissions: {
+                            scope1: formData[currentSection].scopeEmissions?.scope1 || '',
+                            scope2: formData[currentSection].scopeEmissions?.scope2 || '',
+                            scope3: formData[currentSection].scopeEmissions?.scope3 || ''
+                        },
                         certificate: certificateUrl || formData[currentSection].certificate,
                         remarks: formData[currentSection].remarks || '',
                         points: formData[currentSection].points || 0,
                         lastUpdated: new Date()
                     };
+                    sectionData = emissionData;
                     break;
 
                 case 'resourceConservation':
@@ -438,11 +513,12 @@ const EnvironmentForm = () => {
             );
 
             if (response.success) {
-                // Update formData with any changes from server (like certificateUrl)
+                // Update formData with any changes from server
                 setFormData(prev => ({
                     ...prev,
                     [currentSection]: {
                         ...prev[currentSection],
+                        ...sectionData,
                         certificate: certificateUrl || prev[currentSection].certificate
                     }
                 }));
@@ -792,6 +868,13 @@ const EnvironmentForm = () => {
                 );
 
             case 'emissionControl':
+                // Ensure scopeEmissions exists with default values
+                const scopeEmissions = sectionData.scopeEmissions || {
+                    scope1: '',
+                    scope2: '',
+                    scope3: ''
+                };
+
                 return (
                     <div className="space-y-4">
                         <div>
@@ -799,7 +882,7 @@ const EnvironmentForm = () => {
                                 Chemical Management
                             </label>
                             <textarea
-                                value={sectionData.chemicalManagement}
+                                value={sectionData.chemicalManagement || ''}
                                 onChange={(e) => handleChange('emissionControl', 'chemicalManagement', e.target.value)}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2"
                                 rows="3"
@@ -807,6 +890,92 @@ const EnvironmentForm = () => {
                                 disabled={view}
                             />
                         </div>
+
+                        {/* Scope Emissions Section */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <h3 className="text-lg font-medium text-gray-900 mb-4">Scope Emissions <span className="text-red-500">*</span></h3>
+                            <p className="text-sm text-gray-600 mb-4">All scope emissions fields are required. Please enter values in metric tonnes of CO2 equivalent (tCO2e).</p>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {/* Scope 1 */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Scope 1 Emissions <span className="text-red-500">*</span>
+                                    </label>
+                                    <div className="relative mt-1">
+                                        <input
+                                            type="number"
+                                            value={scopeEmissions.scope1 || ''}
+                                            onChange={(e) => handleChange('emissionControl', 'scopeEmissions', {
+                                                ...scopeEmissions,
+                                                scope1: e.target.value
+                                            })}
+                                            className={`mt-1 block w-full rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 border p-2 pr-16 ${!scopeEmissions.scope1 ? 'border-red-300' : 'border-gray-300'
+                                                }`}
+                                            placeholder="Enter Scope 1 emissions"
+                                            required
+                                            disabled={view}
+                                        />
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <span className="text-gray-500 sm:text-sm">tCO2e</span>
+                                        </div>
+                                    </div>
+                                    <p className="mt-1 text-xs text-gray-500">Direct emissions from owned or controlled sources</p>
+                                </div>
+
+                                {/* Scope 2 */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Scope 2 Emissions <span className="text-red-500">*</span>
+                                    </label>
+                                    <div className="relative mt-1">
+                                        <input
+                                            type="number"
+                                            value={scopeEmissions.scope2 || ''}
+                                            onChange={(e) => handleChange('emissionControl', 'scopeEmissions', {
+                                                ...scopeEmissions,
+                                                scope2: e.target.value
+                                            })}
+                                            className={`mt-1 block w-full rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 border p-2 pr-16 ${!scopeEmissions.scope2 ? 'border-red-300' : 'border-gray-300'
+                                                }`}
+                                            placeholder="Enter Scope 2 emissions"
+                                            required
+                                            disabled={view}
+                                        />
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <span className="text-gray-500 sm:text-sm">tCO2e</span>
+                                        </div>
+                                    </div>
+                                    <p className="mt-1 text-xs text-gray-500">Indirect emissions from purchased energy</p>
+                                </div>
+
+                                {/* Scope 3 */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Scope 3 Emissions <span className="text-red-500">*</span>
+                                    </label>
+                                    <div className="relative mt-1">
+                                        <input
+                                            type="number"
+                                            value={scopeEmissions.scope3 || ''}
+                                            onChange={(e) => handleChange('emissionControl', 'scopeEmissions', {
+                                                ...scopeEmissions,
+                                                scope3: e.target.value
+                                            })}
+                                            className={`mt-1 block w-full rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 border p-2 pr-16 ${!scopeEmissions.scope3 ? 'border-red-300' : 'border-gray-300'
+                                                }`}
+                                            placeholder="Enter Scope 3 emissions"
+                                            required
+                                            disabled={view}
+                                        />
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <span className="text-gray-500 sm:text-sm">tCO2e</span>
+                                        </div>
+                                    </div>
+                                    <p className="mt-1 text-xs text-gray-500">Other indirect emissions in the value chain</p>
+                                </div>
+                            </div>
+                        </div>
+
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
                                 Chemical List
@@ -904,7 +1073,7 @@ const EnvironmentForm = () => {
                             />
                         </div>
                         {renderFileUpload('emissionControl', 'Emission Control Documents',
-                            'Upload chemical inventories, EIA/LCA reports', sectionData.remarks, sectionData.points)}
+                            'Upload chemical inventories, EIA/LCA reports, and emissions data', sectionData.remarks, sectionData.points)}
                     </div>
                 );
 

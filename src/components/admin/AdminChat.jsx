@@ -315,7 +315,7 @@ const AdminChat = () => {
                                                             : 'bg-green-500'
                                                             }`}
                                                     >
-                                                        {conv.participants?.supplier?.role === 'supplier' ? 'Value Chain' : conv.participants?.supplier?.role}
+                                                        {conv.participants?.supplier?.role === 'supplier' ? 'Value Chain Partner' : conv.participants?.supplier?.role}
                                                     </p>
 
                                                 </h3>

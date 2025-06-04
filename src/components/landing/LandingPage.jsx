@@ -44,10 +44,10 @@ const LandingPage = () => {
                         <div className="flex flex-col md:flex-row items-center">
                             <div className="md:w-1/2 mb-12 md:mb-0 mr-4">
                                 <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6">
-                                    Make Your Value Chain ESG Report at NO Cost
+                                    Transform Your Value Chain ESG Reporting
                                 </h1>
                                 <p className="text-xl mb-8 text-green-100">
-                                    We generate your comprehensive ESG report and provide FREE platform access to all your value chain partners—through Net Zero Journey, with zero subscription fees.
+                                    We generate your comprehensive ESG report and provide platform access to all your value chain partners—through Net Zero Journey, enabling seamless collaboration and data collection.
                                 </p>
                                 <div className="flex flex-wrap gap-4">
                                     <Link to="/register" className="bg-white text-green-700 hover:bg-green-50 px-8 py-3 rounded-lg font-semibold transition duration-300 inline-flex items-center">
@@ -97,7 +97,7 @@ const LandingPage = () => {
                         <div className="max-w-4xl mx-auto text-center mb-12">
                             <h2 className="text-3xl font-bold mb-6 text-gray-800">Our Offering</h2>
                             <p className="text-xl text-gray-600">
-                                Net Zero Journey handles every step of your ESG reporting process—data gathering, analysis, and report generation—so you can focus on driving sustainable improvements. We open our platform to all your value chain partners for free, ensuring full transparency and collaboration.
+                                Net Zero Journey handles every step of your ESG reporting process—data gathering, analysis, and report generation—so you can focus on driving sustainable improvements. We provide platform access to all your value chain partners, ensuring full transparency and collaboration.
                             </p>
                         </div>
 
@@ -118,9 +118,9 @@ const LandingPage = () => {
                                 <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mb-4">
                                     <FaUsers className="text-green-600 text-2xl" />
                                 </div>
-                                <h3 className="text-xl font-semibold mb-3">Free Partner Access</h3>
+                                <h3 className="text-xl font-semibold mb-3">Partner Access</h3>
                                 <p className="text-gray-600">
-                                    Invite unlimited suppliers and stakeholders to participate on our platform at no extra cost—no hidden fees.
+                                    Invite unlimited suppliers and stakeholders to participate on our platform—enabling seamless collaboration and data collection.
                                 </p>
                             </div>
 
@@ -212,8 +212,6 @@ const LandingPage = () => {
                     </div>
                 </section>
 
-
-
                 {/* Testimonials Section */}
                 <section className="py-16 bg-gray-50">
                     <div className="container mx-auto px-6">
@@ -276,7 +274,7 @@ const LandingPage = () => {
                                     <FaQuoteLeft />
                                 </div>
                                 <p className="mt-6 mb-8 text-gray-600 italic">
-                                    "As a medium-sized business, we couldn't afford enterprise ESG software. Net Zero Journey provided a comprehensive solution at no cost that actually exceeded the capabilities of systems our larger competitors use."
+                                    "As a medium-sized business, we needed an enterprise-grade ESG solution. Net Zero Journey provided a comprehensive platform that exceeded the capabilities of systems our larger competitors use."
                                 </p>
                                 <div className="flex items-center">
                                     <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
@@ -392,7 +390,7 @@ const LandingPage = () => {
                                 <div className="w-20 h-20 bg-green-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6">1</div>
                                 <h3 className="text-xl font-semibold mb-3">Create Your Account</h3>
                                 <p className="text-gray-600">
-                                    Sign up in minutes—no credit card required—and provide basic company details to get started.
+                                    Sign up in minutes and provide basic company details to get started.
                                 </p>
                             </div>
 
@@ -419,7 +417,7 @@ const LandingPage = () => {
                                 <div className="w-20 h-20 bg-green-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6">4</div>
                                 <h3 className="text-xl font-semibold mb-3">Report Delivery</h3>
                                 <p className="text-gray-600">
-                                    Receive an audit-ready ESG report and maintain ongoing, free partner access for continuous tracking.
+                                    Receive an audit-ready ESG report and maintain ongoing partner access for continuous tracking.
                                 </p>
                             </div>
                         </div>
@@ -463,10 +461,10 @@ const LandingPage = () => {
                     <div className="container mx-auto px-6 text-center">
                         <h2 className="text-3xl md:text-4xl font-bold mb-4">Start Your ESG Journey Today</h2>
                         <p className="text-xl mb-8 text-green-100 max-w-3xl mx-auto">
-                            Get comprehensive ESG reporting with free access for all your value chain partners.
+                            Get comprehensive ESG reporting with seamless access for all your value chain partners.
                         </p>
                         <Link to="/register" className="bg-white text-green-700 hover:bg-green-50 px-8 py-4 rounded-lg font-semibold transition duration-300 inline-flex items-center text-lg">
-                            Get Started for Free
+                            Get Started
                             <FaArrowRight className="ml-2" />
                         </Link>
                     </div>

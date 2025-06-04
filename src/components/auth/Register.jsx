@@ -131,7 +131,7 @@ const Register = () => {
             <div className="grid grid-cols-1">
                 <div>
                     <label className="block text-gray-700 text-sm font-medium mb-2">
-                        {formData.role === 'company' ? 'Company Name' : 'Supplier Name'}
+                        {formData.role === 'company' ? 'Company Name' : 'Value Chain Partner Name'}
                     </label>
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -143,12 +143,12 @@ const Register = () => {
                             value={formData.name}
                             onChange={handleChange}
                             className={`w-full pl-10 pr-4 py-3 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all`}
-                            placeholder={formData.role === 'company' ? 'Enter Company Name' : 'Enter Supplier Name'}
+                            placeholder={formData.role === 'company' ? 'Enter Company Name' : 'Enter Value Chain Partner Name'}
                         />
                     </div>
                     {errors.name && (
                         <p className="mt-1 text-sm text-red-600">
-                            {formData.role === 'company' ? 'Company name is required' : 'Supplier name is required'}
+                            {formData.role === 'company' ? 'Company name is required' : 'Value Chain Partner name is required'}
                         </p>
                     )}
                 </div>
@@ -306,7 +306,7 @@ const Register = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 to-indigo-100 flex items-center justify-center p-4">
-            <div className="w-full max-w-md">
+            <div className="w-full max-w-lg">
                 <a href="/" className="text-center mb-8">
                     <motion.h2
                         initial={{ y: 20, opacity: 0 }}
@@ -373,7 +373,7 @@ const Register = () => {
                                         }`}
                                 >
                                     <FaTruck className="mr-2" />
-                                    <span className="font-medium">Value Chain</span>
+                                    <span className="font-medium">Value Chain Partner</span>
                                 </button>
                             </div>
                         )}
