@@ -292,7 +292,7 @@ const Dashboard = () => {
                     className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors duration-200 shadow-md"
                 >
                     <FiPlus className="w-5 h-5" />
-                    <span>Improve Your ESG</span>
+                    <span>Improve Your ESG Score</span>
                 </button>
             </div>
 
@@ -301,7 +301,7 @@ const Dashboard = () => {
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg w-full max-w-2xl mx-4">
                         <div className="flex justify-between items-center p-6 border-b">
-                            <h2 className="text-xl font-semibold text-gray-800">Add Value Chain Partner</h2>
+                            <h2 className="text-xl font-semibold text-gray-800">Reach Out Us to Improve Your ESG Score</h2>
                             <button
                                 onClick={() => setShowImproveModal(false)}
                                 className="text-gray-500 hover:text-gray-700"

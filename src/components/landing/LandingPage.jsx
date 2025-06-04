@@ -367,12 +367,18 @@ const LandingPage = () => {
                             <h2 className="text-2xl font-bold mb-4">Trusted By Industry Leaders</h2>
                         </div>
                         <div className="flex flex-wrap justify-center items-center gap-12">
-                            <div className="w-32 h-12 bg-gray-200 rounded"></div>
-                            <div className="w-32 h-12 bg-gray-200 rounded"></div>
-                            <div className="w-32 h-12 bg-gray-200 rounded"></div>
-                            <div className="w-32 h-12 bg-gray-200 rounded"></div>
-                            <div className="w-32 h-12 bg-gray-200 rounded"></div>
-                            <div className="w-32 h-12 bg-gray-200 rounded"></div>
+                            <div className="w-32   rounded">
+                                <img src="/sts.png" alt="ESG Dashboard Preview" className="rounded w-full" />
+                            </div>
+                            <div className="w-32  rounded">
+                                <img src="/tjc.png" alt="ESG Dashboard Preview" className="rounded w-full" />
+                            </div>
+                            <div className="w-32  rounded">
+                                <img src="/shoplc.png" alt="ESG Dashboard Preview" className="rounded w-full" />
+                            </div>
+                            <div className="w-32 h-24 rounded">
+                                <img src="/mindful_souls_home_logo.png" alt="ESG Dashboard Preview" className="rounded w-full h-24" />
+                            </div>
                         </div>
                     </div>
                 </section>

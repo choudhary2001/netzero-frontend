@@ -77,8 +77,8 @@ const LandingFooter = () => {
                             </li>
                             <li className="flex items-center mt-2">
                                 <FaPhone className="mr-2 text-green-500" />
-                                <a href="tel:+1234567890" className="hover:text-green-400 transition-colors">
-                                    +1 (234) 567-890
+                                <a href="tel:+918209181530" className="hover:text-green-400 transition-colors">
+                                    +91 8209181530
                                 </a>
                             </li>
                         </ul>
