@@ -19,16 +19,16 @@ const LandingFooter = () => {
                             Empowering businesses to track, report, and improve their environmental, social, and governance metrics.
                         </p>
                         <div className="flex space-x-4">
-                            <a href="#" className="text-gray-400 hover:text-green-400 transition-colors">
+                            <a href="https://www.linkedin.com/company/netzerojourney/" target="_blank" className="text-gray-400 hover:text-green-400 transition-colors">
                                 <FaLinkedin className="text-xl" />
                             </a>
-                            <a href="#" className="text-gray-400 hover:text-green-400 transition-colors">
+                            <a href="https://x.com/netzerojourney" target="_blank" className="text-gray-400 hover:text-green-400 transition-colors">
                                 <FaTwitter className="text-xl" />
                             </a>
-                            <a href="#" className="text-gray-400 hover:text-green-400 transition-colors">
+                            <a href="https://www.instagram.com/netzerojourney/" target="_blank" className="text-gray-400 hover:text-green-400 transition-colors">
                                 <FaInstagram className="text-xl" />
                             </a>
-                            <a href="#" className="text-gray-400 hover:text-green-400 transition-colors">
+                            <a href="https://www.facebook.com/netzerojourney/" target="_blank" className="text-gray-400 hover:text-green-400 transition-colors">
                                 <FaFacebook className="text-xl" />
                             </a>
                         </div>

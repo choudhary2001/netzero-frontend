@@ -1,7 +1,7 @@
 import { io } from 'socket.io-client';
 import store from '../store';
 
-import { API_MEDIA_BASE_URL } from '../config';
+import { API_SOCKET_BASE_URL } from '../config';
 
 class SocketService {
     constructor() {
@@ -22,7 +22,7 @@ class SocketService {
         }
 
         // Connect to the socket server with auth token
-        this.socket = io(API_MEDIA_BASE_URL, {
+        this.socket = io(API_SOCKET_BASE_URL, {
             auth: { token },
             transports: ['websocket'],
             reconnection: true,

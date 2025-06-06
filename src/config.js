@@ -1,6 +1,7 @@
 // API Configuration
-export const API_BASE_URL = 'https://netzero-backend-ne4a.onrender.com/api';
-export const API_MEDIA_BASE_URL = 'https://netzero-backend-ne4a.onrender.com';
+export const API_BASE_URL = 'https://api.netzerojourney.org/api';
+export const API_MEDIA_BASE_URL = 'https://api.netzerojourney.org';
+export const API_SOCKET_BASE_URL = 'wss://api.netzerojourney.org/ws';
 
 // Other configuration constants can be added here
 export const APP_NAME = 'NetZero';

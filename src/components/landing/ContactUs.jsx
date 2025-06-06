@@ -125,8 +125,8 @@ const ContactUs = () => {
                                             <p className="text-gray-600 mb-4">
                                                 For partnerships, press, or speaking engagements, please email:
                                             </p>
-                                            <a href="mailto:partnerships@netzerojourney.org" className="text-green-600 hover:underline">
-                                                partnerships@netzerojourney.org
+                                            <a href="mailto:info@netzerojourney.org" className="text-green-600 hover:underline">
+                                                info@netzerojourney.org
                                             </a>
                                         </div>
                                     </div>
