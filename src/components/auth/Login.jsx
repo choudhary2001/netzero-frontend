@@ -49,7 +49,7 @@ const Login = () => {
         try {
             const data = await authService.login(credentials);
             dispatch(login(data));
-            window.location.reload();
+            // window.location.reload();
             if (data.user.role === 'admin') {
                 navigate('/admin/dashboard');
             } else if (data.user.role === 'supplier') {

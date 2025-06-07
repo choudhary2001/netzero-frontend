@@ -24,10 +24,14 @@ class SocketService {
         // Connect to the socket server with auth token
         this.socket = io(API_SOCKET_BASE_URL, {
             auth: { token },
-            transports: ['websocket'],
+            path: '/socket.io/',
+            transports: ['websocket', 'polling'],
             reconnection: true,
-            reconnectionAttempts: 5,
-            reconnectionDelay: 1000
+            reconnectionAttempts: Infinity,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+            timeout: 20000,
+            autoConnect: true
         });
 
         // Set up event listeners

@@ -113,7 +113,7 @@ api.interceptors.response.use(
                 processQueue(err, null);
 
                 // Only logout if the refresh token is invalid or expired
-                if (err.response?.status === 401 || err.response?.status === 400) {
+                if (err.response?.status === 401) {
                     console.log('Logging out due to invalid refresh token');
                     store.dispatch(logout());
                 }
